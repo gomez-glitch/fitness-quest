@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Move Quest</title>
+  <meta name="description" content="Move Quest — a playful movement adventure game for kids. Pick a hero, do short exercises, and earn XP!" />
+  <link rel="stylesheet" href="./src/styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="hero-avatar" id="hero-avatar" aria-hidden="true">👟</div>
+      <div class="hero-copy">
+        <h1>Move Quest</h1>
+        <p class="hero-subtitle">
+          Pick a persona, choose short exercises, tap the dial as reps are finished,
+          and collect XP for healthy habits.
+        </p>
+        <div class="hero-actions">
+          <button type="button" class="btn btn-primary" id="start-moving-btn">Start moving</button>
+          <button type="button" class="btn btn-secondary" id="customize-hero-btn">Customize hero</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Profile customization -->
+    <section class="card profile-card" id="profile-section" aria-labelledby="profile-heading">
+      <h2 id="profile-heading">🎨 Customize your hero</h2>
+      <form id="profile-form" class="profile-form">
+        <div class="field">
+          <label for="nickname-input">Nickname</label>
+          <input type="text" id="nickname-input" name="nickname" maxlength="16" placeholder="Spark" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label for="persona-select">Persona</label>
+          <select id="persona-select" name="persona"></select>
+          <p class="field-hint" id="persona-boost"></p>
+        </div>
+
+        <fieldset class="field avatar-field">
+          <legend>Avatar</legend>
+          <div class="avatar-grid" id="avatar-grid" role="radiogroup" aria-label="Choose an avatar"></div>
+        </fieldset>
+
+        <button type="submit" class="btn btn-primary">Save hero</button>
+      </form>
+    </section>
+
+    <!-- Progress dashboard -->
+    <section class="card dashboard" aria-labelledby="dashboard-heading">
+      <h2 id="dashboard-heading">📊 Quest progress</h2>
+      <div class="stat-grid">
+        <div class="stat-card stat-level">
+          <span class="stat-label">Level</span>
+          <span class="stat-value" id="stat-level">1</span>
+        </div>
+        <div class="stat-card stat-xp">
+          <span class="stat-label">XP</span>
+          <span class="stat-value" id="stat-xp">0</span>
+        </div>
+        <div class="stat-card stat-streak">
+          <span class="stat-label">Streak</span>
+          <span class="stat-value" id="stat-streak">0 🔥</span>
+        </div>
+        <div class="stat-card stat-reps">
+          <span class="stat-label">Total reps</span>
+          <span class="stat-value" id="stat-reps">0</span>
+        </div>
+      </div>
+      <div class="level-progress">
+        <div class="level-progress-track">
+          <div class="level-progress-fill" id="level-progress-fill"></div>
+        </div>
+        <p class="level-progress-label" id="level-progress-label">0 / 150 XP to next level</p>
+      </div>
+    </section>
+
+    <!-- Exercise board -->
+    <section class="card" aria-labelledby="board-heading">
+      <h2 id="board-heading">🗺️ Choose a challenge</h2>
+      <div class="exercise-board" id="exercise-board"></div>
+    </section>
+
+    <!-- Active exercise panel -->
+    <section class="card quest-card" id="active-panel" aria-labelledby="active-heading">
+      <h2 id="active-heading">🦄 <span id="active-heading-text">Spark's move</span></h2>
+      <div class="quest-card-inner">
+        <div class="quest-illustration" id="active-illustration" role="img" aria-label="Exercise illustration"></div>
+
+        <div class="quest-details">
+          <p class="quest-cue" id="active-cue"></p>
+          <ul class="quest-steps" id="active-steps"></ul>
+        </div>
+
+        <div class="quest-dial-area">
+          <div class="dial" id="rep-dial">
+            <div class="dial-inner">
+              <span class="dial-count" id="dial-count" aria-live="polite">0</span>
+              <span class="dial-target">/ <span id="dial-target">0</span></span>
+            </div>
+          </div>
+          <div class="dial-controls">
+            <button type="button" class="btn btn-round" id="dial-minus" aria-label="Decrease reps">−</button>
+            <button type="button" class="btn btn-round" id="dial-plus" aria-label="Increase reps">+</button>
+          </div>
+          <button type="button" class="btn btn-claim" id="claim-xp-btn" disabled>Claim XP ✨</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Move library -->
+    <section class="card" aria-labelledby="library-heading">
+      <h2 id="library-heading">📚 Move library</h2>
+      <div class="move-library" id="move-library"></div>
+    </section>
+
+    <!-- Badge case -->
+    <section class="card" aria-labelledby="badges-heading">
+      <h2 id="badges-heading">🏅 Badge case</h2>
+      <div class="badge-case" id="badge-case"></div>
+    </section>
+
+    <!-- Quest log -->
+    <section class="card" aria-labelledby="log-heading">
+      <h2 id="log-heading">📜 Quest log</h2>
+      <ul class="quest-log" id="quest-log">
+        <li class="quest-log-empty" id="quest-log-empty">No quests completed yet — go earn some XP!</li>
+      </ul>
+    </section>
+
+    <!-- Reset progress -->
+    <section class="card reset-card" aria-labelledby="reset-heading">
+      <h2 id="reset-heading">🔄 Reset progress</h2>
+      <p>This clears all XP, streaks, badges, and quest history on this device.</p>
+      <button type="button" class="btn btn-danger" id="reset-btn">Reset local progress</button>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>Move Quest 🌟 Have fun and always ask a grown-up before trying new exercises.</p>
+  </footer>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

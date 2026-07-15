@@ -1,0 +1,775 @@
+/* Move Quest — styles
+   Palette: dark purple text #3b0764, purple #7c3aed, pink #ec4899,
+   yellow #fde68a, light purple #ede9fe, soft background #fff7ed */
+
+:root {
+  --ink: #3b0764;
+  --purple: #7c3aed;
+  --purple-dark: #5b21b6;
+  --pink: #ec4899;
+  --yellow: #fde68a;
+  --lavender: #ede9fe;
+  --bg: #fff7ed;
+  --white: #ffffff;
+  --success: #16a34a;
+  --radius-lg: 1.75rem;
+  --radius-md: 1.125rem;
+  --radius-sm: 0.75rem;
+  --shadow-soft: 0 10px 30px rgba(124, 58, 237, 0.18);
+  --shadow-pop: 0 6px 16px rgba(236, 72, 153, 0.25);
+  font-size: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", "Trebuchet MS", Verdana, system-ui, sans-serif;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--lavender) 100%);
+  color: var(--ink);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+h1, h2, h3 {
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 0.5rem;
+}
+
+p {
+  margin: 0 0 0.75rem;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--white);
+  color: var(--ink);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  z-index: 100;
+}
+
+.skip-link:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--purple-dark);
+  outline-offset: 2px;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  background: linear-gradient(135deg, var(--purple) 0%, var(--pink) 70%, var(--yellow) 130%);
+  color: var(--white);
+  padding: 2.5rem 1.25rem 3rem;
+  text-align: center;
+}
+
+.hero-inner {
+  max-width: 780px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hero-avatar {
+  font-size: 4rem;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  width: 6rem;
+  height: 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-pop);
+}
+
+.hero h1 {
+  color: var(--white);
+  font-size: clamp(2rem, 6vw, 3rem);
+  margin-bottom: 0.5rem;
+  text-shadow: 0 3px 10px rgba(59, 7, 100, 0.35);
+}
+
+.hero-subtitle {
+  font-size: 1.05rem;
+  max-width: 42ch;
+  margin-inline: auto;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.85rem 1.5rem;
+  border-radius: 999px;
+  border: none;
+  min-height: 48px;
+  min-width: 48px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn-primary {
+  background: var(--white);
+  color: var(--purple-dark);
+  box-shadow: var(--shadow-pop);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-claim {
+  width: 100%;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  color: var(--white);
+  box-shadow: var(--shadow-pop);
+  font-size: 1.1rem;
+}
+
+.btn-claim:disabled {
+  background: #d1d5db;
+  color: #6b7280;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.btn-round {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  background: var(--purple);
+  color: var(--white);
+  font-size: 1.5rem;
+  font-weight: 900;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-round:hover {
+  background: var(--purple-dark);
+}
+
+.btn-danger {
+  background: var(--white);
+  color: #b91c1c;
+  border: 2px solid #b91c1c;
+}
+
+.btn-danger:hover {
+  background: #fee2e2;
+}
+
+/* ---------- Layout ---------- */
+
+main {
+  max-width: 960px;
+  margin: -1.75rem auto 0;
+  padding: 0 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+}
+
+.card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.card h2 {
+  font-size: 1.4rem;
+}
+
+/* ---------- Profile ---------- */
+
+.profile-form {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .profile-form {
+    grid-template-columns: 1fr 1fr;
+  }
+  .avatar-field,
+  .profile-form > button {
+    grid-column: 1 / -1;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field label,
+fieldset legend {
+  font-weight: 700;
+  color: var(--purple-dark);
+}
+
+.field input,
+.field select {
+  font-size: 1rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--lavender);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 48px;
+}
+
+.field-hint {
+  font-size: 0.85rem;
+  color: var(--purple-dark);
+  margin: 0;
+}
+
+fieldset.avatar-field {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.avatar-option {
+  font-size: 1.75rem;
+  min-height: 56px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--lavender);
+  background: var(--bg);
+}
+
+.avatar-option[aria-checked="true"] {
+  border-color: var(--pink);
+  background: var(--yellow);
+}
+
+/* ---------- Dashboard ---------- */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (min-width: 560px) {
+  .stat-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.stat-card {
+  background: var(--lavender);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--purple-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.stat-streak .stat-value {
+  color: var(--pink);
+}
+
+.level-progress {
+  margin-top: 1.25rem;
+}
+
+.level-progress-track {
+  background: var(--lavender);
+  border-radius: 999px;
+  height: 1rem;
+  overflow: hidden;
+}
+
+.level-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--pink), var(--purple));
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.level-progress-label {
+  font-size: 0.9rem;
+  color: var(--purple-dark);
+  margin-top: 0.4rem;
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+/* ---------- Exercise board ---------- */
+
+.exercise-board {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .exercise-board {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 960px) {
+  .exercise-board {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.exercise-tile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  text-align: left;
+  background: var(--bg);
+  border: 3px solid var(--lavender);
+  border-radius: var(--radius-md);
+  padding: 0.9rem;
+  min-height: 64px;
+}
+
+.exercise-tile:hover {
+  border-color: var(--pink);
+}
+
+.exercise-tile[aria-pressed="true"] {
+  border-color: var(--purple);
+  background: var(--lavender);
+}
+
+.exercise-tile-icon {
+  font-size: 1.75rem;
+  flex-shrink: 0;
+}
+
+.exercise-tile-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.exercise-tile-title {
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.exercise-tile-meta {
+  font-size: 0.82rem;
+  color: var(--purple-dark);
+}
+
+/* ---------- Active quest card ---------- */
+
+.quest-card {
+  background: linear-gradient(160deg, var(--lavender) 0%, var(--white) 55%);
+  border: 3px solid var(--pink);
+}
+
+.quest-card-inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+@media (min-width: 720px) {
+  .quest-card-inner {
+    grid-template-columns: 140px 1fr 220px;
+  }
+}
+
+.quest-cue {
+  font-weight: 700;
+  color: var(--purple-dark);
+}
+
+.quest-steps {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.quest-steps li {
+  margin-bottom: 0.25rem;
+}
+
+.quest-dial-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.dial-controls {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Circular dial via conic-gradient, progress set inline via --pct custom prop */
+.dial {
+  --pct: 0;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: conic-gradient(var(--pink) calc(var(--pct) * 1%), var(--lavender) 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-soft);
+}
+
+.dial-inner {
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dial-count {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.dial-target {
+  font-size: 0.95rem;
+  color: var(--purple-dark);
+  font-weight: 700;
+}
+
+/* ---------- Illustrations ---------- */
+
+.quest-illustration,
+.library-illustration {
+  width: 100%;
+  max-width: 140px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  border-radius: var(--radius-md);
+  background: var(--yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.illu-figure {
+  position: relative;
+  width: 70px;
+  height: 90px;
+}
+
+.illu-head {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--purple-dark);
+}
+
+.illu-body {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 36px;
+  border-radius: 7px;
+  background: var(--pink);
+}
+
+.illu-arm {
+  position: absolute;
+  top: 28px;
+  width: 34px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--purple);
+}
+
+.illu-arm.left { left: -8px; transform: rotate(20deg); }
+.illu-arm.right { right: -8px; transform: rotate(-20deg); }
+
+.illu-leg {
+  position: absolute;
+  top: 54px;
+  width: 8px;
+  height: 34px;
+  border-radius: 4px;
+  background: var(--purple-dark);
+}
+
+.illu-leg.left { left: 22px; }
+.illu-leg.right { right: 22px; }
+
+/* Pose variants approximate each movement */
+.illu-core .illu-body { top: 34px; transform: translateX(-50%) rotate(12deg); }
+.illu-core .illu-leg.left { transform: rotate(-25deg); top: 58px; left: 14px; }
+.illu-core .illu-leg.right { transform: rotate(25deg); top: 58px; right: 14px; }
+
+.illu-plank .illu-figure { transform: rotate(90deg) translateY(6px); }
+.illu-plank .illu-arm.left { top: 50px; }
+.illu-plank .illu-arm.right { top: 50px; }
+
+.illu-lunge .illu-leg.left { transform: translateY(-6px) rotate(-18deg); }
+.illu-lunge .illu-leg.right { transform: translateY(8px) rotate(22deg); left: auto; }
+.illu-lunge .illu-arm.left { transform: rotate(60deg); }
+.illu-lunge .illu-arm.right { transform: rotate(-60deg); }
+
+.illu-flutter .illu-body { top: 40px; transform: translateX(-50%) rotate(90deg); }
+.illu-flutter .illu-leg.left { top: 60px; transform: rotate(-15deg); }
+.illu-flutter .illu-leg.right { top: 60px; transform: rotate(15deg); }
+.illu-flutter .illu-arm.left, .illu-flutter .illu-arm.right { top: 46px; }
+
+.illu-dip .illu-arm.left { transform: rotate(80deg); top: 40px; }
+.illu-dip .illu-arm.right { transform: rotate(-80deg); top: 40px; }
+.illu-dip .illu-leg.left { transform: rotate(-10deg); }
+.illu-dip .illu-leg.right { transform: rotate(10deg); }
+
+.illu-sidebend .illu-body { transform: translateX(-50%) rotate(18deg); }
+.illu-sidebend .illu-arm.right { top: 20px; transform: rotate(-70deg); }
+
+.illu-twist .illu-body { transform: translateX(-50%) rotate(-15deg); }
+.illu-twist .illu-arm.left { transform: rotate(50deg); }
+.illu-twist .illu-arm.right { transform: rotate(130deg); }
+
+.illu-curl .illu-arm.left { transform: rotate(-100deg); top: 30px; }
+.illu-curl .illu-arm.right { transform: rotate(100deg); top: 30px; }
+
+.illu-press .illu-arm.left { transform: rotate(-160deg); top: 4px; }
+.illu-press .illu-arm.right { transform: rotate(160deg); top: 4px; }
+
+/* ---------- Move library ---------- */
+
+.move-library {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .move-library {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 960px) {
+  .move-library {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.library-card {
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  padding: 0.9rem;
+  text-align: center;
+  border: 3px solid var(--lavender);
+}
+
+.library-card-title {
+  font-weight: 800;
+  margin-top: 0.6rem;
+}
+
+.library-card-meta {
+  font-size: 0.8rem;
+  color: var(--purple-dark);
+}
+
+/* ---------- Badges ---------- */
+
+.badge-case {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .badge-case {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.badge {
+  border-radius: var(--radius-md);
+  padding: 1rem 0.6rem;
+  text-align: center;
+  background: linear-gradient(160deg, var(--yellow), var(--pink));
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.badge-emoji {
+  display: block;
+  font-size: 2rem;
+}
+
+.badge.locked {
+  background: #e5e7eb;
+  color: #6b7280;
+  filter: grayscale(1);
+}
+
+.badge-req {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+/* ---------- Quest log ---------- */
+
+.quest-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.quest-log-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.9rem;
+}
+
+.quest-log-icon {
+  font-size: 1.5rem;
+}
+
+.quest-log-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.quest-log-title {
+  font-weight: 700;
+}
+
+.quest-log-meta {
+  font-size: 0.8rem;
+  color: var(--purple-dark);
+}
+
+.quest-log-empty {
+  color: var(--purple-dark);
+  font-style: italic;
+}
+
+/* ---------- Reset ---------- */
+
+.reset-card {
+  border: 2px dashed #fca5a5;
+}
+
+/* ---------- Footer ---------- */
+
+.app-footer {
+  text-align: center;
+  padding: 1.5rem 1rem 2.5rem;
+  color: var(--purple-dark);
+  font-size: 0.85rem;
+}
+
+/* ---------- Utility ---------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

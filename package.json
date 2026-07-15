@@ -1,0 +1,13 @@
+{
+  "name": "move-quest",
+  "version": "1.0.0",
+  "description": "Move Quest — a playful, kid-friendly fitness adventure game for the browser.",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "build": "node scripts/build.js",
+    "preview": "node scripts/dev-server.js dist",
+    "lint": "node --check src/app.js && node --check scripts/build.js && node --check scripts/dev-server.js"
+  }
+}
