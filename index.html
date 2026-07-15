@@ -28,10 +28,17 @@
   </header>
 
   <main id="main">
-    <!-- Profile switcher -->
+    <!-- Profile switcher (collapsible drawer) -->
     <section class="card switcher-card" aria-labelledby="switcher-heading">
-      <h2 id="switcher-heading">🧒 Who's moving today?</h2>
-      <div class="profile-switcher" id="profile-switcher"></div>
+      <button type="button" class="switcher-toggle" id="switcher-toggle"
+              aria-expanded="false" aria-controls="switcher-panel">
+        <h2 id="switcher-heading">🧒 Hero: <span id="switcher-summary"></span></h2>
+        <span class="switcher-chevron" aria-hidden="true">▾</span>
+      </button>
+      <div class="switcher-panel" id="switcher-panel" hidden>
+        <p class="field-hint">Tap a hero to switch, or add a new one — everyone keeps their own progress.</p>
+        <div class="profile-switcher" id="profile-switcher"></div>
+      </div>
     </section>
 
     <!-- Profile customization -->
@@ -88,6 +95,23 @@
         </div>
         <p class="level-progress-label" id="level-progress-label">0 / 150 XP to next level</p>
       </div>
+      <h3 class="week-heading">Last 7 days</h3>
+      <div class="week-chart" id="week-chart"></div>
+      <p class="week-bests" id="week-bests"></p>
+    </section>
+
+    <!-- Daily quests -->
+    <section class="card daily-card" aria-labelledby="daily-heading">
+      <h2 id="daily-heading">⚡ Today's quests</h2>
+      <p class="daily-intro">Three special moves picked fresh every day. Finish all three to open the bonus chest!</p>
+      <div class="daily-board" id="daily-board"></div>
+    </section>
+
+    <!-- Adventure mode -->
+    <section class="card adventure-section" aria-labelledby="adventure-heading">
+      <h2 id="adventure-heading">🧭 Adventure mode</h2>
+      <p class="daily-intro">A guided mini-workout: Spark leads you through each move with rest breaks between — finish the chain for combo bonus XP!</p>
+      <div class="adventure-presets" id="adventure-presets"></div>
     </section>
 
     <!-- Exercise board -->
@@ -159,6 +183,8 @@
       <button type="button" class="btn btn-danger" id="reset-btn">Reset local progress</button>
     </section>
   </main>
+
+  <div class="adventure-overlay" id="adventure-overlay" hidden></div>
 
   <footer class="app-footer">
     <p>Move Quest 🌟 Have fun and always ask a grown-up before trying new exercises.</p>

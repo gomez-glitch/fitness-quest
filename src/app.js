@@ -105,6 +105,16 @@ const EXERCISES = [
   },
 ];
 
+const DAILY_QUEST_COUNT = 3;
+const DAILY_BONUS_XP = 40;
+
+const ADVENTURES = [
+  { id: "morning-spark", name: "Morning Spark", emoji: "🌅", moves: ["jumping-jacks", "squats", "sit-ups"] },
+  { id: "power-play", name: "Power Play", emoji: "⚡", moves: ["push-ups", "mountain-climbers", "high-knees", "flutter-kicks"] },
+  { id: "super-five", name: "Super Hero Five", emoji: "🦸", moves: ["jumping-jacks", "squats", "push-ups", "russian-twists", "superman"] },
+  { id: "surprise", name: "Surprise Me!", emoji: "🎲", moves: null },
+];
+
 const BADGES = [
   { id: "xp-35", emoji: "✨", label: "First Move", need: "Earn 35 XP", test: (s) => s.xp >= 35 },
   { id: "xp-160", emoji: "🔢", label: "Rep Rookie", need: "Earn 160 XP", test: (s) => s.xp >= 160 },
@@ -138,7 +148,9 @@ function defaultProfileState(nickname = "Spark") {
     lastCompletedDate: null,
     counters,
     profile: { nickname, persona: "spark-sprinter", avatar: "👟" },
-    stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0 },
+    stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0 },
+    daily: { date: null, done: [], bonusClaimed: false },
+    days: {},
   };
 }
 
@@ -198,6 +210,27 @@ function normalizeProfile(parsed) {
     if (typeof st.todayDate === "string") state.stats.todayDate = st.todayDate;
     if (typeof st.todayCount === "number" && st.todayCount >= 0) state.stats.todayCount = st.todayCount;
     if (typeof st.bestDay === "number" && st.bestDay >= 0) state.stats.bestDay = st.bestDay;
+    if (typeof st.bestStreak === "number" && st.bestStreak >= 0) state.stats.bestStreak = st.bestStreak;
+  }
+
+  const dl = parsed.daily;
+  if (dl && typeof dl === "object") {
+    const ids = EXERCISES.map((ex) => ex.id);
+    if (typeof dl.date === "string") state.daily.date = dl.date;
+    if (Array.isArray(dl.done)) state.daily.done = dl.done.filter((id) => ids.includes(id));
+    state.daily.bonusClaimed = dl.bonusClaimed === true;
+  }
+
+  if (parsed.days && typeof parsed.days === "object") {
+    for (const [date, entry] of Object.entries(parsed.days)) {
+      if (
+        /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+        entry && typeof entry === "object" &&
+        typeof entry.xp === "number" && typeof entry.reps === "number"
+      ) {
+        state.days[date] = { xp: entry.xp, reps: entry.reps };
+      }
+    }
   }
 
   return state;
@@ -286,6 +319,43 @@ function levelForXp(xp) {
   return Math.floor(xp / XP_PER_LEVEL) + 1;
 }
 
+// Deterministic PRNG so every device shows the same daily quests for a date.
+function mulberry32(seed) {
+  return function () {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function dailyQuestIds(dateStr = todayStr()) {
+  const rand = mulberry32(Number(dateStr.replace(/-/g, "")));
+  const pool = EXERCISES.map((ex) => ex.id);
+  const picked = [];
+  while (picked.length < DAILY_QUEST_COUNT && pool.length) {
+    picked.push(pool.splice(Math.floor(rand() * pool.length), 1)[0]);
+  }
+  return picked;
+}
+
+function ensureDailyFresh(st) {
+  const today = todayStr();
+  if (st.daily.date !== today) {
+    st.daily = { date: today, done: [], bonusClaimed: false };
+  }
+}
+
+function pruneDays(st) {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 14);
+  const cutoffStr = todayStr(cutoff);
+  for (const date of Object.keys(st.days)) {
+    if (date < cutoffStr) delete st.days[date];
+  }
+}
+
 function findExercise(id) {
   return EXERCISES.find((ex) => ex.id === id) || null;
 }
@@ -326,6 +396,9 @@ const el = {
   customizeHeroBtn: document.getElementById("customize-hero-btn"),
 
   profileSwitcher: document.getElementById("profile-switcher"),
+  switcherToggle: document.getElementById("switcher-toggle"),
+  switcherPanel: document.getElementById("switcher-panel"),
+  switcherSummary: document.getElementById("switcher-summary"),
   profileForm: document.getElementById("profile-form"),
   nicknameInput: document.getElementById("nickname-input"),
   personaSelect: document.getElementById("persona-select"),
@@ -357,6 +430,12 @@ const el = {
   dialMinus: document.getElementById("dial-minus"),
   muteBtn: document.getElementById("mute-btn"),
   claimBtn: document.getElementById("claim-xp-btn"),
+
+  dailyBoard: document.getElementById("daily-board"),
+  weekChart: document.getElementById("week-chart"),
+  weekBests: document.getElementById("week-bests"),
+  adventurePresets: document.getElementById("adventure-presets"),
+  adventureOverlay: document.getElementById("adventure-overlay"),
 
   moveLibrary: document.getElementById("move-library"),
   badgeCase: document.getElementById("badge-case"),
@@ -394,6 +473,16 @@ function renderProfileSwitcher() {
   }
   el.profileSwitcher.innerHTML = chips.join("");
   el.removeProfileBtn.style.display = ids.length > 1 ? "" : "none";
+
+  const p = activeProfile().profile;
+  el.switcherSummary.innerHTML =
+    `<span class="profile-chip-avatar" aria-hidden="true">${p.avatar}</span> <span>${escapeHtml(p.nickname)}</span>`;
+}
+
+function setSwitcherOpen(open) {
+  el.switcherPanel.hidden = !open;
+  el.switcherToggle.setAttribute("aria-expanded", String(open));
+  el.switcherToggle.classList.toggle("open", open);
 }
 
 function renderProfileForm() {
@@ -619,17 +708,17 @@ el.clicker.addEventListener("keydown", (event) => {
   }
 });
 
-function spawnConfetti() {
+function spawnConfetti(host = el.dialArea, count = 14) {
   if (REDUCED_MOTION) return;
   const colors = ["#7c3aed", "#ec4899", "#fde68a", "#a78bfa", "#f9a8d4"];
-  for (let i = 0; i < 14; i++) {
+  for (let i = 0; i < count; i++) {
     const piece = document.createElement("span");
     piece.className = "confetti-piece";
     piece.style.setProperty("--dx", `${(Math.random() - 0.5) * 220}px`);
     piece.style.setProperty("--rot", `${(Math.random() - 0.5) * 540}deg`);
     piece.style.setProperty("--clr", colors[i % colors.length]);
     piece.style.setProperty("--delay", `${Math.random() * 0.12}s`);
-    el.dialArea.appendChild(piece);
+    host.appendChild(piece);
     setTimeout(() => piece.remove(), 1300);
   }
 }
@@ -686,6 +775,65 @@ function renderQuestLog() {
   `).join("");
 }
 
+function renderDaily() {
+  const st = activeProfile();
+  ensureDailyFresh(st);
+  const quests = dailyQuestIds();
+  const allDone = st.daily.done.length >= quests.length;
+
+  const cards = quests.map((id) => {
+    const ex = findExercise(id);
+    const done = st.daily.done.includes(id);
+    return `
+      <button type="button" class="daily-quest ${done ? "done" : ""}" data-exercise="${id}">
+        <span class="daily-quest-icon" aria-hidden="true">${done ? "✅" : ex.icon}</span>
+        <span class="daily-quest-title">${ex.title}</span>
+        <span class="daily-quest-meta">${done ? "Done!" : `${ex.target} reps`}</span>
+      </button>
+    `;
+  });
+
+  cards.push(`
+    <div class="daily-chest ${allDone ? "open" : ""}" role="img"
+         aria-label="${allDone ? `Bonus chest opened: +${DAILY_BONUS_XP} XP earned` : `Complete all three quests to open the bonus chest for +${DAILY_BONUS_XP} XP`}">
+      <span class="daily-chest-emoji" aria-hidden="true">${allDone ? "🎁" : "📦"}</span>
+      <span class="daily-quest-meta">${allDone ? `+${DAILY_BONUS_XP} XP earned!` : `All 3 = +${DAILY_BONUS_XP} XP`}</span>
+    </div>
+  `);
+
+  el.dailyBoard.innerHTML = cards.join("");
+  el.dailyBoard.closest("section").classList.toggle("daily-complete", allDone);
+}
+
+function renderWeekChart() {
+  const st = activeProfile();
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = todayStr(d);
+    days.push({
+      key,
+      label: ["S", "M", "T", "W", "T", "F", "S"][d.getDay()],
+      xp: (st.days[key] && st.days[key].xp) || 0,
+      isToday: i === 0,
+    });
+  }
+  const max = Math.max(...days.map((d) => d.xp), 1);
+
+  el.weekChart.innerHTML = days.map((d) => `
+    <div class="week-col ${d.isToday ? "today" : ""}">
+      <span class="week-xp">${d.xp || ""}</span>
+      <div class="week-bar" style="height:${Math.max(4, Math.round((d.xp / max) * 100))}%"></div>
+      <span class="week-day">${d.label}</span>
+    </div>
+  `).join("");
+
+  const bestDayXp = Math.max(...Object.values(st.days).map((d) => d.xp), 0);
+  el.weekBests.textContent =
+    `Best day: ${bestDayXp} XP · Longest streak: ${st.stats.bestStreak} day${st.stats.bestStreak === 1 ? "" : "s"}`;
+}
+
 function renderAll() {
   renderHero();
   renderProfileSwitcher();
@@ -696,6 +844,8 @@ function renderAll() {
   renderActivePanel();
   renderBadges();
   renderQuestLog();
+  renderDaily();
+  renderWeekChart();
 }
 
 // ---------------------------------------------------------------------------
@@ -709,6 +859,10 @@ el.startMovingBtn.addEventListener("click", () => {
 el.customizeHeroBtn.addEventListener("click", () => {
   document.getElementById("profile-section").scrollIntoView({ behavior: "smooth", block: "start" });
   el.nicknameInput.focus();
+});
+
+el.switcherToggle.addEventListener("click", () => {
+  setSwitcherOpen(el.switcherPanel.hidden);
 });
 
 el.profileSwitcher.addEventListener("click", (event) => {
@@ -733,6 +887,7 @@ el.profileSwitcher.addEventListener("click", (event) => {
   profileDraft = { ...activeProfile().profile };
   saveData();
   renderAll();
+  setSwitcherOpen(false); // hero picked — tuck the drawer away
 });
 
 el.removeProfileBtn.addEventListener("click", () => {
@@ -791,6 +946,231 @@ el.exerciseBoard.addEventListener("click", (event) => {
 
 el.dialMinus.addEventListener("click", () => changeCount(-1));
 
+el.dailyBoard.addEventListener("click", (event) => {
+  const quest = event.target.closest(".daily-quest[data-exercise]");
+  if (!quest) return;
+  activeExerciseId = quest.dataset.exercise;
+  renderExerciseBoard();
+  renderActivePanel();
+  document.getElementById("active-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+// ---------------------------------------------------------------------------
+// Adventure mode: a guided quest chain with rest breaks and a finale.
+// ---------------------------------------------------------------------------
+
+const adventure = {
+  active: false,
+  name: "",
+  moves: [],
+  index: 0,
+  count: 0,
+  xpEarned: 0,
+  mascot: null,
+  restTimer: null,
+};
+
+function renderAdventurePresets() {
+  el.adventurePresets.innerHTML = ADVENTURES.map((a) => {
+    const moves = a.moves
+      ? a.moves.map((id) => findExercise(id).icon).join(" ")
+      : "❓ ❓ ❓";
+    return `
+      <button type="button" class="adventure-preset" data-adventure="${a.id}">
+        <span class="adventure-preset-emoji" aria-hidden="true">${a.emoji}</span>
+        <span class="adventure-preset-name">${a.name}</span>
+        <span class="adventure-preset-moves">${moves}</span>
+      </button>
+    `;
+  }).join("");
+}
+
+function randomMoves(count) {
+  const pool = EXERCISES.map((ex) => ex.id);
+  const picked = [];
+  while (picked.length < count && pool.length) {
+    picked.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  }
+  return picked;
+}
+
+function adventureProgressDots() {
+  return `<div class="adventure-dots">${adventure.moves.map((id, i) => {
+    const cls = i < adventure.index ? "done" : i === adventure.index ? "current" : "";
+    return `<span class="adventure-dot ${cls}"></span>`;
+  }).join("")}</div>`;
+}
+
+function stopAdventureExtras() {
+  if (adventure.mascot) {
+    adventure.mascot.stop();
+    adventure.mascot = null;
+  }
+  if (adventure.restTimer) {
+    clearInterval(adventure.restTimer);
+    adventure.restTimer = null;
+  }
+}
+
+function startAdventure(preset) {
+  adventure.active = true;
+  adventure.name = preset.name;
+  adventure.moves = preset.moves ? preset.moves.slice() : randomMoves(3);
+  adventure.index = 0;
+  adventure.xpEarned = 0;
+  el.adventureOverlay.hidden = false;
+  document.body.classList.add("no-scroll");
+  showAdventureMove();
+}
+
+function closeAdventure() {
+  stopAdventureExtras();
+  adventure.active = false;
+  el.adventureOverlay.hidden = true;
+  el.adventureOverlay.innerHTML = "";
+  document.body.classList.remove("no-scroll");
+}
+
+function adventureHeader() {
+  return `
+    <div class="adventure-header">
+      <span class="adventure-title">${escapeHtml(adventure.name)}</span>
+      ${adventureProgressDots()}
+      <button type="button" class="btn btn-round adventure-close" data-action="close" aria-label="Leave adventure">✕</button>
+    </div>
+  `;
+}
+
+function showAdventureMove() {
+  stopAdventureExtras();
+  adventure.count = 0;
+  const ex = findExercise(adventure.moves[adventure.index]);
+
+  el.adventureOverlay.innerHTML = `
+    <div class="adventure-card" role="dialog" aria-modal="true" aria-label="Adventure: ${escapeHtml(ex.title)}">
+      ${adventureHeader()}
+      <div class="adventure-stage">
+        <div class="adventure-mascot" id="adventure-mascot" role="img"
+             aria-label="Spark demonstrating the ${ex.title} movement"></div>
+        <h3 class="adventure-move-title">${ex.icon} ${ex.title}</h3>
+        <p class="adventure-cue">${ex.cue}</p>
+        <div class="adventure-counter">
+          <button type="button" class="btn btn-round" data-action="minus" aria-label="Remove one rep">−</button>
+          <span class="adventure-count" aria-live="polite"><b id="adventure-count">0</b> / ${ex.target}</span>
+          <button type="button" class="btn adventure-plus" data-action="plus" aria-label="Count one rep">+1</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  adventure.mascot = createMascot(document.getElementById("adventure-mascot"), ex.id);
+}
+
+function adventureTap(delta) {
+  const ex = findExercise(adventure.moves[adventure.index]);
+  const next = Math.max(0, Math.min(ex.target, adventure.count + delta));
+  if (next === adventure.count) return;
+  adventure.count = next;
+  if (delta > 0) {
+    sound.tick();
+    if (navigator.vibrate) navigator.vibrate(8);
+  }
+  const countEl = document.getElementById("adventure-count");
+  if (countEl) countEl.textContent = String(adventure.count);
+
+  if (adventure.count >= ex.target) {
+    sound.chime();
+    awardCompletion(ex, ex.target);
+    adventure.xpEarned += ex.xp;
+    adventure.index += 1;
+    if (adventure.index >= adventure.moves.length) {
+      showAdventureCelebration();
+    } else {
+      showAdventureRest();
+    }
+  }
+}
+
+function showAdventureRest() {
+  stopAdventureExtras();
+  let remaining = 15;
+
+  el.adventureOverlay.innerHTML = `
+    <div class="adventure-card" role="dialog" aria-modal="true" aria-label="Rest break">
+      ${adventureHeader()}
+      <div class="adventure-stage adventure-rest">
+        <div class="adventure-rest-circle"><span id="rest-count">${remaining}</span></div>
+        <h3 class="adventure-move-title">Shake it out! 🌬️</h3>
+        <p class="adventure-cue">Wiggle, breathe, and get ready for the next move.</p>
+        <button type="button" class="btn btn-primary" data-action="skip-rest">I'm ready!</button>
+      </div>
+    </div>
+  `;
+
+  adventure.restTimer = setInterval(() => {
+    remaining -= 1;
+    const node = document.getElementById("rest-count");
+    if (node) node.textContent = String(remaining);
+    if (remaining <= 0) {
+      clearInterval(adventure.restTimer);
+      adventure.restTimer = null;
+      showAdventureMove();
+    }
+  }, 1000);
+}
+
+function showAdventureCelebration() {
+  stopAdventureExtras();
+  const combo = adventure.moves.length * 10;
+  const st = activeProfile();
+  st.xp += combo;
+  const today = todayStr();
+  if (!st.days[today]) st.days[today] = { xp: 0, reps: 0 };
+  st.days[today].xp += combo;
+  saveData();
+  renderDashboard();
+  renderBadges();
+  renderWeekChart();
+
+  el.adventureOverlay.innerHTML = `
+    <div class="adventure-card" role="dialog" aria-modal="true" aria-label="Adventure complete">
+      <div class="adventure-stage adventure-finale">
+        <span class="adventure-trophy" aria-hidden="true">🏆</span>
+        <h3 class="adventure-move-title">Quest complete!</h3>
+        <p class="adventure-cue">
+          ${adventure.moves.length} moves finished · ${adventure.xpEarned} XP earned
+          <br /><strong>+${combo} combo bonus XP!</strong>
+        </p>
+        <button type="button" class="btn btn-primary" data-action="close">Amazing! Done</button>
+      </div>
+    </div>
+  `;
+
+  sound.fanfare();
+  spawnConfetti(el.adventureOverlay.querySelector(".adventure-stage"), 22);
+}
+
+el.adventurePresets.addEventListener("click", (event) => {
+  const btn = event.target.closest(".adventure-preset");
+  if (!btn) return;
+  const preset = ADVENTURES.find((a) => a.id === btn.dataset.adventure);
+  if (preset) startAdventure(preset);
+});
+
+el.adventureOverlay.addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-action]");
+  if (!btn) return;
+  const action = btn.dataset.action;
+  if (action === "close") closeAdventure();
+  else if (action === "plus") adventureTap(1);
+  else if (action === "minus") adventureTap(-1);
+  else if (action === "skip-rest") showAdventureMove();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && adventure.active) closeAdventure();
+});
+
 el.muteBtn.addEventListener("click", () => {
   const muted = sound.toggleMuted();
   el.muteBtn.textContent = muted ? "🔇" : "🔊";
@@ -798,18 +1178,15 @@ el.muteBtn.addEventListener("click", () => {
   el.muteBtn.setAttribute("aria-label", muted ? "Turn sounds on" : "Turn sounds off");
 });
 
-el.claimBtn.addEventListener("click", () => {
-  const exercise = findExercise(activeExerciseId);
-  if (!exercise) return;
+// Shared completion pipeline used by both the main Claim button and
+// Adventure mode: XP, streak, log, lifetime stats, daily quests, day history.
+function awardCompletion(exercise, reps) {
   const st = activeProfile();
-  const current = st.counters[exercise.id] || 0;
-  if (current < exercise.target) return;
-
   const today = todayStr();
   const badgesBefore = earnedBadgeIds(st);
 
   st.xp += exercise.xp;
-  st.reps += current;
+  st.reps += reps;
 
   st.completed.unshift({
     id: exercise.id,
@@ -817,7 +1194,7 @@ el.claimBtn.addEventListener("click", () => {
     icon: exercise.icon,
     date: today,
     xp: exercise.xp,
-    reps: current,
+    reps,
   });
   st.completed = st.completed.slice(0, HISTORY_LIMIT);
 
@@ -840,22 +1217,58 @@ el.claimBtn.addEventListener("click", () => {
     st.stats.todayCount = 1;
   }
   st.stats.bestDay = Math.max(st.stats.bestDay, st.stats.todayCount);
+  st.stats.bestStreak = Math.max(st.stats.bestStreak, st.streak);
 
-  st.counters[exercise.id] = 0;
+  // Per-day history for the weekly chart
+  if (!st.days[today]) st.days[today] = { xp: 0, reps: 0 };
+  st.days[today].xp += exercise.xp;
+  st.days[today].reps += reps;
+  pruneDays(st);
+
+  // Daily quests
+  ensureDailyFresh(st);
+  const quests = dailyQuestIds(today);
+  let dailyBonusEarned = false;
+  if (quests.includes(exercise.id) && !st.daily.done.includes(exercise.id)) {
+    st.daily.done.push(exercise.id);
+    if (st.daily.done.length >= quests.length && !st.daily.bonusClaimed) {
+      st.daily.bonusClaimed = true;
+      st.xp += DAILY_BONUS_XP;
+      st.days[today].xp += DAILY_BONUS_XP;
+      dailyBonusEarned = true;
+    }
+  }
 
   saveData();
-  sound.fanfare();
-  spawnConfetti();
 
+  if (dailyBonusEarned) setTimeout(() => sound.badge(), 600);
   const badgesAfter = earnedBadgeIds(st);
   if (badgesAfter.length > badgesBefore.length) {
     setTimeout(() => sound.badge(), 450);
   }
 
   renderDashboard();
-  renderClicker();
   renderBadges();
   renderQuestLog();
+  renderDaily();
+  renderWeekChart();
+  return dailyBonusEarned;
+}
+
+el.claimBtn.addEventListener("click", () => {
+  const exercise = findExercise(activeExerciseId);
+  if (!exercise) return;
+  const st = activeProfile();
+  const current = st.counters[exercise.id] || 0;
+  if (current < exercise.target) return;
+
+  awardCompletion(exercise, current);
+  st.counters[exercise.id] = 0;
+  saveData();
+
+  sound.fanfare();
+  spawnConfetti();
+  renderClicker();
 });
 
 el.resetBtn.addEventListener("click", () => {
@@ -881,5 +1294,7 @@ el.resetBtn.addEventListener("click", () => {
 buildRingNotches();
 el.muteBtn.textContent = sound.isMuted() ? "🔇" : "🔊";
 el.muteBtn.setAttribute("aria-pressed", String(sound.isMuted()));
+setSwitcherOpen(false); // drawer starts tucked away — the summary shows who's playing
+renderAdventurePresets();
 renderAll();
 renderMoveLibrary();

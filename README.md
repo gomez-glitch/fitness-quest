@@ -11,7 +11,15 @@ colors, big buttons, and encouraging, positive language throughout.
 ## Features
 
 - Multiple hero profiles (up to 4) so siblings can play side by side, each with
-  their own XP, streaks, badges, and quest history
+  their own XP, streaks, badges, and quest history — tucked into a collapsible
+  drawer once a hero is picked
+- Daily Quests: three featured moves picked fresh each day (same picks on every
+  device), with a +40 XP bonus chest for finishing all three
+- Adventure mode: guided mini-workouts (preset chains or a surprise mix) where
+  Spark demonstrates each move, with rest breaks between moves and a combo-bonus
+  celebration at the end
+- A last-7-days activity chart on the dashboard with best-day and
+  longest-streak callouts
 - Hero customization: nickname, persona, and avatar, saved to the browser
 - 16 short kid-friendly exercises with a muscle-group filter (Core / Arms /
   Legs / Whole body)

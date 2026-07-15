@@ -245,7 +245,45 @@ main {
   font-size: 1.4rem;
 }
 
-/* ---------- Profile switcher ---------- */
+/* ---------- Profile switcher (collapsible drawer) ---------- */
+
+.switcher-card {
+  padding: 0.75rem 1.5rem;
+}
+
+.switcher-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.5rem 0;
+  min-height: 52px;
+  text-align: left;
+}
+
+.switcher-toggle h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.switcher-chevron {
+  font-size: 1.4rem;
+  color: var(--purple);
+  transition: transform 0.25s ease;
+}
+
+.switcher-toggle.open .switcher-chevron {
+  transform: rotate(180deg);
+}
+
+.switcher-panel {
+  padding: 0.5rem 0 0.75rem;
+}
 
 .profile-switcher {
   display: flex;
@@ -448,6 +486,327 @@ fieldset.avatar-field {
   margin-top: 0.4rem;
   margin-bottom: 0;
   font-weight: 600;
+}
+
+/* ---------- Weekly chart ---------- */
+
+.week-heading {
+  font-size: 1rem;
+  color: var(--purple-dark);
+  margin: 1.25rem 0 0.5rem;
+}
+
+.week-chart {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  align-items: end;
+  height: 110px;
+}
+
+.week-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  gap: 0.2rem;
+}
+
+.week-xp {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--purple-dark);
+  min-height: 0.9rem;
+}
+
+.week-bar {
+  width: 70%;
+  max-width: 34px;
+  border-radius: 6px 6px 3px 3px;
+  background: linear-gradient(180deg, var(--pink), var(--purple));
+  transition: height 0.4s ease;
+}
+
+.week-col:not(.today) .week-bar {
+  opacity: 0.65;
+}
+
+.week-day {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--purple-dark);
+}
+
+.week-col.today .week-day {
+  color: var(--pink);
+}
+
+.week-bests {
+  margin: 0.6rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--purple-dark);
+}
+
+/* ---------- Daily quests ---------- */
+
+.daily-intro {
+  color: var(--purple-dark);
+  font-size: 0.95rem;
+}
+
+.daily-board {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .daily-board {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.daily-quest,
+.daily-chest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.9rem 0.5rem;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--lavender);
+  background: var(--bg);
+  text-align: center;
+  font-family: inherit;
+  color: var(--ink);
+}
+
+.daily-quest:hover {
+  border-color: var(--pink);
+}
+
+.daily-quest.done {
+  border-color: var(--success);
+  background: #f0fdf4;
+}
+
+.daily-quest-icon,
+.daily-chest-emoji {
+  font-size: 1.8rem;
+}
+
+.daily-quest-title {
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.daily-quest-meta {
+  font-size: 0.78rem;
+  color: var(--purple-dark);
+  font-weight: 600;
+}
+
+.daily-chest {
+  border-style: dashed;
+}
+
+.daily-chest.open {
+  border-color: var(--pink);
+  background: linear-gradient(160deg, var(--yellow), #fbcfe8);
+  animation: badge-pop 0.5s ease;
+}
+
+.daily-card.daily-complete {
+  border: 3px solid var(--yellow);
+}
+
+/* ---------- Adventure mode ---------- */
+
+.adventure-presets {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .adventure-presets {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.adventure-preset {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 1rem 0.5rem;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--lavender);
+  background: linear-gradient(160deg, var(--white), var(--lavender));
+  font-family: inherit;
+  color: var(--ink);
+}
+
+.adventure-preset:hover {
+  border-color: var(--purple);
+  transform: translateY(-2px);
+}
+
+.adventure-preset-emoji {
+  font-size: 2rem;
+}
+
+.adventure-preset-name {
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.adventure-preset-moves {
+  font-size: 0.85rem;
+}
+
+.adventure-overlay[hidden] {
+  display: none;
+}
+
+.adventure-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: linear-gradient(160deg, rgba(59, 7, 100, 0.92), rgba(124, 58, 237, 0.92));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+body.no-scroll {
+  overflow: hidden;
+}
+
+.adventure-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  width: min(440px, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.adventure-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.adventure-title {
+  font-weight: 800;
+  color: var(--purple-dark);
+  flex: 1;
+}
+
+.adventure-dots {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.adventure-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--lavender);
+}
+
+.adventure-dot.current {
+  background: var(--pink);
+  transform: scale(1.25);
+}
+
+.adventure-dot.done {
+  background: var(--success);
+}
+
+.adventure-close {
+  width: 2.6rem;
+  height: 2.6rem;
+  min-height: 2.6rem;
+  font-size: 1.1rem;
+}
+
+.adventure-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.adventure-mascot {
+  width: 150px;
+  height: 150px;
+  border-radius: var(--radius-md);
+  background: var(--yellow);
+  overflow: hidden;
+}
+
+.adventure-move-title {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.adventure-cue {
+  color: var(--purple-dark);
+  font-weight: 600;
+}
+
+.adventure-counter {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+
+.adventure-count {
+  font-size: 1.5rem;
+  font-weight: 800;
+  min-width: 4.5rem;
+}
+
+.adventure-plus {
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  color: var(--white);
+  font-size: 1.4rem;
+  padding: 1rem 2rem;
+  box-shadow: var(--shadow-pop);
+}
+
+.adventure-rest-circle {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: var(--lavender);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--purple-dark);
+  animation: rest-breathe 3s ease-in-out infinite;
+}
+
+@keyframes rest-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+.adventure-trophy {
+  font-size: 4rem;
+  animation: badge-pop 0.6s ease;
 }
 
 /* ---------- Exercise board ---------- */
