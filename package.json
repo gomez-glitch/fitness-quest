@@ -8,6 +8,6 @@
     "dev": "node scripts/dev-server.js",
     "build": "node scripts/build.js",
     "preview": "node scripts/dev-server.js dist",
-    "lint": "node --check src/app.js && node --check scripts/build.js && node --check scripts/dev-server.js"
+    "lint": "node --check src/app.js && node --check src/mascot.js && node --check src/sound.js && node --check scripts/build.js && node --check scripts/dev-server.js"
   }
 }

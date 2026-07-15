@@ -10,16 +10,24 @@ colors, big buttons, and encouraging, positive language throughout.
 
 ## Features
 
+- Multiple hero profiles (up to 4) so siblings can play side by side, each with
+  their own XP, streaks, badges, and quest history
 - Hero customization: nickname, persona, and avatar, saved to the browser
-- Exercise board with 9 short bodyweight challenges (reps, XP, target muscle group)
-- Active "quest card" panel with an illustrated move, cues, steps, and a circular
-  rep dial (+ / − controls, claim XP when the target is reached)
+- 16 short kid-friendly exercises with a muscle-group filter (Core / Arms /
+  Legs / Whole body)
+- Spark, an articulated mascot with real elbow and knee joints, demonstrates
+  each exercise with anatomically-faithful looping animation in the active
+  quest card (side or front view, whichever reads best per move)
+- A rotating clicker-style rep counter: tap it or spin it like a tally counter,
+  with a ratcheting notched ring, springy feedback, and optional sounds
+- Synthesized sound effects (rep tick, target chime, XP fanfare, badge jingle)
+  via the Web Audio API — no audio files — with a persistent mute toggle
 - Progress dashboard: level, XP, streak, and total reps, with a level-up progress bar
 - Daily streak tracking (based on local calendar dates)
-- Badge case that unlocks badges as XP grows
+- 15 badges: XP milestones, streaks, daily goals, variety/explorer, and levels
 - Move library of illustrated cards for every exercise
 - Quest log of the most recent completed challenges
-- One-tap "reset progress" (with confirmation) to start fresh
+- Per-hero "reset progress" (with confirmation) that keeps the hero's identity
 
 ## Tech
 
