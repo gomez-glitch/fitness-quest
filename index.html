@@ -10,185 +10,218 @@
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
 
-  <header class="hero">
-    <div class="hero-inner">
-      <div class="hero-avatar" id="hero-avatar" aria-hidden="true">👟</div>
-      <div class="hero-copy">
-        <h1>Move Quest</h1>
-        <p class="hero-subtitle">
-          Pick a persona, choose short exercises, tap the dial as reps are finished,
-          and collect XP for healthy habits.
-        </p>
-        <div class="hero-actions">
-          <button type="button" class="btn btn-primary" id="start-moving-btn">Start moving</button>
-          <button type="button" class="btn btn-secondary" id="customize-hero-btn">Customize hero</button>
-        </div>
-      </div>
-    </div>
-  </header>
-
   <main id="main">
-    <!-- Profile switcher (collapsible drawer) -->
-    <section class="card switcher-card" aria-labelledby="switcher-heading">
-      <button type="button" class="switcher-toggle" id="switcher-toggle"
-              aria-expanded="false" aria-controls="switcher-panel">
-        <h2 id="switcher-heading">🧒 Hero: <span id="switcher-summary"></span></h2>
-        <span class="switcher-chevron" aria-hidden="true">▾</span>
-      </button>
-      <div class="switcher-panel" id="switcher-panel" hidden>
-        <p class="field-hint">Tap a hero to switch, or add a new one — everyone keeps their own progress.</p>
-        <div class="profile-switcher" id="profile-switcher"></div>
-      </div>
-    </section>
-
-    <!-- Profile customization -->
-    <section class="card profile-card" id="profile-section" aria-labelledby="profile-heading">
-      <h2 id="profile-heading">🎨 Customize your hero</h2>
-      <form id="profile-form" class="profile-form">
-        <div class="field">
-          <label for="nickname-input">Nickname</label>
-          <input type="text" id="nickname-input" name="nickname" maxlength="16" placeholder="Spark" autocomplete="off" />
-        </div>
-
-        <div class="field">
-          <label for="persona-select">Persona</label>
-          <select id="persona-select" name="persona"></select>
-          <p class="field-hint" id="persona-boost"></p>
-        </div>
-
-        <fieldset class="field avatar-field">
-          <legend>Avatar</legend>
-          <div class="avatar-grid" id="avatar-grid" role="radiogroup" aria-label="Choose an avatar"></div>
-        </fieldset>
-
-        <div class="profile-actions">
-          <button type="submit" class="btn btn-primary">Save hero</button>
-          <button type="button" class="btn btn-danger" id="remove-profile-btn">Remove hero</button>
-        </div>
-      </form>
-    </section>
-
-    <!-- Progress dashboard -->
-    <section class="card dashboard" aria-labelledby="dashboard-heading">
-      <h2 id="dashboard-heading">📊 Quest progress</h2>
-      <div class="stat-grid">
-        <div class="stat-card stat-level">
-          <span class="stat-label">Level</span>
-          <span class="stat-value" id="stat-level">1</span>
-        </div>
-        <div class="stat-card stat-xp">
-          <span class="stat-label">XP</span>
-          <span class="stat-value" id="stat-xp">0</span>
-        </div>
-        <div class="stat-card stat-streak">
-          <span class="stat-label">Streak</span>
-          <span class="stat-value" id="stat-streak">0 🔥</span>
-        </div>
-        <div class="stat-card stat-reps">
-          <span class="stat-label">Total reps</span>
-          <span class="stat-value" id="stat-reps">0</span>
-        </div>
-      </div>
-      <div class="level-progress">
-        <div class="level-progress-track">
-          <div class="level-progress-fill" id="level-progress-fill"></div>
-        </div>
-        <p class="level-progress-label" id="level-progress-label">0 / 150 XP to next level</p>
-      </div>
-      <h3 class="week-heading">Last 7 days</h3>
-      <div class="week-chart" id="week-chart"></div>
-      <p class="week-bests" id="week-bests"></p>
-    </section>
-
-    <!-- Daily quests -->
-    <section class="card daily-card" aria-labelledby="daily-heading">
-      <h2 id="daily-heading">⚡ Today's quests</h2>
-      <p class="daily-intro">Three special moves picked fresh every day. Finish all three to open the bonus chest!</p>
-      <div class="daily-board" id="daily-board"></div>
-    </section>
-
-    <!-- Adventure mode -->
-    <section class="card adventure-section" aria-labelledby="adventure-heading">
-      <h2 id="adventure-heading">🧭 Adventure mode</h2>
-      <p class="daily-intro">A guided mini-workout: Spark leads you through each move with rest breaks between — finish the chain for combo bonus XP!</p>
-      <div class="adventure-presets" id="adventure-presets"></div>
-    </section>
-
-    <!-- Exercise board -->
-    <section class="card" aria-labelledby="board-heading">
-      <h2 id="board-heading">🗺️ Choose a challenge</h2>
-      <div class="filter-chips" id="filter-chips" role="group" aria-label="Filter exercises by muscle group"></div>
-      <div class="exercise-board" id="exercise-board"></div>
-    </section>
-
-    <!-- Active exercise panel -->
-    <section class="card quest-card" id="active-panel" aria-labelledby="active-heading">
-      <h2 id="active-heading">🦄 <span id="active-heading-text">Spark's move</span></h2>
-      <div class="quest-card-inner">
-        <div class="quest-illustration" id="active-illustration" role="img" aria-label="Exercise illustration"></div>
-
-        <div class="quest-details">
-          <p class="quest-cue" id="active-cue"></p>
-          <ul class="quest-steps" id="active-steps"></ul>
-        </div>
-
-        <div class="quest-dial-area" id="quest-dial-area">
-          <div class="clicker" id="rep-clicker" role="spinbutton" tabindex="0"
-               aria-label="Rep counter — tap the dial or spin it to count reps"
-               aria-valuemin="0" aria-valuenow="0">
-            <svg class="clicker-svg" viewBox="0 0 200 200" aria-hidden="true">
-              <circle class="clicker-track" cx="100" cy="100" r="86" />
-              <circle class="clicker-progress" id="clicker-progress" cx="100" cy="100" r="86" />
-              <g class="clicker-ring" id="clicker-ring"></g>
-            </svg>
-            <div class="clicker-center" id="clicker-center">
-              <span class="dial-count" id="dial-count" aria-live="polite">0</span>
-              <span class="dial-target">/ <span id="dial-target">0</span></span>
-              <span class="clicker-hint">tap or spin</span>
+    <!-- ================= HOME ================= -->
+    <div class="tab-view" id="view-home" role="tabpanel" aria-labelledby="tab-home">
+      <header class="hero">
+        <div class="hero-inner">
+          <div class="hero-avatar" id="hero-avatar" aria-hidden="true">👟</div>
+          <div class="hero-copy">
+            <h1>Move Quest</h1>
+            <p class="hero-subtitle">
+              Pick a persona, choose short exercises, tap the dial as reps are finished,
+              and collect XP for healthy habits.
+            </p>
+            <div class="hero-actions">
+              <button type="button" class="btn btn-primary" id="start-moving-btn">Start moving</button>
+              <button type="button" class="btn btn-secondary" id="customize-hero-btn">Customize hero</button>
             </div>
           </div>
-          <div class="dial-controls">
-            <button type="button" class="btn btn-round" id="dial-minus" aria-label="Remove one rep">−</button>
-            <button type="button" class="btn btn-round btn-mute" id="mute-btn" aria-label="Turn sounds off" aria-pressed="false">🔊</button>
-          </div>
-          <button type="button" class="btn btn-claim" id="claim-xp-btn" disabled>Claim XP ✨</button>
         </div>
-      </div>
-    </section>
+      </header>
 
-    <!-- Move library -->
-    <section class="card" aria-labelledby="library-heading">
-      <h2 id="library-heading">📚 Move library</h2>
-      <div class="move-library" id="move-library"></div>
-    </section>
+      <!-- Profile switcher (collapsible drawer) -->
+      <section class="card switcher-card" aria-labelledby="switcher-heading">
+        <button type="button" class="switcher-toggle" id="switcher-toggle"
+                aria-expanded="false" aria-controls="switcher-panel">
+          <h2 id="switcher-heading">🧒 Hero: <span id="switcher-summary"></span></h2>
+          <span class="switcher-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="switcher-panel" id="switcher-panel" hidden>
+          <p class="field-hint">Tap a hero to switch, or add a new one — everyone keeps their own progress.</p>
+          <div class="profile-switcher" id="profile-switcher"></div>
 
-    <!-- Badge case -->
-    <section class="card" aria-labelledby="badges-heading">
-      <h2 id="badges-heading">🏅 Badge case</h2>
-      <div class="badge-case" id="badge-case"></div>
-    </section>
+          <!-- Customize hero (sub-drawer) -->
+          <button type="button" class="switcher-toggle sub-toggle" id="customize-toggle"
+                  aria-expanded="false" aria-controls="customize-panel">
+            <h3>🎨 Customize hero</h3>
+            <span class="switcher-chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="customize-panel" id="customize-panel" hidden>
+            <form id="profile-form" class="profile-form">
+              <div class="field">
+                <label for="nickname-input">Nickname</label>
+                <input type="text" id="nickname-input" name="nickname" maxlength="16" placeholder="Spark" autocomplete="off" />
+              </div>
 
-    <!-- Quest log -->
-    <section class="card" aria-labelledby="log-heading">
-      <h2 id="log-heading">📜 Quest log</h2>
-      <ul class="quest-log" id="quest-log">
-        <li class="quest-log-empty" id="quest-log-empty">No quests completed yet — go earn some XP!</li>
-      </ul>
-    </section>
+              <div class="field">
+                <label for="persona-select">Persona</label>
+                <select id="persona-select" name="persona"></select>
+                <p class="field-hint" id="persona-boost"></p>
+              </div>
 
-    <!-- Reset progress -->
-    <section class="card reset-card" aria-labelledby="reset-heading">
-      <h2 id="reset-heading">🔄 Reset progress</h2>
-      <p>This clears the current hero's XP, streak, badges, and quest history on this device. Other heroes are not affected.</p>
-      <button type="button" class="btn btn-danger" id="reset-btn">Reset local progress</button>
-    </section>
+              <fieldset class="field avatar-field">
+                <legend>Avatar</legend>
+                <div class="avatar-grid" id="avatar-grid" role="radiogroup" aria-label="Choose an avatar"></div>
+              </fieldset>
+
+              <div class="profile-actions">
+                <button type="submit" class="btn btn-primary">Save hero</button>
+                <button type="button" class="btn btn-danger" id="remove-profile-btn">Remove hero</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Progress dashboard -->
+      <section class="card dashboard" aria-labelledby="dashboard-heading">
+        <h2 id="dashboard-heading">📊 Quest progress</h2>
+        <div class="stat-grid">
+          <div class="stat-card stat-level">
+            <span class="stat-label">Level</span>
+            <span class="stat-value" id="stat-level">1</span>
+          </div>
+          <div class="stat-card stat-xp">
+            <span class="stat-label">XP</span>
+            <span class="stat-value" id="stat-xp">0</span>
+          </div>
+          <div class="stat-card stat-streak">
+            <span class="stat-label">Streak</span>
+            <span class="stat-value" id="stat-streak">0 🔥</span>
+          </div>
+          <div class="stat-card stat-reps">
+            <span class="stat-label">Total reps</span>
+            <span class="stat-value" id="stat-reps">0</span>
+          </div>
+        </div>
+        <div class="level-progress">
+          <div class="level-progress-track">
+            <div class="level-progress-fill" id="level-progress-fill"></div>
+          </div>
+          <p class="level-progress-label" id="level-progress-label">0 / 150 XP to next level</p>
+        </div>
+        <h3 class="week-heading">Last 7 days</h3>
+        <div class="week-chart" id="week-chart"></div>
+        <p class="week-bests" id="week-bests"></p>
+      </section>
+
+      <!-- Daily quests -->
+      <section class="card daily-card" aria-labelledby="daily-heading">
+        <h2 id="daily-heading">⚡ Today's quests</h2>
+        <p class="daily-intro">Three special moves picked fresh every day. Finish all three to open the bonus chest!</p>
+        <div class="daily-board" id="daily-board"></div>
+      </section>
+    </div>
+
+    <!-- ================= PLAY ================= -->
+    <div class="tab-view" id="view-play" role="tabpanel" aria-labelledby="tab-play" hidden>
+      <!-- Exercise board -->
+      <section class="card" aria-labelledby="board-heading">
+        <h2 id="board-heading">🗺️ Choose a challenge</h2>
+        <div class="filter-chips" id="filter-chips" role="group" aria-label="Filter exercises by muscle group"></div>
+        <div class="exercise-board h-row" id="exercise-board"></div>
+      </section>
+
+      <!-- Active exercise panel -->
+      <section class="card quest-card" id="active-panel" aria-labelledby="active-heading">
+        <h2 id="active-heading">🦄 <span id="active-heading-text">Spark's move</span></h2>
+        <div class="quest-card-inner">
+          <div class="quest-illustration" id="active-illustration" role="img" aria-label="Exercise illustration"></div>
+
+          <div class="quest-details">
+            <p class="quest-cue" id="active-cue"></p>
+            <ul class="quest-steps" id="active-steps"></ul>
+          </div>
+
+          <div class="quest-dial-area" id="quest-dial-area">
+            <div class="clicker" id="rep-clicker" role="spinbutton" tabindex="0"
+                 aria-label="Rep counter — tap the dial or spin it to count reps"
+                 aria-valuemin="0" aria-valuenow="0">
+              <svg class="clicker-svg" viewBox="0 0 200 200" aria-hidden="true">
+                <circle class="clicker-track" cx="100" cy="100" r="86" />
+                <circle class="clicker-progress" id="clicker-progress" cx="100" cy="100" r="86" />
+                <g class="clicker-ring" id="clicker-ring"></g>
+              </svg>
+              <div class="clicker-center" id="clicker-center">
+                <span class="dial-count" id="dial-count" aria-live="polite">0</span>
+                <span class="dial-target">/ <span id="dial-target">0</span></span>
+                <span class="clicker-hint">tap or spin</span>
+              </div>
+            </div>
+            <div class="dial-controls">
+              <button type="button" class="btn btn-round" id="dial-minus" aria-label="Remove one rep">−</button>
+              <button type="button" class="btn btn-round btn-mute" id="mute-btn" aria-label="Turn sounds off" aria-pressed="false">🔊</button>
+            </div>
+            <button type="button" class="btn btn-claim" id="claim-xp-btn" disabled>Claim XP ✨</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= ADVENTURE ================= -->
+    <div class="tab-view" id="view-adventure" role="tabpanel" aria-labelledby="tab-adventure" hidden>
+      <section class="card adventure-section" aria-labelledby="adventure-heading">
+        <h2 id="adventure-heading">🧭 Adventure mode</h2>
+        <p class="daily-intro">A guided mini-workout: Spark leads you through each move with rest breaks between — finish the chain for combo bonus XP!</p>
+        <div class="adventure-presets" id="adventure-presets"></div>
+      </section>
+    </div>
+
+    <!-- ================= LIBRARY ================= -->
+    <div class="tab-view" id="view-library" role="tabpanel" aria-labelledby="tab-library" hidden>
+      <section class="card" aria-labelledby="library-heading">
+        <h2 id="library-heading">📚 Move library</h2>
+        <p class="daily-intro">Swipe through every move, sorted by muscle group.</p>
+        <div class="move-library" id="move-library"></div>
+      </section>
+    </div>
+
+    <!-- ================= AWARDS ================= -->
+    <div class="tab-view" id="view-awards" role="tabpanel" aria-labelledby="tab-awards" hidden>
+      <section class="card" aria-labelledby="badges-heading">
+        <h2 id="badges-heading">🏅 Badge case</h2>
+        <div class="badge-case h-row" id="badge-case"></div>
+      </section>
+
+      <section class="card" aria-labelledby="log-heading">
+        <h2 id="log-heading">📜 Quest log</h2>
+        <ul class="quest-log" id="quest-log">
+          <li class="quest-log-empty" id="quest-log-empty">No quests completed yet — go earn some XP!</li>
+        </ul>
+      </section>
+
+      <section class="card reset-card" aria-labelledby="reset-heading">
+        <h2 id="reset-heading">🔄 Reset progress</h2>
+        <p>This clears the current hero's XP, streak, badges, and quest history on this device. Other heroes are not affected.</p>
+        <button type="button" class="btn btn-danger" id="reset-btn">Reset local progress</button>
+      </section>
+
+      <footer class="app-footer">
+        <p>Move Quest 🌟 Have fun and always ask a grown-up before trying new exercises.</p>
+      </footer>
+    </div>
   </main>
 
   <div class="adventure-overlay" id="adventure-overlay" hidden></div>
 
-  <footer class="app-footer">
-    <p>Move Quest 🌟 Have fun and always ask a grown-up before trying new exercises.</p>
-  </footer>
+  <nav class="tab-bar" role="tablist" aria-label="App sections">
+    <button type="button" class="tab-btn" id="tab-home" role="tab" data-tab="home" aria-selected="true" aria-controls="view-home">
+      <span class="tab-icon" aria-hidden="true">🏠</span><span class="tab-label">Home</span>
+    </button>
+    <button type="button" class="tab-btn" id="tab-play" role="tab" data-tab="play" aria-selected="false" aria-controls="view-play">
+      <span class="tab-icon" aria-hidden="true">🎯</span><span class="tab-label">Play</span>
+    </button>
+    <button type="button" class="tab-btn" id="tab-adventure" role="tab" data-tab="adventure" aria-selected="false" aria-controls="view-adventure">
+      <span class="tab-icon" aria-hidden="true">🧭</span><span class="tab-label">Adventure</span>
+    </button>
+    <button type="button" class="tab-btn" id="tab-library" role="tab" data-tab="library" aria-selected="false" aria-controls="view-library">
+      <span class="tab-icon" aria-hidden="true">📚</span><span class="tab-label">Library</span>
+    </button>
+    <button type="button" class="tab-btn" id="tab-awards" role="tab" data-tab="awards" aria-selected="false" aria-controls="view-awards">
+      <span class="tab-icon" aria-hidden="true">🏅</span><span class="tab-label">Awards</span>
+    </button>
+  </nav>
 
   <script type="module" src="./src/app.js"></script>
 </body>

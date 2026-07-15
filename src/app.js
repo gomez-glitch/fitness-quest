@@ -399,6 +399,8 @@ const el = {
   switcherToggle: document.getElementById("switcher-toggle"),
   switcherPanel: document.getElementById("switcher-panel"),
   switcherSummary: document.getElementById("switcher-summary"),
+  customizeToggle: document.getElementById("customize-toggle"),
+  customizePanel: document.getElementById("customize-panel"),
   profileForm: document.getElementById("profile-form"),
   nicknameInput: document.getElementById("nickname-input"),
   personaSelect: document.getElementById("persona-select"),
@@ -431,6 +433,7 @@ const el = {
   muteBtn: document.getElementById("mute-btn"),
   claimBtn: document.getElementById("claim-xp-btn"),
 
+  tabBar: document.querySelector(".tab-bar"),
   dailyBoard: document.getElementById("daily-board"),
   weekChart: document.getElementById("week-chart"),
   weekBests: document.getElementById("week-bests"),
@@ -483,6 +486,34 @@ function setSwitcherOpen(open) {
   el.switcherPanel.hidden = !open;
   el.switcherToggle.setAttribute("aria-expanded", String(open));
   el.switcherToggle.classList.toggle("open", open);
+}
+
+function setCustomizeOpen(open) {
+  el.customizePanel.hidden = !open;
+  el.customizeToggle.setAttribute("aria-expanded", String(open));
+  el.customizeToggle.classList.toggle("open", open);
+}
+
+// ---------------------------------------------------------------------------
+// Tabs
+// ---------------------------------------------------------------------------
+
+const TABS = ["home", "play", "adventure", "library", "awards"];
+
+function switchTab(name) {
+  if (!TABS.includes(name)) return;
+  TABS.forEach((t) => {
+    document.getElementById(`view-${t}`).hidden = t !== name;
+  });
+  el.tabBar.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.setAttribute("aria-selected", String(btn.dataset.tab === name));
+  });
+  window.scrollTo({ top: 0 });
+  // Don't burn rAF frames animating a mascot nobody can see.
+  if (mascot) {
+    if (name === "play") mascot.start();
+    else mascot.stop();
+  }
 }
 
 function renderProfileForm() {
@@ -728,13 +759,20 @@ function spawnConfetti(host = el.dialArea, count = 14) {
 // ---------------------------------------------------------------------------
 
 function renderMoveLibrary() {
-  el.moveLibrary.innerHTML = EXERCISES.map((ex) => `
-    <div class="library-card">
-      <div class="library-illustration" role="img" aria-label="Spark demonstrating the ${ex.title} movement" data-exercise="${ex.id}"></div>
-      <p class="library-card-title">${ex.icon} ${ex.title}</p>
-      <p class="library-card-meta">${ex.target} reps · ${ex.muscles}</p>
-    </div>
-  `).join("");
+  const groups = GROUPS.filter((g) => g !== "All");
+  el.moveLibrary.innerHTML = groups.map((group) => {
+    const cards = EXERCISES.filter((ex) => ex.group === group).map((ex) => `
+      <div class="library-card">
+        <div class="library-illustration" role="img" aria-label="Spark demonstrating the ${ex.title} movement" data-exercise="${ex.id}"></div>
+        <p class="library-card-title">${ex.icon} ${ex.title}</p>
+        <p class="library-card-meta">${ex.target} reps · ${ex.muscles}</p>
+      </div>
+    `).join("");
+    return `
+      <h3 class="library-group-heading">${group}</h3>
+      <div class="h-row library-row">${cards}</div>
+    `;
+  }).join("");
   el.moveLibrary.querySelectorAll(".library-illustration").forEach((node) => {
     renderStaticMascot(node, node.dataset.exercise);
   });
@@ -852,17 +890,27 @@ function renderAll() {
 // Event handlers
 // ---------------------------------------------------------------------------
 
+el.tabBar.addEventListener("click", (event) => {
+  const btn = event.target.closest(".tab-btn");
+  if (btn) switchTab(btn.dataset.tab);
+});
+
 el.startMovingBtn.addEventListener("click", () => {
-  el.exerciseBoard.closest("section").scrollIntoView({ behavior: "smooth", block: "start" });
+  switchTab("play");
 });
 
 el.customizeHeroBtn.addEventListener("click", () => {
-  document.getElementById("profile-section").scrollIntoView({ behavior: "smooth", block: "start" });
+  setSwitcherOpen(true);
+  setCustomizeOpen(true);
   el.nicknameInput.focus();
 });
 
 el.switcherToggle.addEventListener("click", () => {
   setSwitcherOpen(el.switcherPanel.hidden);
+});
+
+el.customizeToggle.addEventListener("click", () => {
+  setCustomizeOpen(el.customizePanel.hidden);
 });
 
 el.profileSwitcher.addEventListener("click", (event) => {
@@ -876,7 +924,7 @@ el.profileSwitcher.addEventListener("click", (event) => {
     profileDraft = { ...activeProfile().profile };
     saveData();
     renderAll();
-    document.getElementById("profile-section").scrollIntoView({ behavior: "smooth", block: "start" });
+    setCustomizeOpen(true); // straight into naming the new hero
     el.nicknameInput.focus();
     return;
   }
@@ -952,7 +1000,7 @@ el.dailyBoard.addEventListener("click", (event) => {
   activeExerciseId = quest.dataset.exercise;
   renderExerciseBoard();
   renderActivePanel();
-  document.getElementById("active-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+  switchTab("play");
 });
 
 // ---------------------------------------------------------------------------
@@ -1295,6 +1343,7 @@ buildRingNotches();
 el.muteBtn.textContent = sound.isMuted() ? "🔇" : "🔊";
 el.muteBtn.setAttribute("aria-pressed", String(sound.isMuted()));
 setSwitcherOpen(false); // drawer starts tucked away — the summary shows who's playing
+setCustomizeOpen(false);
 renderAdventurePresets();
 renderAll();
 renderMoveLibrary();

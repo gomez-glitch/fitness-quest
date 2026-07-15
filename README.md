@@ -10,9 +10,13 @@ colors, big buttons, and encouraging, positive language throughout.
 
 ## Features
 
+- App-style shell: a fixed bottom tab bar (Home / Play / Adventure / Library /
+  Awards) keeps every screen short, and long card sets (exercise picker, move
+  library, badge case) are swipeable horizontal snap rows
 - Multiple hero profiles (up to 4) so siblings can play side by side, each with
   their own XP, streaks, badges, and quest history — tucked into a collapsible
-  drawer once a hero is picked
+  drawer once a hero is picked, with hero customization nested inside it as a
+  sub-drawer
 - Daily Quests: three featured moves picked fresh each day (same picks on every
   device), with a +40 XP bonus chest for finishing all three
 - Adventure mode: guided mini-workouts (preset chains or a surprise mix) where

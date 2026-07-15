@@ -81,8 +81,10 @@ a:focus-visible {
 .hero {
   background: linear-gradient(135deg, var(--purple) 0%, var(--pink) 70%, var(--yellow) 130%);
   color: var(--white);
-  padding: 2.5rem 1.25rem 3rem;
+  padding: 2rem 1.25rem;
   text-align: center;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
 }
 
 .hero-inner {
@@ -226,12 +228,89 @@ a:focus-visible {
 
 main {
   max-width: 960px;
-  margin: -1.75rem auto 0;
-  padding: 0 1rem 3rem;
+  margin: 0 auto;
+  padding: 1rem 1rem 6.5rem; /* bottom padding clears the fixed tab bar */
+  position: relative;
+}
+
+.tab-view {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  position: relative;
+}
+
+.tab-view[hidden] {
+  display: none;
+}
+
+/* ---------- Bottom tab bar ---------- */
+
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  background: var(--white);
+  box-shadow: 0 -6px 24px rgba(59, 7, 100, 0.16);
+  padding: 0.4rem 0.5rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
+}
+
+.tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  flex: 1;
+  max-width: 120px;
+  min-height: 56px;
+  padding: 0.35rem 0.25rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--purple-dark);
+}
+
+.tab-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.tab-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.tab-btn[aria-selected="true"] {
+  background: var(--lavender);
+  color: var(--ink);
+}
+
+.tab-btn[aria-selected="true"] .tab-icon {
+  transform: scale(1.15);
+}
+
+/* ---------- Horizontal snap rows ---------- */
+
+.h-row {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding: 0.25rem 0.25rem 0.75rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--purple) var(--lavender);
+}
+
+.h-row > * {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
 }
 
 .card {
@@ -283,6 +362,22 @@ main {
 
 .switcher-panel {
   padding: 0.5rem 0 0.75rem;
+}
+
+.sub-toggle {
+  margin-top: 1rem;
+  border-top: 2px dashed var(--lavender);
+  padding-top: 0.75rem;
+}
+
+.sub-toggle h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--purple-dark);
+}
+
+.customize-panel {
+  padding-top: 0.5rem;
 }
 
 .profile-switcher {
@@ -839,35 +934,19 @@ body.no-scroll {
   color: var(--white);
 }
 
-.exercise-board {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
-}
-
-@media (min-width: 640px) {
-  .exercise-board {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 960px) {
-  .exercise-board {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
 .exercise-tile {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  text-align: left;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 148px;
+  text-align: center;
   background: var(--bg);
   border: 3px solid var(--lavender);
   border-radius: var(--radius-md);
-  padding: 0.9rem;
-  min-height: 64px;
+  padding: 0.9rem 0.6rem;
+  min-height: 110px;
 }
 
 .exercise-tile:hover {
@@ -888,6 +967,7 @@ body.no-scroll {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+  align-items: center;
 }
 
 .exercise-tile-title {
@@ -1078,22 +1158,10 @@ body.no-scroll {
 
 /* ---------- Move library ---------- */
 
-.move-library {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
-
-@media (min-width: 640px) {
-  .move-library {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 960px) {
-  .move-library {
-    grid-template-columns: repeat(4, 1fr);
-  }
+.library-group-heading {
+  font-size: 1rem;
+  color: var(--purple-dark);
+  margin: 0.75rem 0 0.25rem;
 }
 
 .library-card {
@@ -1102,6 +1170,7 @@ body.no-scroll {
   padding: 0.9rem;
   text-align: center;
   border: 3px solid var(--lavender);
+  width: 168px;
 }
 
 .library-card-title {
@@ -1116,16 +1185,8 @@ body.no-scroll {
 
 /* ---------- Badges ---------- */
 
-.badge-case {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-}
-
-@media (min-width: 640px) {
-  .badge-case {
-    grid-template-columns: repeat(4, 1fr);
-  }
+.badge-case .badge {
+  width: 140px;
 }
 
 .badge {
