@@ -6,7 +6,11 @@ import { sound } from "./sound.js";
 const STORAGE_KEY = "move-quest-progress-v3";
 const LEGACY_KEY = "move-quest-progress-v2";
 const HISTORY_LIMIT = 12;
-const XP_PER_LEVEL = 150;
+const CURVE_VERSION = 2;
+// Energy system: full XP for the first claims each day, then reduced —
+// gentle nudge to rest and come back tomorrow.
+const ENERGY_FULL_CLAIMS = 6;
+const ENERGY_TIRED_CLAIMS = 10;
 const MAX_PROFILES = 4;
 const DEG_PER_REP = 22.5; // clicker ring rotation per rep
 const SPIN_STEP_DEG = 24; // drag angle needed per rep while spinning
@@ -200,6 +204,7 @@ function defaultProfileState(nickname = "Spark") {
     stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0 },
     daily: { date: null, done: [], bonusClaimed: false },
     days: {},
+    curve: CURVE_VERSION,
   };
 }
 
@@ -232,7 +237,8 @@ function normalizeProfile(parsed) {
   if (parsed.counters && typeof parsed.counters === "object") {
     EXERCISES.forEach((ex) => {
       const val = parsed.counters[ex.id];
-      state.counters[ex.id] = typeof val === "number" && val >= 0 && val <= ex.target ? val : 0;
+      // Bound by 2x base target — the highest a level-scaled target can reach.
+      state.counters[ex.id] = typeof val === "number" && val >= 0 && val <= ex.target * 2 ? val : 0;
     });
   }
 
@@ -279,6 +285,16 @@ function normalizeProfile(parsed) {
       ) {
         state.days[date] = { xp: entry.xp, reps: entry.reps };
       }
+    }
+  }
+
+  // One-time migration from the old flat 150-XP-per-level curve: nobody gets
+  // demoted — if the new curve would lower an earned level, top XP up to that
+  // level's new threshold.
+  if (parsed.curve !== CURVE_VERSION) {
+    const oldLevel = Math.floor(state.xp / 150) + 1;
+    if (levelForXp(state.xp) < oldLevel) {
+      state.xp = xpThreshold(oldLevel);
     }
   }
 
@@ -364,8 +380,32 @@ function wasYesterday(lastDateStr, currentTodayStr) {
   return currentTodayStr === todayStr(last);
 }
 
+// Quadratic level curve: reaching level n costs 50*(n^2 - 1) total XP.
+// Level 2 comes fast (150 XP) but each level costs more than the last.
+function xpThreshold(level) {
+  return 50 * (level * level - 1);
+}
+
 function levelForXp(xp) {
-  return Math.floor(xp / XP_PER_LEVEL) + 1;
+  return Math.max(1, Math.floor(Math.sqrt(xp / 50 + 1) + 1e-9));
+}
+
+// Progressive overload: rep targets creep up (+1 per 2 levels, capped at
+// double the base). Push ups are exempt — they're hard enough already.
+function targetFor(exercise, level = levelForXp(activeProfile().xp)) {
+  if (exercise.id === "push-ups") return exercise.target;
+  return Math.min(exercise.target * 2, exercise.target + Math.floor((level - 1) / 2));
+}
+
+function todayClaimCount(st) {
+  return st.stats.todayDate === todayStr() ? st.stats.todayCount : 0;
+}
+
+function energyMultiplier(st) {
+  const claims = todayClaimCount(st);
+  if (claims < ENERGY_FULL_CLAIMS) return 1;
+  if (claims < ENERGY_TIRED_CLAIMS) return 0.5;
+  return 0.25;
 }
 
 // Deterministic PRNG so every device shows the same daily quests for a date.
@@ -480,6 +520,7 @@ const el = {
   dialTarget: document.getElementById("dial-target"),
   dialMinus: document.getElementById("dial-minus"),
   muteBtn: document.getElementById("mute-btn"),
+  energyNote: document.getElementById("energy-note"),
   claimBtn: document.getElementById("claim-xp-btn"),
 
   tabBar: document.querySelector(".tab-bar"),
@@ -603,8 +644,9 @@ function updatePersonaBoost() {
 function renderDashboard() {
   const st = activeProfile();
   const level = levelForXp(st.xp);
-  const xpIntoLevel = st.xp % XP_PER_LEVEL;
-  const pct = Math.round((xpIntoLevel / XP_PER_LEVEL) * 100);
+  const xpIntoLevel = st.xp - xpThreshold(level);
+  const span = xpThreshold(level + 1) - xpThreshold(level);
+  const pct = Math.round((xpIntoLevel / span) * 100);
 
   el.statLevel.textContent = String(level);
   el.statXp.textContent = String(st.xp);
@@ -612,7 +654,7 @@ function renderDashboard() {
   el.statReps.textContent = String(st.reps);
 
   el.levelProgressFill.style.width = `${pct}%`;
-  el.levelProgressLabel.textContent = `${xpIntoLevel} / ${XP_PER_LEVEL} XP to next level`;
+  el.levelProgressLabel.textContent = `${xpIntoLevel} / ${span} XP to level ${level + 1}`;
 }
 
 function renderFilterChips() {
@@ -630,7 +672,7 @@ function renderExerciseBoard() {
         <span class="exercise-tile-icon" aria-hidden="true">${ex.icon}</span>
         <span class="exercise-tile-body">
           <span class="exercise-tile-title">${ex.title}</span>
-          <span class="exercise-tile-meta">${ex.target} reps · ${ex.xp} XP · ${ex.muscles}</span>
+          <span class="exercise-tile-meta">${targetFor(ex)} reps · ${ex.xp} XP · ${ex.muscles}</span>
         </span>
       </button>
     `;
@@ -683,14 +725,15 @@ function renderClicker() {
   const exercise = findExercise(activeExerciseId);
   if (!exercise) return;
   const st = activeProfile();
+  const target = targetFor(exercise);
   const count = st.counters[exercise.id] || 0;
-  const pct = exercise.target > 0 ? count / exercise.target : 0;
+  const pct = target > 0 ? Math.min(1, count / target) : 0;
 
   el.dialCount.textContent = String(count);
-  el.dialTarget.textContent = String(exercise.target);
-  el.clicker.setAttribute("aria-valuemax", String(exercise.target));
+  el.dialTarget.textContent = String(target);
+  el.clicker.setAttribute("aria-valuemax", String(target));
   el.clicker.setAttribute("aria-valuenow", String(count));
-  el.clicker.classList.toggle("clicker-full", count >= exercise.target);
+  el.clicker.classList.toggle("clicker-full", count >= target);
 
   el.clickerProgress.style.strokeDasharray = String(RING_CIRC);
   el.clickerProgress.style.strokeDashoffset = String(RING_CIRC * (1 - pct));
@@ -698,15 +741,23 @@ function renderClicker() {
   const angle = count * DEG_PER_REP + spinAngleOffset;
   el.clickerRing.setAttribute("transform", `rotate(${angle} 100 100)`);
 
-  el.claimBtn.disabled = count < exercise.target;
+  el.claimBtn.disabled = count < target;
+
+  const mult = energyMultiplier(st);
+  el.energyNote.textContent =
+    mult === 1 ? "⚡ Full power!"
+    : mult === 0.5 ? "🔋 Muscles getting tired — half XP now. Rest makes you stronger!"
+    : "😴 Super tired! Tiny XP until tomorrow — time to rest and recover.";
+  el.energyNote.classList.toggle("energy-low", mult < 1);
 }
 
 function changeCount(delta, opts = {}) {
   const exercise = findExercise(activeExerciseId);
   if (!exercise) return;
   const st = activeProfile();
+  const target = targetFor(exercise);
   const current = st.counters[exercise.id] || 0;
-  const next = Math.max(0, Math.min(exercise.target, current + delta));
+  const next = Math.max(0, Math.min(target, current + delta));
   if (next === current) return;
 
   st.counters[exercise.id] = next;
@@ -720,7 +771,7 @@ function changeCount(delta, opts = {}) {
       void el.clicker.offsetWidth; // restart animation
       el.clicker.classList.add("clicker-bump");
     }
-    if (next === exercise.target) {
+    if (next === target) {
       sound.chime();
       spawnConfetti();
     }
@@ -830,7 +881,7 @@ function renderMoveLibrary() {
               aria-label="See how to do ${ex.title}">
         <span class="library-illustration" role="img" aria-label="Spark demonstrating the ${ex.title} movement" data-exercise="${ex.id}"></span>
         <span class="library-card-title">${ex.icon} ${ex.title}</span>
-        <span class="library-card-meta">${ex.target} reps · ${ex.muscles}</span>
+        <span class="library-card-meta">${targetFor(ex)} reps · ${ex.muscles}</span>
       </button>
     `).join("");
     return `
@@ -891,7 +942,7 @@ function renderDaily() {
       <button type="button" class="daily-quest ${done ? "done" : ""}" data-exercise="${id}">
         <span class="daily-quest-icon" aria-hidden="true">${done ? "✅" : ex.icon}</span>
         <span class="daily-quest-title">${ex.title}</span>
-        <span class="daily-quest-meta">${done ? "Done!" : `${ex.target} reps`}</span>
+        <span class="daily-quest-meta">${done ? "Done!" : `${targetFor(ex)} reps`}</span>
       </button>
     `;
   });
@@ -1159,6 +1210,7 @@ function showAdventureMove() {
   stopAdventureExtras();
   adventure.count = 0;
   const ex = findExercise(adventure.moves[adventure.index]);
+  const target = targetFor(ex);
 
   el.adventureOverlay.innerHTML = `
     <div class="adventure-card" role="dialog" aria-modal="true" aria-label="Adventure: ${escapeHtml(ex.title)}">
@@ -1170,7 +1222,7 @@ function showAdventureMove() {
         <p class="adventure-cue">${ex.cue}</p>
         <div class="adventure-counter">
           <button type="button" class="btn btn-round" data-action="minus" aria-label="Remove one rep">−</button>
-          <span class="adventure-count" aria-live="polite"><b id="adventure-count">0</b> / ${ex.target}</span>
+          <span class="adventure-count" aria-live="polite"><b id="adventure-count">0</b> / ${target}</span>
           <button type="button" class="btn adventure-plus" data-action="plus" aria-label="Count one rep">+1</button>
         </div>
       </div>
@@ -1182,7 +1234,8 @@ function showAdventureMove() {
 
 function adventureTap(delta) {
   const ex = findExercise(adventure.moves[adventure.index]);
-  const next = Math.max(0, Math.min(ex.target, adventure.count + delta));
+  const target = targetFor(ex);
+  const next = Math.max(0, Math.min(target, adventure.count + delta));
   if (next === adventure.count) return;
   adventure.count = next;
   if (delta > 0) {
@@ -1192,10 +1245,9 @@ function adventureTap(delta) {
   const countEl = document.getElementById("adventure-count");
   if (countEl) countEl.textContent = String(adventure.count);
 
-  if (adventure.count >= ex.target) {
+  if (adventure.count >= target) {
     sound.chime();
-    awardCompletion(ex, ex.target);
-    adventure.xpEarned += ex.xp;
+    adventure.xpEarned += awardCompletion(ex, target);
     adventure.index += 1;
     if (adventure.index >= adventure.moves.length) {
       showAdventureCelebration();
@@ -1354,7 +1406,7 @@ function openMoveDetail(id) {
       <div class="adventure-stage">
         <div class="adventure-mascot" id="detail-mascot" role="img"
              aria-label="Spark demonstrating the ${ex.title} movement"></div>
-        <p class="detail-meta">${ex.target} reps · ${ex.xp} XP · ${ex.muscles}</p>
+        <p class="detail-meta">${targetFor(ex)} reps · ${ex.xp} XP · ${ex.muscles}</p>
         <p class="adventure-cue">${ex.cue}</p>
         <ul class="quest-steps detail-steps">
           ${ex.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}
@@ -1421,8 +1473,9 @@ function awardCompletion(exercise, reps) {
   const today = todayStr();
   const badgesBefore = earnedBadgeIds(st);
   const levelBefore = levelForXp(st.xp);
+  const earnedXp = Math.round(exercise.xp * energyMultiplier(st));
 
-  st.xp += exercise.xp;
+  st.xp += earnedXp;
   st.reps += reps;
 
   st.completed.unshift({
@@ -1430,7 +1483,7 @@ function awardCompletion(exercise, reps) {
     title: exercise.title,
     icon: exercise.icon,
     date: today,
-    xp: exercise.xp,
+    xp: earnedXp,
     reps,
   });
   st.completed = st.completed.slice(0, HISTORY_LIMIT);
@@ -1458,7 +1511,7 @@ function awardCompletion(exercise, reps) {
 
   // Per-day history for the weekly chart
   if (!st.days[today]) st.days[today] = { xp: 0, reps: 0 };
-  st.days[today].xp += exercise.xp;
+  st.days[today].xp += earnedXp;
   st.days[today].reps += reps;
   pruneDays(st);
 
@@ -1496,7 +1549,7 @@ function awardCompletion(exercise, reps) {
   renderDaily();
   renderWeekChart();
   maybeShowLevelUp();
-  return dailyBonusEarned;
+  return earnedXp;
 }
 
 el.claimBtn.addEventListener("click", () => {
@@ -1504,7 +1557,7 @@ el.claimBtn.addEventListener("click", () => {
   if (!exercise) return;
   const st = activeProfile();
   const current = st.counters[exercise.id] || 0;
-  if (current < exercise.target) return;
+  if (current < targetFor(exercise)) return;
 
   awardCompletion(exercise, current);
   st.counters[exercise.id] = 0;

@@ -42,6 +42,11 @@ colors, big buttons, and encouraging, positive language throughout.
 - Synthesized sound effects (rep tick, target chime, XP fanfare, badge jingle)
   via the Web Audio API — no audio files — with a persistent mute toggle
 - Progress dashboard: level, XP, streak, and total reps, with a level-up progress bar
+- Balanced progression: a quadratic level curve (level n costs 50×(n²−1) total
+  XP) keeps early levels quick and later ones earned; rep targets grow +1 per
+  2 levels (capped at 2× base, push ups exempt); and an "energy" system pays
+  full XP for the first 6 claims each day, then half, then a quarter — a
+  gentle nudge to rest and come back tomorrow
 - Daily streak tracking (based on local calendar dates)
 - 15 badges: XP milestones, streaks, daily goals, variety/explorer, and levels
 - Move library of illustrated cards for every exercise

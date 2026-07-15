@@ -1106,6 +1106,21 @@ body.no-scroll {
   position: relative;
 }
 
+.energy-note {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--purple-dark);
+  text-align: center;
+}
+
+.energy-note.energy-low {
+  color: #b45309;
+  background: #fef3c7;
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.7rem;
+}
+
 .confetti-piece {
   position: absolute;
   top: 40%;
