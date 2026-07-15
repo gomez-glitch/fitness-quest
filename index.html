@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Move Quest</title>
   <meta name="description" content="Move Quest — a playful movement adventure game for kids. Pick a hero, do short exercises, and earn XP!" />
+  <meta name="theme-color" content="#7c3aed" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icons/icon.svg" />
   <link rel="stylesheet" href="./src/styles.css" />
 </head>
 <body>
@@ -16,6 +23,7 @@
       <header class="hero">
         <div class="hero-inner">
           <div class="hero-avatar" id="hero-avatar" aria-hidden="true">👟</div>
+          <p class="hero-rank" id="hero-rank"></p>
           <div class="hero-copy">
             <h1>Move Quest</h1>
             <div class="hero-fact">
@@ -205,6 +213,7 @@
 
   <div class="adventure-overlay" id="adventure-overlay" hidden></div>
   <div class="adventure-overlay" id="detail-overlay" hidden></div>
+  <div class="adventure-overlay" id="levelup-overlay" hidden></div>
 
   <nav class="tab-bar" role="tablist" aria-label="App sections">
     <button type="button" class="tab-btn" id="tab-home" role="tab" data-tab="home" aria-selected="true" aria-controls="view-home">

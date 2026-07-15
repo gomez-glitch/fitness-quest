@@ -151,6 +151,19 @@ const ADVENTURES = [
   { id: "surprise", name: "Surprise Me!", emoji: "🎲", moves: null },
 ];
 
+// Hero rank: title + avatar-ring tier, earned by level.
+const RANKS = [
+  { level: 10, title: "Move Quest Legend", tier: "rainbow" },
+  { level: 7, title: "Mighty Champion", tier: "gold" },
+  { level: 5, title: "Fitness Hero", tier: "gold" },
+  { level: 3, title: "Quest Explorer", tier: "silver" },
+  { level: 1, title: "Rookie Mover", tier: "bronze" },
+];
+
+function heroRank(level) {
+  return RANKS.find((r) => level >= r.level) || RANKS[RANKS.length - 1];
+}
+
 const BADGES = [
   { id: "xp-35", emoji: "✨", label: "First Move", need: "Earn 35 XP", test: (s) => s.xp >= 35 },
   { id: "xp-160", emoji: "🔢", label: "Rep Rookie", need: "Earn 160 XP", test: (s) => s.xp >= 160 },
@@ -471,7 +484,9 @@ const el = {
 
   tabBar: document.querySelector(".tab-bar"),
   heroFactText: document.getElementById("hero-fact-text"),
+  heroRank: document.getElementById("hero-rank"),
   detailOverlay: document.getElementById("detail-overlay"),
+  levelupOverlay: document.getElementById("levelup-overlay"),
   dailyBoard: document.getElementById("daily-board"),
   weekChart: document.getElementById("week-chart"),
   weekBests: document.getElementById("week-bests"),
@@ -489,7 +504,12 @@ const el = {
 // ---------------------------------------------------------------------------
 
 function renderHero() {
-  el.heroAvatar.textContent = activeProfile().profile.avatar;
+  const st = activeProfile();
+  const level = levelForXp(st.xp);
+  const rank = heroRank(level);
+  el.heroAvatar.textContent = st.profile.avatar;
+  el.heroAvatar.className = `hero-avatar ring-${rank.tier}`;
+  el.heroRank.textContent = `Lv ${level} · ${rank.title}`;
 }
 
 function renderDailyFact() {
@@ -1122,6 +1142,7 @@ function closeAdventure() {
   el.adventureOverlay.hidden = true;
   el.adventureOverlay.innerHTML = "";
   document.body.classList.remove("no-scroll");
+  maybeShowLevelUp(); // a level crossed mid-adventure celebrates now
 }
 
 function adventureHeader() {
@@ -1216,11 +1237,16 @@ function showAdventureCelebration() {
   stopAdventureExtras();
   const combo = adventure.moves.length * 10;
   const st = activeProfile();
+  const levelBefore = levelForXp(st.xp);
   st.xp += combo;
+  if (levelForXp(st.xp) > levelBefore) {
+    pendingLevelUp = { from: levelBefore, to: levelForXp(st.xp) };
+  }
   const today = todayStr();
   if (!st.days[today]) st.days[today] = { xp: 0, reps: 0 };
   st.days[today].xp += combo;
   saveData();
+  renderHero();
   renderDashboard();
   renderBadges();
   renderWeekChart();
@@ -1258,6 +1284,55 @@ el.adventureOverlay.addEventListener("click", (event) => {
   else if (action === "plus") adventureTap(1);
   else if (action === "minus") adventureTap(-1);
   else if (action === "skip-rest") showAdventureMove();
+});
+
+// ---------------------------------------------------------------------------
+// Level-up celebration
+// ---------------------------------------------------------------------------
+
+let pendingLevelUp = null;
+
+// Level-ups can happen while the adventure overlay is up; hold the moment
+// until no other overlay is in the way, then celebrate.
+function maybeShowLevelUp() {
+  if (!pendingLevelUp) return;
+  if (!el.adventureOverlay.hidden || !el.detailOverlay.hidden) return;
+  const { to } = pendingLevelUp;
+  pendingLevelUp = null;
+
+  const st = activeProfile();
+  const rank = heroRank(to);
+  const prevRank = heroRank(to - 1);
+  const newTitle = rank.title !== prevRank.title;
+
+  el.levelupOverlay.innerHTML = `
+    <div class="adventure-card levelup-card" role="dialog" aria-modal="true" aria-label="Level up!">
+      <div class="adventure-stage">
+        <div class="levelup-avatar ring-${rank.tier}" aria-hidden="true">${st.profile.avatar}</div>
+        <h3 class="levelup-heading">LEVEL UP!</h3>
+        <p class="levelup-level">Level ${to}</p>
+        ${newTitle
+          ? `<p class="levelup-title">🌟 New title: <strong>${rank.title}</strong></p>`
+          : `<p class="levelup-title">${escapeHtml(st.profile.nickname)} the ${rank.title}</p>`}
+        <button type="button" class="btn btn-primary detail-try" data-action="close-levelup">Keep moving! 🚀</button>
+      </div>
+    </div>
+  `;
+  el.levelupOverlay.hidden = false;
+  document.body.classList.add("no-scroll");
+  sound.fanfare();
+  setTimeout(() => sound.badge(), 500);
+  spawnConfetti(el.levelupOverlay.querySelector(".adventure-stage"), 24);
+}
+
+function closeLevelUp() {
+  el.levelupOverlay.hidden = true;
+  el.levelupOverlay.innerHTML = "";
+  document.body.classList.remove("no-scroll");
+}
+
+el.levelupOverlay.addEventListener("click", (event) => {
+  if (event.target.closest('[data-action="close-levelup"]')) closeLevelUp();
 });
 
 // ---------------------------------------------------------------------------
@@ -1329,6 +1404,7 @@ document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
   if (adventure.active) closeAdventure();
   if (!el.detailOverlay.hidden) closeMoveDetail();
+  if (!el.levelupOverlay.hidden) closeLevelUp();
 });
 
 el.muteBtn.addEventListener("click", () => {
@@ -1344,6 +1420,7 @@ function awardCompletion(exercise, reps) {
   const st = activeProfile();
   const today = todayStr();
   const badgesBefore = earnedBadgeIds(st);
+  const levelBefore = levelForXp(st.xp);
 
   st.xp += exercise.xp;
   st.reps += reps;
@@ -1407,11 +1484,18 @@ function awardCompletion(exercise, reps) {
     setTimeout(() => sound.badge(), 450);
   }
 
+  const levelAfter = levelForXp(st.xp);
+  if (levelAfter > levelBefore) {
+    pendingLevelUp = { from: levelBefore, to: levelAfter };
+  }
+
+  renderHero();
   renderDashboard();
   renderBadges();
   renderQuestLog();
   renderDaily();
   renderWeekChart();
+  maybeShowLevelUp();
   return dailyBonusEarned;
 }
 
@@ -1457,6 +1541,16 @@ el.muteBtn.setAttribute("aria-pressed", String(sound.isMuted()));
 setSwitcherOpen(false); // drawer starts tucked away — the summary shows who's playing
 setCustomizeOpen(false);
 renderDailyFact();
+
+// Installable app: register the service worker (relative path so it works
+// under a GitHub Pages subpath).
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {
+      // Offline support is a bonus — the app works fine without it.
+    });
+  });
+}
 renderAdventurePresets();
 renderAll();
 renderMoveLibrary();

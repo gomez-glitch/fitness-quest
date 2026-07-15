@@ -10,6 +10,13 @@ colors, big buttons, and encouraging, positive language throughout.
 
 ## Features
 
+- Installable PWA: a web app manifest plus an offline-first service worker
+  means Move Quest can be added to a phone or tablet home screen and works
+  fully offline after the first visit
+- Level-up celebrations: crossing a level triggers a full-screen confetti
+  moment, and heroes earn evolving titles (Rookie Mover → Quest Explorer →
+  Fitness Hero → Mighty Champion → Move Quest Legend) with an avatar ring that
+  upgrades from bronze to silver, gold, and rainbow
 - App-style shell: a fixed bottom tab bar (Home / Play / Adventure / Library /
   Awards) keeps every screen short, and long card sets (exercise picker, move
   library, badge case) are swipeable horizontal snap rows

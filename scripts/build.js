@@ -23,5 +23,8 @@ fs.mkdirSync(distDir, { recursive: true });
 
 copyRecursive(path.join(root, "index.html"), path.join(distDir, "index.html"));
 copyRecursive(path.join(root, "src"), path.join(distDir, "src"));
+copyRecursive(path.join(root, "manifest.webmanifest"), path.join(distDir, "manifest.webmanifest"));
+copyRecursive(path.join(root, "sw.js"), path.join(distDir, "sw.js"));
+copyRecursive(path.join(root, "icons"), path.join(distDir, "icons"));
 
-console.log("Build complete: dist/index.html and dist/src/ are ready.");
+console.log("Build complete: dist/ is ready (app, manifest, service worker, icons).");
