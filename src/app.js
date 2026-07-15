@@ -28,6 +28,16 @@ const GROUPS = ["All", "Core", "Arms", "Legs", "Whole body"];
 
 const EXERCISES = [
   {
+    id: "marching", title: "Marching", target: 16, xp: 40, icon: "🥁", group: "Whole body",
+    muscles: "Warm-up", cue: "March on the spot standing proud and tall — the perfect warm-up.",
+    steps: ["Stand tall", "Lift knees gently", "Swing your arms"],
+  },
+  {
+    id: "arm-circles", title: "Arm Circles", target: 10, xp: 40, icon: "🌀", group: "Arms",
+    muscles: "Shoulders", cue: "Stretch your arms wide and draw big slow circles in the air.",
+    steps: ["Arms out like wings", "Big slow circles", "Switch direction halfway"],
+  },
+  {
     id: "sit-ups", title: "Sit Ups", target: 5, xp: 35, icon: "🧘", group: "Core",
     muscles: "Core", cue: "Cross arms, curl up slowly, and lower with control.",
     steps: ["Feet planted", "Belly button gently tucked", "Exhale as you sit up"],
@@ -107,6 +117,31 @@ const EXERCISES = [
     muscles: "Calves", cue: "Rise up onto tiptoes slowly, then lower with control.",
     steps: ["Hold a wall if wobbly", "Pause at the top", "Heels down softly"],
   },
+  {
+    id: "toe-touches", title: "Toe Touches", target: 8, xp: 45, icon: "🙇", group: "Legs",
+    muscles: "Hamstrings", cue: "Bend forward gently and reach toward your toes, then stand tall.",
+    steps: ["Soft knees", "Reach down slowly", "Roll back up tall"],
+  },
+  {
+    id: "skater-hops", title: "Skater Hops", target: 10, xp: 55, icon: "⛸️", group: "Whole body",
+    muscles: "Legs + balance", cue: "Hop side to side like a speed skater gliding on ice.",
+    steps: ["Push off one foot", "Land softly", "Swing arms across"],
+  },
+  {
+    id: "wall-sit", title: "Wall Sit", mode: "timed", target: 20, xp: 55, icon: "🧱", group: "Legs",
+    muscles: "Legs", cue: "Slide down a wall until your legs make a chair shape — and hold!",
+    steps: ["Back flat on the wall", "Knees over ankles", "Breathe and hold"],
+  },
+  {
+    id: "plank-hold", title: "Plank Hold", mode: "timed", target: 15, xp: 55, icon: "🛡️", group: "Core",
+    muscles: "Core", cue: "Hold your body straight and strong like a wooden plank.",
+    steps: ["Elbows or hands down", "Body in one line", "Squeeze your tummy"],
+  },
+  {
+    id: "flamingo-balance", title: "Flamingo Balance", mode: "timed", target: 10, xp: 40, icon: "🦩", group: "Legs",
+    muscles: "Balance", cue: "Stand on one leg like a flamingo — switch legs next time!",
+    steps: ["Stare at one spot", "Arms out wide", "Wobbling means it's working!"],
+  },
 ];
 
 const DAILY_QUEST_COUNT = 3;
@@ -146,13 +181,69 @@ const FUN_FACTS = [
   "A high-five in the mirror is scientifically silly AND fun. Try one! 🖐️",
   "Being kind releases the same feel-good chemicals as exercise. Double points for kind movers! ✨",
   "Dancing counts as exercise — even the silly kind. Especially the silly kind! 🕺",
+  "Your heart pumps enough blood every day to fill 35 bathtubs. What a champion! 🛁",
+  "Kangaroos can't walk backwards — but YOU can. Try five careful backward steps! 🦘",
+  "Fleas can jump 100 times their own height. Strong legs are amazing at any size!",
+  "Your funny bone isn't a bone at all — it's a nerve near your elbow!",
+  "Cheetahs sprint super fast but get tired in seconds. Steady movers last much longer! 🐆",
+  "Blueberries are brain berries — brilliant fuel before thinking hard. 🫐",
+  "Milk, yogurt, and cheese carry calcium — the building blocks of strong bones. 🥛",
+  "Plain popcorn is a whole grain — a real snack superpower! 🍿",
+  "Your tongue has about 10,000 taste buds. New foods often taste better on the third try!",
+  "Eating slowly gives your tummy time to say 'I'm full, thank you!'",
+  "Laughing is a mini tummy workout. Giggle away! 😂",
+  "Hugging someone you love releases calm, cozy chemicals. 🤗",
+  "While you sleep, your brain tidies up memories like sorting a toy box. 🧸",
+  "A big stretch and a yawn help wake your brain right up!",
+  "Standing tall like a superhero for ten seconds can help you feel braver. 🦸",
+  "Octopuses have three hearts — you only need your one mighty champion. 🐙",
+  "Walking to school or the park totally counts as exercise. Every step wins!",
+  "Your ears help you balance! Spinning swirls the liquid inside — that's why you feel dizzy.",
+  "Drinking water helps your joints move smoothly, like oil on a bike chain. 🚲",
+  "Astronauts exercise two hours a day in space to keep their muscles strong. 🧑‍🚀",
 ];
 
+// Story adventures: each move carries a narrative line so the workout plays
+// like a little quest. Every chain opens with a gentle warm-up move.
 const ADVENTURES = [
-  { id: "morning-spark", name: "Morning Spark", emoji: "🌅", moves: ["jumping-jacks", "squats", "sit-ups"] },
-  { id: "power-play", name: "Power Play", emoji: "⚡", moves: ["push-ups", "mountain-climbers", "high-knees", "flutter-kicks"] },
-  { id: "super-five", name: "Super Hero Five", emoji: "🦸", moves: ["jumping-jacks", "squats", "push-ups", "russian-twists", "superman"] },
-  { id: "surprise", name: "Surprise Me!", emoji: "🎲", moves: null },
+  {
+    id: "lava-volcano", name: "Lava Volcano Escape", emoji: "🌋",
+    moves: [
+      { id: "marching", line: "March up the rumbling mountain path…" },
+      { id: "jumping-jacks", line: "Leap across the lava stepping stones!" },
+      { id: "squats", line: "Duck under the falling ash clouds!" },
+      { id: "high-knees", line: "The lava is coming — run for the exit!" },
+    ],
+  },
+  {
+    id: "deep-sea", name: "Deep Sea Dive", emoji: "🌊",
+    moves: [
+      { id: "arm-circles", line: "Warm up your fins on the boat deck…" },
+      { id: "flutter-kicks", line: "Swim down with the dolphin crew!" },
+      { id: "russian-twists", line: "Weave through the swishing seaweed!" },
+      { id: "toe-touches", line: "Scoop up the sunken treasure!" },
+      { id: "superman", line: "Glide home like a giant manta ray!" },
+    ],
+  },
+  {
+    id: "space-rescue", name: "Space Station Rescue", emoji: "🚀",
+    moves: [
+      { id: "marching", line: "Suit up and march to the launch pad…" },
+      { id: "overhead-press", line: "Push open the heavy airlock!" },
+      { id: "mountain-climbers", line: "Climb the rocket ladder — quick!" },
+      { id: "skater-hops", line: "Dodge the floating asteroids!" },
+      { id: "wall-sit", line: "Brace for landing — hold steady!" },
+    ],
+  },
+  { id: "surprise", name: "Surprise Quest", emoji: "🎲", moves: null },
+];
+
+const SURPRISE_LINES = [
+  "Spark believes in you — go!",
+  "A wild challenge appears!",
+  "Show your super strength!",
+  "One more twist in the tale!",
+  "The grand finale — make it shine!",
 ];
 
 // Hero rank: title + avatar-ring tier, earned by level.
@@ -184,6 +275,12 @@ const BADGES = [
   { id: "lvl-5", emoji: "🏅", label: "Level 5 Hero", need: "Reach level 5", test: (s) => levelForXp(s.xp) >= 5 },
   { id: "lvl-10", emoji: "👑", label: "Level 10 Legend", need: "Reach level 10", test: (s) => levelForXp(s.xp) >= 10 },
   { id: "reps-500", emoji: "⛰️", label: "Rep Mountain", need: "500 total reps", test: (s) => s.reps >= 500 },
+  { id: "xp-1200", emoji: "💫", label: "Rising Star", need: "Earn 1,200 XP", test: (s) => s.xp >= 1200 },
+  { id: "xp-2400", emoji: "🌠", label: "Superstar", need: "Earn 2,400 XP", test: (s) => s.xp >= 2400 },
+  { id: "hold-5", emoji: "⏱️", label: "Hold Master", need: "5 hold challenges", test: (s) => (s.stats.timedDone || 0) >= 5 },
+  { id: "adv-3", emoji: "🥾", label: "Trail Blazer", need: "Finish 3 adventures", test: (s) => (s.stats.adventuresDone || 0) >= 3 },
+  { id: "adv-10", emoji: "🗻", label: "Quest Conqueror", need: "Finish 10 adventures", test: (s) => (s.stats.adventuresDone || 0) >= 10 },
+  { id: "whole-5", emoji: "🌟", label: "Whole-Body Wonder", need: "5 whole body quests", test: (s) => (s.stats.groups["Whole body"] || 0) >= 5 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -201,7 +298,7 @@ function defaultProfileState(nickname = "Spark") {
     lastCompletedDate: null,
     counters,
     profile: { nickname, persona: "spark-sprinter", avatar: "👟" },
-    stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0 },
+    stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0, timedDone: 0, adventuresDone: 0 },
     daily: { date: null, done: [], bonusClaimed: false },
     days: {},
     curve: CURVE_VERSION,
@@ -266,6 +363,8 @@ function normalizeProfile(parsed) {
     if (typeof st.todayCount === "number" && st.todayCount >= 0) state.stats.todayCount = st.todayCount;
     if (typeof st.bestDay === "number" && st.bestDay >= 0) state.stats.bestDay = st.bestDay;
     if (typeof st.bestStreak === "number" && st.bestStreak >= 0) state.stats.bestStreak = st.bestStreak;
+    if (typeof st.timedDone === "number" && st.timedDone >= 0) state.stats.timedDone = st.timedDone;
+    if (typeof st.adventuresDone === "number" && st.adventuresDone >= 0) state.stats.adventuresDone = st.adventuresDone;
   }
 
   const dl = parsed.daily;
@@ -392,9 +491,19 @@ function levelForXp(xp) {
 
 // Progressive overload: rep targets creep up (+1 per 2 levels, capped at
 // double the base). Push ups are exempt — they're hard enough already.
+// Timed holds grow faster (+2 seconds per level) under the same cap.
 function targetFor(exercise, level = levelForXp(activeProfile().xp)) {
   if (exercise.id === "push-ups") return exercise.target;
+  if (exercise.mode === "timed") {
+    return Math.min(exercise.target * 2, exercise.target + (level - 1) * 2);
+  }
   return Math.min(exercise.target * 2, exercise.target + Math.floor((level - 1) / 2));
+}
+
+// "20s hold" vs "8 reps" — used everywhere a target is displayed.
+function targetLabel(exercise) {
+  const t = targetFor(exercise);
+  return exercise.mode === "timed" ? `${t}s hold` : `${t} reps`;
 }
 
 function todayClaimCount(st) {
@@ -518,6 +627,7 @@ const el = {
   clickerProgress: document.getElementById("clicker-progress"),
   dialCount: document.getElementById("dial-count"),
   dialTarget: document.getElementById("dial-target"),
+  clickerHint: document.getElementById("clicker-hint"),
   dialMinus: document.getElementById("dial-minus"),
   muteBtn: document.getElementById("mute-btn"),
   energyNote: document.getElementById("energy-note"),
@@ -619,6 +729,8 @@ function switchTab(name) {
     if (name === "play") mascot.start();
     else mascot.stop();
   }
+  if (name !== "play") pauseHold();
+  renderClicker();
 }
 
 function renderProfileForm() {
@@ -672,7 +784,7 @@ function renderExerciseBoard() {
         <span class="exercise-tile-icon" aria-hidden="true">${ex.icon}</span>
         <span class="exercise-tile-body">
           <span class="exercise-tile-title">${ex.title}</span>
-          <span class="exercise-tile-meta">${targetFor(ex)} reps · ${ex.xp} XP · ${ex.muscles}</span>
+          <span class="exercise-tile-meta">${targetLabel(ex)} · ${ex.xp} XP · ${ex.muscles}</span>
         </span>
       </button>
     `;
@@ -684,6 +796,7 @@ let mascot = null;
 function renderActivePanel() {
   const exercise = findExercise(activeExerciseId);
   if (!exercise) return;
+  resetHold(); // switching moves cancels any running hold countdown
 
   el.activeHeadingText.textContent = `${activeProfile().profile.nickname}'s move: ${exercise.title}`;
   el.activeIllustration.setAttribute(
@@ -721,19 +834,77 @@ function buildRingNotches() {
   el.clickerRing.innerHTML = html;
 }
 
+// Countdown engine for timed "hold" challenges (wall sit, plank, flamingo).
+const hold = { running: false, remaining: 0, intervalId: null };
+
+function pauseHold() {
+  if (hold.intervalId) clearInterval(hold.intervalId);
+  hold.intervalId = null;
+  hold.running = false;
+}
+
+function resetHold() {
+  pauseHold();
+  hold.remaining = 0;
+}
+
+function toggleHold() {
+  const exercise = findExercise(activeExerciseId);
+  if (!exercise || exercise.mode !== "timed") return;
+  if (hold.running) {
+    pauseHold();
+    renderClicker();
+    return;
+  }
+  const target = targetFor(exercise);
+  const st = activeProfile();
+  if ((st.counters[exercise.id] || 0) >= target) return; // already claim-ready
+
+  if (hold.remaining <= 0) hold.remaining = target;
+  hold.running = true;
+  sound.tick();
+  hold.intervalId = setInterval(() => {
+    hold.remaining -= 1;
+    if (hold.remaining > 3) sound.tick();
+    else if (hold.remaining > 0) sound.beep();
+    if (hold.remaining <= 0) {
+      resetHold();
+      st.counters[exercise.id] = target;
+      saveData();
+      sound.chime();
+      spawnConfetti();
+    }
+    renderClicker();
+  }, 1000);
+  renderClicker();
+}
+
 function renderClicker() {
   const exercise = findExercise(activeExerciseId);
   if (!exercise) return;
   const st = activeProfile();
   const target = targetFor(exercise);
+  const timed = exercise.mode === "timed";
   const count = st.counters[exercise.id] || 0;
-  const pct = target > 0 ? Math.min(1, count / target) : 0;
+  const done = count >= target;
+  const pct = timed
+    ? (done ? 1 : hold.remaining > 0 ? (target - hold.remaining) / target : 0)
+    : (target > 0 ? Math.min(1, count / target) : 0);
 
-  el.dialCount.textContent = String(count);
-  el.dialTarget.textContent = String(target);
+  if (timed) {
+    el.dialCount.textContent = done ? "✓" : String(hold.remaining > 0 ? hold.remaining : target);
+    el.dialTarget.textContent = `${target}s`;
+    el.clickerHint.textContent = done ? "amazing hold!" : hold.running ? "hold on!" : "tap to start";
+    el.clicker.setAttribute("aria-valuenow", String(done ? target : target - (hold.remaining || target)));
+  } else {
+    el.dialCount.textContent = String(count);
+    el.dialTarget.textContent = String(target);
+    el.clickerHint.textContent = "tap or spin";
+    el.clicker.setAttribute("aria-valuenow", String(count));
+  }
   el.clicker.setAttribute("aria-valuemax", String(target));
-  el.clicker.setAttribute("aria-valuenow", String(count));
-  el.clicker.classList.toggle("clicker-full", count >= target);
+  el.clicker.classList.toggle("clicker-full", done);
+  el.dialMinus.style.display = timed ? "none" : "";
 
   el.clickerProgress.style.strokeDasharray = String(RING_CIRC);
   el.clickerProgress.style.strokeDashoffset = String(RING_CIRC * (1 - pct));
@@ -753,7 +924,7 @@ function renderClicker() {
 
 function changeCount(delta, opts = {}) {
   const exercise = findExercise(activeExerciseId);
-  if (!exercise) return;
+  if (!exercise || exercise.mode === "timed") return; // holds use the timer
   const st = activeProfile();
   const target = targetFor(exercise);
   const current = st.counters[exercise.id] || 0;
@@ -810,6 +981,8 @@ function changeCount(delta, opts = {}) {
 
   el.clicker.addEventListener("pointermove", (event) => {
     if (!dragging) return;
+    const active = findExercise(activeExerciseId);
+    if (active && active.mode === "timed") return; // holds don't spin
     if (Math.hypot(event.clientX - startX, event.clientY - startY) > 10) moved = true;
     if (!moved) return;
 
@@ -836,7 +1009,11 @@ function changeCount(delta, opts = {}) {
     dragging = false;
     spinAngleOffset = 0;
     const quick = performance.now() - startTime < 400;
-    if (!moved && quick) changeCount(1);
+    if (!moved && quick) {
+      const active = findExercise(activeExerciseId);
+      if (active && active.mode === "timed") toggleHold();
+      else changeCount(1);
+    }
     renderClicker();
   }
 
@@ -845,12 +1022,15 @@ function changeCount(delta, opts = {}) {
 })();
 
 el.clicker.addEventListener("keydown", (event) => {
+  const active = findExercise(activeExerciseId);
+  const timed = active && active.mode === "timed";
   if (["ArrowUp", "ArrowRight", " ", "Enter"].includes(event.key)) {
     event.preventDefault();
-    changeCount(1);
+    if (timed) toggleHold();
+    else changeCount(1);
   } else if (["ArrowDown", "ArrowLeft"].includes(event.key)) {
     event.preventDefault();
-    changeCount(-1);
+    if (!timed) changeCount(-1);
   }
 });
 
@@ -881,7 +1061,7 @@ function renderMoveLibrary() {
               aria-label="See how to do ${ex.title}">
         <span class="library-illustration" role="img" aria-label="Spark demonstrating the ${ex.title} movement" data-exercise="${ex.id}"></span>
         <span class="library-card-title">${ex.icon} ${ex.title}</span>
-        <span class="library-card-meta">${targetFor(ex)} reps · ${ex.muscles}</span>
+        <span class="library-card-meta">${targetLabel(ex)} · ${ex.muscles}</span>
       </button>
     `).join("");
     return `
@@ -942,7 +1122,7 @@ function renderDaily() {
       <button type="button" class="daily-quest ${done ? "done" : ""}" data-exercise="${id}">
         <span class="daily-quest-icon" aria-hidden="true">${done ? "✅" : ex.icon}</span>
         <span class="daily-quest-title">${ex.title}</span>
-        <span class="daily-quest-meta">${done ? "Done!" : `${targetFor(ex)} reps`}</span>
+        <span class="daily-quest-meta">${done ? "Done!" : targetLabel(ex)}</span>
       </button>
     `;
   });
@@ -1137,7 +1317,7 @@ const adventure = {
 function renderAdventurePresets() {
   el.adventurePresets.innerHTML = ADVENTURES.map((a) => {
     const moves = a.moves
-      ? a.moves.map((id) => findExercise(id).icon).join(" ")
+      ? a.moves.map((m) => findExercise(m.id).icon).join(" ")
       : "❓ ❓ ❓";
     return `
       <button type="button" class="adventure-preset" data-adventure="${a.id}">
@@ -1153,13 +1333,24 @@ function randomMoves(count) {
   const pool = EXERCISES.map((ex) => ex.id);
   const picked = [];
   while (picked.length < count && pool.length) {
-    picked.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    const id = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+    picked.push({ id, line: SURPRISE_LINES[picked.length % SURPRISE_LINES.length] });
   }
   return picked;
 }
 
+function showCheer(text) {
+  const stage = el.adventureOverlay.querySelector(".adventure-stage");
+  if (!stage || REDUCED_MOTION) return;
+  const bubble = document.createElement("div");
+  bubble.className = "cheer-bubble";
+  bubble.textContent = text;
+  stage.appendChild(bubble);
+  setTimeout(() => bubble.remove(), 1700);
+}
+
 function adventureProgressDots() {
-  return `<div class="adventure-dots">${adventure.moves.map((id, i) => {
+  return `<div class="adventure-dots">${adventure.moves.map((m, i) => {
     const cls = i < adventure.index ? "done" : i === adventure.index ? "current" : "";
     return `<span class="adventure-dot ${cls}"></span>`;
   }).join("")}</div>`;
@@ -1174,16 +1365,21 @@ function stopAdventureExtras() {
     clearInterval(adventure.restTimer);
     adventure.restTimer = null;
   }
+  if (adventure.holdId) {
+    clearInterval(adventure.holdId);
+    adventure.holdId = null;
+  }
 }
 
 function startAdventure(preset) {
   adventure.active = true;
-  adventure.name = preset.name;
+  adventure.name = `${preset.emoji} ${preset.name}`;
   adventure.moves = preset.moves ? preset.moves.slice() : randomMoves(3);
   adventure.index = 0;
   adventure.xpEarned = 0;
   el.adventureOverlay.hidden = false;
   document.body.classList.add("no-scroll");
+  resetHold();
   showAdventureMove();
 }
 
@@ -1209,22 +1405,36 @@ function adventureHeader() {
 function showAdventureMove() {
   stopAdventureExtras();
   adventure.count = 0;
-  const ex = findExercise(adventure.moves[adventure.index]);
+  const move = adventure.moves[adventure.index];
+  const ex = findExercise(move.id);
   const target = targetFor(ex);
+  const timed = ex.mode === "timed";
+
+  const counter = timed
+    ? `
+      <div class="adventure-counter">
+        <span class="adventure-count" aria-live="polite"><b id="adventure-count">${target}</b>s</span>
+        <button type="button" class="btn adventure-plus" data-action="hold-start" id="adventure-hold-btn">Start! ⏱️</button>
+      </div>
+    `
+    : `
+      <div class="adventure-counter">
+        <button type="button" class="btn btn-round" data-action="minus" aria-label="Remove one rep">−</button>
+        <span class="adventure-count" aria-live="polite"><b id="adventure-count">0</b> / ${target}</span>
+        <button type="button" class="btn adventure-plus" data-action="plus" aria-label="Count one rep">+1</button>
+      </div>
+    `;
 
   el.adventureOverlay.innerHTML = `
     <div class="adventure-card" role="dialog" aria-modal="true" aria-label="Adventure: ${escapeHtml(ex.title)}">
       ${adventureHeader()}
       <div class="adventure-stage">
+        <p class="story-line">${escapeHtml(move.line)}</p>
         <div class="adventure-mascot" id="adventure-mascot" role="img"
              aria-label="Spark demonstrating the ${ex.title} movement"></div>
         <h3 class="adventure-move-title">${ex.icon} ${ex.title}</h3>
         <p class="adventure-cue">${ex.cue}</p>
-        <div class="adventure-counter">
-          <button type="button" class="btn btn-round" data-action="minus" aria-label="Remove one rep">−</button>
-          <span class="adventure-count" aria-live="polite"><b id="adventure-count">0</b> / ${target}</span>
-          <button type="button" class="btn adventure-plus" data-action="plus" aria-label="Count one rep">+1</button>
-        </div>
+        ${counter}
       </div>
     </div>
   `;
@@ -1232,8 +1442,20 @@ function showAdventureMove() {
   adventure.mascot = createMascot(document.getElementById("adventure-mascot"), ex.id);
 }
 
+function adventureMoveDone(ex, target) {
+  sound.chime();
+  adventure.xpEarned += awardCompletion(ex, target);
+  adventure.index += 1;
+  if (adventure.index >= adventure.moves.length) {
+    showAdventureCelebration();
+  } else {
+    showAdventureRest();
+  }
+}
+
 function adventureTap(delta) {
-  const ex = findExercise(adventure.moves[adventure.index]);
+  const ex = findExercise(adventure.moves[adventure.index].id);
+  if (ex.mode === "timed") return;
   const target = targetFor(ex);
   const next = Math.max(0, Math.min(target, adventure.count + delta));
   if (next === adventure.count) return;
@@ -1241,20 +1463,40 @@ function adventureTap(delta) {
   if (delta > 0) {
     sound.tick();
     if (navigator.vibrate) navigator.vibrate(8);
+    if (adventure.count === Math.ceil(target / 2) && target >= 6) {
+      showCheer("Halfway there — keep going! 🔥");
+    }
   }
   const countEl = document.getElementById("adventure-count");
   if (countEl) countEl.textContent = String(adventure.count);
 
   if (adventure.count >= target) {
-    sound.chime();
-    adventure.xpEarned += awardCompletion(ex, target);
-    adventure.index += 1;
-    if (adventure.index >= adventure.moves.length) {
-      showAdventureCelebration();
-    } else {
-      showAdventureRest();
-    }
+    adventureMoveDone(ex, target);
   }
+}
+
+function adventureStartHold() {
+  const ex = findExercise(adventure.moves[adventure.index].id);
+  if (ex.mode !== "timed" || adventure.holdId) return;
+  const target = targetFor(ex);
+  let remaining = target;
+  const btn = document.getElementById("adventure-hold-btn");
+  if (btn) btn.disabled = true;
+  sound.tick();
+
+  adventure.holdId = setInterval(() => {
+    remaining -= 1;
+    if (remaining > 3) sound.tick();
+    else if (remaining > 0) sound.beep();
+    const countEl = document.getElementById("adventure-count");
+    if (countEl) countEl.textContent = String(Math.max(0, remaining));
+    if (remaining === Math.ceil(target / 2)) showCheer("Halfway — hold strong! 💪");
+    if (remaining <= 0) {
+      clearInterval(adventure.holdId);
+      adventure.holdId = null;
+      adventureMoveDone(ex, target);
+    }
+  }, 1000);
 }
 
 function showAdventureRest() {
@@ -1297,6 +1539,7 @@ function showAdventureCelebration() {
   const today = todayStr();
   if (!st.days[today]) st.days[today] = { xp: 0, reps: 0 };
   st.days[today].xp += combo;
+  st.stats.adventuresDone = (st.stats.adventuresDone || 0) + 1;
   saveData();
   renderHero();
   renderDashboard();
@@ -1335,6 +1578,7 @@ el.adventureOverlay.addEventListener("click", (event) => {
   if (action === "close") closeAdventure();
   else if (action === "plus") adventureTap(1);
   else if (action === "minus") adventureTap(-1);
+  else if (action === "hold-start") adventureStartHold();
   else if (action === "skip-rest") showAdventureMove();
 });
 
@@ -1406,7 +1650,7 @@ function openMoveDetail(id) {
       <div class="adventure-stage">
         <div class="adventure-mascot" id="detail-mascot" role="img"
              aria-label="Spark demonstrating the ${ex.title} movement"></div>
-        <p class="detail-meta">${targetFor(ex)} reps · ${ex.xp} XP · ${ex.muscles}</p>
+        <p class="detail-meta">${targetLabel(ex)} · ${ex.xp} XP · ${ex.muscles}</p>
         <p class="adventure-cue">${ex.cue}</p>
         <ul class="quest-steps detail-steps">
           ${ex.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}
@@ -1500,6 +1744,7 @@ function awardCompletion(exercise, reps) {
   // Lifetime stats for badges
   if (!st.stats.tried.includes(exercise.id)) st.stats.tried.push(exercise.id);
   st.stats.groups[exercise.group] = (st.stats.groups[exercise.group] || 0) + 1;
+  if (exercise.mode === "timed") st.stats.timedDone = (st.stats.timedDone || 0) + 1;
   if (st.stats.todayDate === today) {
     st.stats.todayCount += 1;
   } else {
@@ -1561,6 +1806,7 @@ el.claimBtn.addEventListener("click", () => {
 
   awardCompletion(exercise, current);
   st.counters[exercise.id] = 0;
+  resetHold();
   saveData();
 
   sound.fanfare();

@@ -26,14 +26,31 @@ colors, big buttons, and encouraging, positive language throughout.
   sub-drawer
 - Daily Quests: three featured moves picked fresh each day (same picks on every
   device), with a +40 XP bonus chest for finishing all three
-- Adventure mode: guided mini-workouts (preset chains or a surprise mix) where
-  Spark demonstrates each move, with rest breaks between moves and a combo-bonus
-  celebration at the end
+- Adventure mode: story-driven guided workouts (Lava Volcano Escape, Deep Sea
+  Dive, Space Station Rescue, or a surprise mix) — every move carries a
+  narrative line, chains open with a warm-up, halfway cheer bubbles pop up,
+  and a combo-bonus celebration ends the quest
+- 21 badges and 52 rotating daily fun facts
+
+## Testing
+
+```bash
+npm install
+npm test
+```
+
+`npm test` builds `dist/`, serves it locally, and drives the real app with
+Playwright: level curve and migration, the rep clicker and claim flow, a full
+timed hold, the energy taper, a complete story adventure, the library detail
+dialog, and badge unlocks. Set `CHROMIUM_PATH` if Playwright's own browser
+download isn't available.
 - A last-7-days activity chart on the dashboard with best-day and
   longest-streak callouts
 - Hero customization: nickname, persona, and avatar, saved to the browser
-- 16 short kid-friendly exercises with a muscle-group filter (Core / Arms /
-  Legs / Whole body)
+- 23 short kid-friendly exercises with a muscle-group filter (Core / Arms /
+  Legs / Whole body), including three timed "hold" challenges (wall sit, plank
+  hold, flamingo balance) with a ticking countdown, 3-2-1 beeps, and a finish
+  chime instead of rep counting
 - Spark, an articulated mascot with real elbow and knee joints, demonstrates
   each exercise with anatomically-faithful looping animation in the active
   quest card (side or front view, whichever reads best per move)

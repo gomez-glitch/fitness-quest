@@ -922,6 +922,38 @@ body.no-scroll {
   box-shadow: var(--shadow-pop);
 }
 
+.story-line {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--pink);
+  font-style: italic;
+}
+
+.cheer-bubble {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--yellow);
+  color: var(--ink);
+  font-weight: 800;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  box-shadow: var(--shadow-pop);
+  animation: cheer-float 1.6s ease-out forwards;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 5;
+}
+
+@keyframes cheer-float {
+  0% { opacity: 0; transform: translate(-50%, 12px) scale(0.8); }
+  20% { opacity: 1; transform: translate(-50%, 0) scale(1.05); }
+  80% { opacity: 1; transform: translate(-50%, -10px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -22px) scale(0.95); }
+}
+
 .adventure-rest-circle {
   width: 110px;
   height: 110px;

@@ -51,10 +51,16 @@ export const sound = {
     return muted;
   },
 
-  // One rep counted.
+  // One rep counted (also the soft once-per-second timer tick).
   tick() {
     if (muted) return;
     note(720, 0, 0.05, "triangle", 0.18);
+  },
+
+  // Countdown warning for the last seconds of a timed hold.
+  beep() {
+    if (muted) return;
+    note(988, 0, 0.12, "square", 0.14);
   },
 
   // Rep target reached — Claim XP is ready.

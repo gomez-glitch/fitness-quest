@@ -251,6 +251,86 @@ export const MOTIONS = {
       { t: 1, y: 75, l1: [1, 3, 0], l2: [3, 4, 0] },
     ],
   },
+
+  "marching": {
+    view: "side", duration: 1000, poster: 0,
+    base: { ...SIDE_BASE, y: 74, torso: 4, neck: -2 },
+    frames: [
+      { t: 0, l1: [52, 78, 0], l2: [-6, 8, 10], a1: [-22, 55], a2: [26, 55] },
+      { t: 0.5, l1: [-6, 8, 10], l2: [52, 78, 0], a1: [26, 55], a2: [-22, 55] },
+      { t: 1, l1: [52, 78, 0], l2: [-6, 8, 10], a1: [-22, 55], a2: [26, 55] },
+    ],
+  },
+
+  "arm-circles": {
+    view: "front", duration: 1800, poster: 0,
+    base: { ...FRONT_BASE },
+    frames: [
+      { t: 0, a1: [100, 6], a2: [100, 6] },
+      { t: 0.25, a1: [190, 6], a2: [190, 6] },
+      { t: 0.5, a1: [280, 6], a2: [280, 6] },
+      { t: 0.75, a1: [370, 6], a2: [370, 6] },
+      { t: 1, a1: [460, 6], a2: [460, 6] },
+    ],
+  },
+
+  "toe-touches": {
+    view: "side", duration: 2400, poster: 0.5,
+    base: { ...SIDE_BASE },
+    frames: [
+      { t: 0, torso: 4, neck: 0, a1: [12, 8], a2: [16, 10], l1: [1, 3, 0], l2: [3, 5, 0] },
+      { t: 0.5, torso: 86, neck: -24, a1: [4, 4], a2: [8, 6], l1: [1, 8, 0], l2: [3, 10, 0] },
+      { t: 1, torso: 4, neck: 0, a1: [12, 8], a2: [16, 10], l1: [1, 3, 0], l2: [3, 5, 0] },
+    ],
+  },
+
+  "skater-hops": {
+    view: "front", duration: 1000, poster: 0,
+    base: { ...FRONT_BASE, y: 76 },
+    frames: [
+      { t: 0, x: 52, torso: -8, l1: [40, 8, 0], l2: [8, 34, 0], a1: [45, 10], a2: [12, 45] },
+      { t: 0.5, x: 68, torso: 8, l1: [8, 34, 0], l2: [40, 8, 0], a1: [12, 45], a2: [45, 10] },
+      { t: 1, x: 52, torso: -8, l1: [40, 8, 0], l2: [8, 34, 0], a1: [45, 10], a2: [12, 45] },
+    ],
+  },
+
+  "wall-sit": {
+    view: "side", duration: 2400, poster: 0.5, prop: "wall",
+    base: {
+      ...SIDE_BASE, x: 58, torso: -4, neck: 4,
+      a1: [58, 18], a2: [62, 20],
+      l1: [88, 92, 0], l2: [85, 89, 0],
+    },
+    frames: [
+      { t: 0, y: 84, neck: 2 },
+      { t: 0.5, y: 85.5, neck: 6 },
+      { t: 1, y: 84, neck: 2 },
+    ],
+  },
+
+  "plank-hold": {
+    view: "side", duration: 2400, poster: 0.5,
+    base: {
+      ...SIDE_BASE, x: 52, torso: 78,
+      a1: [-4, 8], a2: [-8, 10],
+      l1: [-94, 4, -55], l2: [-97, 6, -55],
+    },
+    frames: [
+      { t: 0, y: 84, neck: 4 },
+      { t: 0.5, y: 85.5, neck: 9 },
+      { t: 1, y: 84, neck: 4 },
+    ],
+  },
+
+  "flamingo-balance": {
+    view: "front", duration: 2200, poster: 0.5,
+    base: { ...FRONT_BASE, y: 75, a1: [92, 8], a2: [92, 8], l1: [4, 2, 0] },
+    frames: [
+      { t: 0, torso: -4, l2: [42, 92, 0], a1: [88, 8], a2: [96, 8] },
+      { t: 0.5, torso: 4, l2: [46, 96, 0], a1: [96, 8], a2: [88, 8] },
+      { t: 1, torso: -4, l2: [42, 92, 0], a1: [88, 8], a2: [96, 8] },
+    ],
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -387,6 +467,10 @@ function buildFigure(svg, view, motion) {
     chair.appendChild(svgEl("rect", { x: 40, y: 89, width: 5, height: 18, rx: 2, fill: COLORS.chair }));
     chair.appendChild(svgEl("rect", { x: 25, y: 58, width: 6, height: 27, rx: 3, fill: COLORS.chair }));
     svg.appendChild(chair);
+  }
+
+  if (motion.prop === "wall") {
+    svg.appendChild(svgEl("rect", { x: 38, y: 26, width: 7, height: 84, rx: 2, fill: COLORS.chair }));
   }
 
   const farColor = view === "side" ? COLORS.far : COLORS.near;
