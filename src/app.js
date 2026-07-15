@@ -240,13 +240,24 @@ const el = {
 
 function illustrationHtml(exercise) {
   return `
-    <div class="illu-figure illu-${exercise.image}">
-      <div class="illu-head"></div>
-      <div class="illu-body"></div>
-      <div class="illu-arm left"></div>
-      <div class="illu-arm right"></div>
-      <div class="illu-leg left"></div>
-      <div class="illu-leg right"></div>
+    <div class="spark-mascot spark-pose-${exercise.image}">
+      <div class="spark-upper">
+        <div class="spark-arm left"></div>
+        <div class="spark-arm right"></div>
+        <div class="spark-torso"><span class="spark-emblem"></span></div>
+        <div class="spark-head">
+          <span class="spark-spike"></span>
+          <span class="spark-eye left"></span>
+          <span class="spark-eye right"></span>
+          <span class="spark-smile"></span>
+        </div>
+      </div>
+      <div class="spark-lower">
+        <div class="spark-leg left"></div>
+        <div class="spark-leg right"></div>
+        <div class="spark-shoe left"></div>
+        <div class="spark-shoe right"></div>
+      </div>
     </div>
   `;
 }
@@ -286,7 +297,7 @@ function renderDashboard() {
 
   el.statLevel.textContent = String(level);
   el.statXp.textContent = String(state.xp);
-  el.statStreak.textContent = `${state.streak} 🔥`;
+  el.statStreak.innerHTML = `${state.streak} <span class="flame">🔥</span>`;
   el.statReps.textContent = String(state.reps);
 
   el.levelProgressFill.style.width = `${pct}%`;
@@ -316,7 +327,7 @@ function renderActivePanel() {
   el.activeIllustration.innerHTML = illustrationHtml(exercise);
   el.activeIllustration.setAttribute(
     "aria-label",
-    `Illustration showing the ${exercise.title} movement`
+    `Spark demonstrating the ${exercise.title} movement`
   );
   el.activeCue.textContent = exercise.cue;
   el.activeSteps.innerHTML = exercise.steps.map((step) => `<li>${step}</li>`).join("");
@@ -339,7 +350,7 @@ function renderDial() {
 function renderMoveLibrary() {
   el.moveLibrary.innerHTML = EXERCISES.map((ex) => `
     <div class="library-card">
-      <div class="library-illustration" role="img" aria-label="Illustration showing the ${ex.title} movement">
+      <div class="library-illustration" role="img" aria-label="Spark demonstrating the ${ex.title} movement">
         ${illustrationHtml(ex)}
       </div>
       <p class="library-card-title">${ex.icon} ${ex.title}</p>

@@ -105,6 +105,12 @@ a:focus-visible {
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-pop);
+  animation: hero-float 3s ease-in-out infinite;
+}
+
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 .hero h1 {
@@ -179,6 +185,16 @@ a:focus-visible {
   color: #6b7280;
   box-shadow: none;
   cursor: not-allowed;
+  animation: none;
+}
+
+.btn-claim:not(:disabled) {
+  animation: claim-glow 1.6s ease-in-out infinite;
+}
+
+@keyframes claim-glow {
+  0%, 100% { box-shadow: var(--shadow-pop); }
+  50% { box-shadow: 0 0 0 8px rgba(236, 72, 153, 0.22), var(--shadow-pop); }
 }
 
 .btn-round {
@@ -346,6 +362,16 @@ fieldset.avatar-field {
   color: var(--pink);
 }
 
+.flame {
+  display: inline-block;
+  animation: flame-flicker 1.2s ease-in-out infinite;
+}
+
+@keyframes flame-flicker {
+  0%, 100% { transform: scale(1) rotate(-3deg); }
+  50% { transform: scale(1.15) rotate(3deg); }
+}
+
 .level-progress {
   margin-top: 1.25rem;
 }
@@ -481,7 +507,15 @@ fieldset.avatar-field {
   gap: 1rem;
 }
 
-/* Circular dial via conic-gradient, progress set inline via --pct custom prop */
+/* Circular dial via conic-gradient, progress set inline via --pct custom prop.
+   @property lets the browser animate --pct as a number, so the fill sweeps
+   smoothly instead of snapping between rep counts. */
+@property --pct {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
 .dial {
   --pct: 0;
   width: 140px;
@@ -492,6 +526,7 @@ fieldset.avatar-field {
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-soft);
+  transition: --pct 0.4s ease;
 }
 
 .dial-inner {
@@ -534,94 +569,211 @@ fieldset.avatar-field {
   overflow: hidden;
 }
 
-.illu-figure {
+/* Spark — the Move Quest mascot. A small chibi character built from plain
+   divs so every exercise pose (and its active-panel animation) is just
+   CSS transforms on head/torso/arm/leg parts. */
+
+.spark-mascot {
   position: relative;
-  width: 70px;
-  height: 90px;
+  width: 84px;
+  height: 104px;
+  margin: 0 auto;
 }
 
-.illu-head {
+.spark-upper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 84px;
+  height: 60px;
+  transform-origin: 50% 100%;
+}
+
+.spark-lower {
+  position: absolute;
+  top: 54px;
+  left: 0;
+  width: 84px;
+  height: 50px;
+  transform-origin: 50% 0%;
+}
+
+.spark-head {
   position: absolute;
   top: 0;
   left: 50%;
-  transform: translateX(-50%);
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 30px;
+  margin-left: -15px;
   border-radius: 50%;
-  background: var(--purple-dark);
+  background: linear-gradient(160deg, #a78bfa, var(--purple-dark));
+  box-shadow: inset -3px -3px 0 rgba(59, 7, 100, 0.25);
 }
 
-.illu-body {
+.spark-spike {
   position: absolute;
-  top: 22px;
+  top: -10px;
   left: 50%;
-  transform: translateX(-50%);
-  width: 14px;
-  height: 36px;
-  border-radius: 7px;
-  background: var(--pink);
+  width: 0;
+  height: 0;
+  margin-left: -5px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 12px solid var(--yellow);
 }
 
-.illu-arm {
+.spark-eye {
   position: absolute;
-  top: 28px;
-  width: 34px;
-  height: 8px;
-  border-radius: 4px;
+  top: 12px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.spark-eye.left { left: 9px; }
+.spark-eye.right { left: 18px; }
+
+.spark-smile {
+  position: absolute;
+  top: 17px;
+  left: 11px;
+  width: 9px;
+  height: 5px;
+  border: 2px solid var(--ink);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.spark-torso {
+  position: absolute;
+  top: 27px;
+  left: 50%;
+  width: 22px;
+  height: 32px;
+  margin-left: -11px;
+  border-radius: 11px;
+  background: linear-gradient(160deg, var(--pink), #db2777);
+}
+
+.spark-emblem {
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  margin-left: -4.5px;
+  background: var(--yellow);
+  transform: rotate(45deg);
+  box-shadow: 0 0 4px rgba(253, 230, 138, 0.9);
+}
+
+.spark-arm {
+  position: absolute;
+  top: 30px;
+  width: 32px;
+  height: 9px;
+  border-radius: 5px;
   background: var(--purple);
 }
 
-.illu-arm.left { left: -8px; transform: rotate(20deg); }
-.illu-arm.right { right: -8px; transform: rotate(-20deg); }
+.spark-arm.left { left: 6px; transform-origin: 0 50%; transform: rotate(20deg); }
+.spark-arm.right { right: 6px; transform-origin: 100% 50%; transform: rotate(-20deg); }
 
-.illu-leg {
+.spark-leg {
   position: absolute;
-  top: 54px;
-  width: 8px;
+  top: 0;
+  width: 11px;
   height: 34px;
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--purple-dark);
 }
 
-.illu-leg.left { left: 22px; }
-.illu-leg.right { right: 22px; }
+.spark-leg.left { left: 19px; }
+.spark-leg.right { right: 19px; }
 
-/* Pose variants approximate each movement */
-.illu-core .illu-body { top: 34px; transform: translateX(-50%) rotate(12deg); }
-.illu-core .illu-leg.left { transform: rotate(-25deg); top: 58px; left: 14px; }
-.illu-core .illu-leg.right { transform: rotate(25deg); top: 58px; right: 14px; }
+.spark-shoe {
+  position: absolute;
+  top: 30px;
+  width: 18px;
+  height: 10px;
+  border-radius: 6px;
+  background: var(--white);
+  box-shadow: inset 0 -2px 0 var(--lavender), 0 1px 2px rgba(59, 7, 100, 0.2);
+}
 
-.illu-plank .illu-figure { transform: rotate(90deg) translateY(6px); }
-.illu-plank .illu-arm.left { top: 50px; }
-.illu-plank .illu-arm.right { top: 50px; }
+.spark-shoe.left { left: 14px; }
+.spark-shoe.right { right: 14px; }
 
-.illu-lunge .illu-leg.left { transform: translateY(-6px) rotate(-18deg); }
-.illu-lunge .illu-leg.right { transform: translateY(8px) rotate(22deg); left: auto; }
-.illu-lunge .illu-arm.left { transform: rotate(60deg); }
-.illu-lunge .illu-arm.right { transform: rotate(-60deg); }
+/* ---- Pose variants (static base look, used everywhere) ---- */
 
-.illu-flutter .illu-body { top: 40px; transform: translateX(-50%) rotate(90deg); }
-.illu-flutter .illu-leg.left { top: 60px; transform: rotate(-15deg); }
-.illu-flutter .illu-leg.right { top: 60px; transform: rotate(15deg); }
-.illu-flutter .illu-arm.left, .illu-flutter .illu-arm.right { top: 46px; }
+.spark-pose-core .spark-upper { transform: rotate(-10deg); }
+.spark-pose-core .spark-arm.left { transform: rotate(110deg); }
+.spark-pose-core .spark-arm.right { transform: rotate(-110deg); }
+.spark-pose-core .spark-leg.left { transform: rotate(-20deg) translateX(4px); }
+.spark-pose-core .spark-leg.right { transform: rotate(20deg) translateX(-4px); }
 
-.illu-dip .illu-arm.left { transform: rotate(80deg); top: 40px; }
-.illu-dip .illu-arm.right { transform: rotate(-80deg); top: 40px; }
-.illu-dip .illu-leg.left { transform: rotate(-10deg); }
-.illu-dip .illu-leg.right { transform: rotate(10deg); }
+.spark-mascot.spark-pose-plank { transform: rotate(20deg); transform-origin: 50% 90%; }
+.spark-pose-plank .spark-arm.left { transform: rotate(70deg); }
+.spark-pose-plank .spark-arm.right { transform: rotate(-70deg); }
 
-.illu-sidebend .illu-body { transform: translateX(-50%) rotate(18deg); }
-.illu-sidebend .illu-arm.right { top: 20px; transform: rotate(-70deg); }
+.spark-pose-lunge .spark-leg.left { transform: rotate(-25deg) translateX(-6px); }
+.spark-pose-lunge .spark-leg.right { transform: translateX(4px); }
+.spark-pose-lunge .spark-arm.left { transform: rotate(50deg); }
+.spark-pose-lunge .spark-arm.right { transform: rotate(-50deg); }
 
-.illu-twist .illu-body { transform: translateX(-50%) rotate(-15deg); }
-.illu-twist .illu-arm.left { transform: rotate(50deg); }
-.illu-twist .illu-arm.right { transform: rotate(130deg); }
+.spark-mascot.spark-pose-flutter { transform: rotate(-15deg); transform-origin: 50% 90%; }
+.spark-pose-flutter .spark-leg.left { transform: rotate(-15deg); }
+.spark-pose-flutter .spark-leg.right { transform: rotate(10deg); }
+.spark-pose-flutter .spark-arm.left { transform: rotate(80deg); }
+.spark-pose-flutter .spark-arm.right { transform: rotate(-80deg); }
 
-.illu-curl .illu-arm.left { transform: rotate(-100deg); top: 30px; }
-.illu-curl .illu-arm.right { transform: rotate(100deg); top: 30px; }
+.spark-pose-dip .spark-arm.left { transform: rotate(95deg); }
+.spark-pose-dip .spark-arm.right { transform: rotate(-95deg); }
 
-.illu-press .illu-arm.left { transform: rotate(-160deg); top: 4px; }
-.illu-press .illu-arm.right { transform: rotate(160deg); top: 4px; }
+.spark-pose-sidebend .spark-upper { transform: rotate(12deg); }
+.spark-pose-sidebend .spark-arm.right { transform: rotate(-70deg); }
+
+.spark-pose-twist .spark-arm.left { transform: rotate(60deg); }
+.spark-pose-twist .spark-arm.right { transform: rotate(-60deg); }
+.spark-pose-twist .spark-lower { transform: rotate(-6deg); }
+
+.spark-pose-curl .spark-arm.left { transform: rotate(-70deg); }
+.spark-pose-curl .spark-arm.right { transform: rotate(70deg); }
+
+.spark-pose-press .spark-arm.left { transform: rotate(-130deg); }
+.spark-pose-press .spark-arm.right { transform: rotate(130deg); }
+
+/* ---- Animated versions — only inside the active quest card ---- */
+
+@keyframes spark-anim-core { 0% { transform: rotate(-22deg); } 100% { transform: rotate(18deg); } }
+@keyframes spark-anim-plank { 0% { transform: rotate(20deg) translateY(0); } 100% { transform: rotate(20deg) translateY(10px); } }
+@keyframes spark-anim-lunge { 0% { transform: translateX(-10px) rotate(-4deg); } 100% { transform: translateX(10px) rotate(4deg); } }
+@keyframes spark-anim-flutter-left { 0% { transform: rotate(-25deg); } 100% { transform: rotate(5deg); } }
+@keyframes spark-anim-flutter-right { 0% { transform: rotate(20deg); } 100% { transform: rotate(-8deg); } }
+@keyframes spark-anim-dip { 0% { transform: translateY(0); } 100% { transform: translateY(10px); } }
+@keyframes spark-anim-sidebend { 0% { transform: rotate(-16deg); } 100% { transform: rotate(16deg); } }
+@keyframes spark-anim-twist { 0% { transform: rotate(-14deg) skewX(-6deg); } 100% { transform: rotate(14deg) skewX(6deg); } }
+@keyframes spark-anim-curl-left { 0% { transform: rotate(10deg); } 100% { transform: rotate(-90deg); } }
+@keyframes spark-anim-curl-right { 0% { transform: rotate(-10deg); } 100% { transform: rotate(90deg); } }
+@keyframes spark-anim-press-left { 0% { transform: rotate(-40deg); } 100% { transform: rotate(-150deg); } }
+@keyframes spark-anim-press-right { 0% { transform: rotate(40deg); } 100% { transform: rotate(150deg); } }
+
+.quest-illustration .spark-pose-core .spark-upper { animation: spark-anim-core 1.6s ease-in-out infinite alternate; }
+.quest-illustration .spark-mascot.spark-pose-plank { animation: spark-anim-plank 1.4s ease-in-out infinite alternate; }
+.quest-illustration .spark-mascot.spark-pose-lunge { animation: spark-anim-lunge 1.4s ease-in-out infinite alternate; }
+.quest-illustration .spark-pose-flutter .spark-leg.left { animation: spark-anim-flutter-left 0.6s ease-in-out infinite alternate; }
+.quest-illustration .spark-pose-flutter .spark-leg.right { animation: spark-anim-flutter-right 0.6s ease-in-out infinite alternate; animation-delay: 0.3s; }
+.quest-illustration .spark-pose-dip .spark-upper { animation: spark-anim-dip 1.3s ease-in-out infinite alternate; }
+.quest-illustration .spark-pose-sidebend .spark-upper { animation: spark-anim-sidebend 1.5s ease-in-out infinite alternate; }
+.quest-illustration .spark-pose-twist .spark-upper { animation: spark-anim-twist 1.3s ease-in-out infinite alternate; }
+.quest-illustration .spark-pose-curl .spark-arm.left { animation: spark-anim-curl-left 1.3s ease-in-out infinite alternate; }
+.quest-illustration .spark-pose-curl .spark-arm.right { animation: spark-anim-curl-right 1.3s ease-in-out infinite alternate; }
+.quest-illustration .spark-pose-press .spark-arm.left { animation: spark-anim-press-left 1.4s ease-in-out infinite alternate; }
+.quest-illustration .spark-pose-press .spark-arm.right { animation: spark-anim-press-right 1.4s ease-in-out infinite alternate; }
 
 /* ---------- Move library ---------- */
 
@@ -682,6 +834,16 @@ fieldset.avatar-field {
   background: linear-gradient(160deg, var(--yellow), var(--pink));
   color: var(--ink);
   font-weight: 800;
+}
+
+.badge:not(.locked) {
+  animation: badge-pop 0.5s ease;
+}
+
+@keyframes badge-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
 }
 
 .badge-emoji {
@@ -772,4 +934,14 @@ fieldset.avatar-field {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
