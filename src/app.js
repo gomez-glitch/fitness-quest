@@ -108,6 +108,42 @@ const EXERCISES = [
 const DAILY_QUEST_COUNT = 3;
 const DAILY_BONUS_XP = 40;
 
+// Rotates one per day — movement, amazing-body, food, calm, and kindness facts.
+const FUN_FACTS = [
+  "Your heart is a muscle about the size of your fist — and it gets a little stronger every time you play! ❤️",
+  "Jumping and skipping make your bones grow stronger. Bones love a bounce! 🦴",
+  "Kids' hearts beat faster than grown-ups' — around 70 to 100 beats every minute!",
+  "Your muscles work in pairs: when one pulls, its partner rests. Teamwork! 🤝",
+  "Moving your body releases happy brain chemicals called endorphins. 😊",
+  "Stretching after moving keeps your muscles bendy, like a cat. 🐱",
+  "Balancing on one leg is a secret workout — your body makes hundreds of tiny fixes to keep you steady!",
+  "Playing tag is real athlete training — bursts of running, then rest. Champions train like that on purpose! 🏃",
+  "You have more than 600 muscles, and every single one likes to be used.",
+  "Your bones are alive! They quietly rebuild themselves all the time.",
+  "Kids have about 300 bones, but grown-ups have 206 — some of yours will join together as you grow!",
+  "Your blood zooms all the way around your body in about one minute. 🚀",
+  "You breathe about 20,000 times every day. Your lungs are champions! 🌬️",
+  "For its weight, your thigh bone is stronger than concrete. 🏗️",
+  "Carrots really do help your eyes — they're packed with vitamin A. 🥕",
+  "Your brain is about three-quarters water, so drinking water is like watering your thoughts! 💧",
+  "A rainbow plate is a power plate: every colour of fruit and veggie has its own superpower. 🌈",
+  "Bananas are famous for quick energy — tennis stars munch them between games! 🍌",
+  "Breakfast is like plugging in your body's charger for the whole day. 🔌",
+  "Crunchy apples wake up your brain AND give your teeth a mini clean. 🍎",
+  "Five slow belly breaths tell your brain 'all is well.' Try it tonight! 🧘",
+  "Sleep is when your muscles grow and your brain files away everything you learned today. 😴",
+  "Smiling — even a pretend smile — can nudge your brain toward happy. 🙂",
+  "Time outside in green places helps your mind feel calm and fresh. 🌳",
+  "Closing your eyes and just listening for ten seconds is a mini vacation for your mind. 🎧",
+  "Everyone's body is different — and yours is exactly right for being you. 💜",
+  "Saying 'I can't do it YET' turns a wall into a staircase. 🪜",
+  "Cheering for a friend gives YOUR brain a happiness boost too. 📣",
+  "Trying new things grows your brain — mistakes are proof you're learning!",
+  "A high-five in the mirror is scientifically silly AND fun. Try one! 🖐️",
+  "Being kind releases the same feel-good chemicals as exercise. Double points for kind movers! ✨",
+  "Dancing counts as exercise — even the silly kind. Especially the silly kind! 🕺",
+];
+
 const ADVENTURES = [
   { id: "morning-spark", name: "Morning Spark", emoji: "🌅", moves: ["jumping-jacks", "squats", "sit-ups"] },
   { id: "power-play", name: "Power Play", emoji: "⚡", moves: ["push-ups", "mountain-climbers", "high-knees", "flutter-kicks"] },
@@ -434,6 +470,8 @@ const el = {
   claimBtn: document.getElementById("claim-xp-btn"),
 
   tabBar: document.querySelector(".tab-bar"),
+  heroFactText: document.getElementById("hero-fact-text"),
+  detailOverlay: document.getElementById("detail-overlay"),
   dailyBoard: document.getElementById("daily-board"),
   weekChart: document.getElementById("week-chart"),
   weekBests: document.getElementById("week-bests"),
@@ -452,6 +490,12 @@ const el = {
 
 function renderHero() {
   el.heroAvatar.textContent = activeProfile().profile.avatar;
+}
+
+function renderDailyFact() {
+  // Sequential daily rotation: every fact gets its turn before any repeats.
+  const daysSinceEpoch = Math.floor(Date.now() / 86400000);
+  el.heroFactText.textContent = FUN_FACTS[daysSinceEpoch % FUN_FACTS.length];
 }
 
 function renderProfileSwitcher() {
@@ -762,11 +806,12 @@ function renderMoveLibrary() {
   const groups = GROUPS.filter((g) => g !== "All");
   el.moveLibrary.innerHTML = groups.map((group) => {
     const cards = EXERCISES.filter((ex) => ex.group === group).map((ex) => `
-      <div class="library-card">
-        <div class="library-illustration" role="img" aria-label="Spark demonstrating the ${ex.title} movement" data-exercise="${ex.id}"></div>
-        <p class="library-card-title">${ex.icon} ${ex.title}</p>
-        <p class="library-card-meta">${ex.target} reps · ${ex.muscles}</p>
-      </div>
+      <button type="button" class="library-card" data-exercise="${ex.id}"
+              aria-label="See how to do ${ex.title}">
+        <span class="library-illustration" role="img" aria-label="Spark demonstrating the ${ex.title} movement" data-exercise="${ex.id}"></span>
+        <span class="library-card-title">${ex.icon} ${ex.title}</span>
+        <span class="library-card-meta">${ex.target} reps · ${ex.muscles}</span>
+      </button>
     `).join("");
     return `
       <h3 class="library-group-heading">${group}</h3>
@@ -1215,8 +1260,75 @@ el.adventureOverlay.addEventListener("click", (event) => {
   else if (action === "skip-rest") showAdventureMove();
 });
 
+// ---------------------------------------------------------------------------
+// Move detail pop-up (opened from the Library)
+// ---------------------------------------------------------------------------
+
+let detailMascot = null;
+
+function openMoveDetail(id) {
+  const ex = findExercise(id);
+  if (!ex) return;
+
+  el.detailOverlay.innerHTML = `
+    <div class="adventure-card" role="dialog" aria-modal="true" aria-label="How to do ${ex.title}">
+      <div class="adventure-header">
+        <span class="adventure-title">${ex.icon} ${ex.title}</span>
+        <button type="button" class="btn btn-round adventure-close" data-action="close" aria-label="Close">✕</button>
+      </div>
+      <div class="adventure-stage">
+        <div class="adventure-mascot" id="detail-mascot" role="img"
+             aria-label="Spark demonstrating the ${ex.title} movement"></div>
+        <p class="detail-meta">${ex.target} reps · ${ex.xp} XP · ${ex.muscles}</p>
+        <p class="adventure-cue">${ex.cue}</p>
+        <ul class="quest-steps detail-steps">
+          ${ex.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}
+        </ul>
+        <button type="button" class="btn btn-primary detail-try" data-action="try" data-exercise="${ex.id}">
+          Try it now! 🎯
+        </button>
+      </div>
+    </div>
+  `;
+  el.detailOverlay.hidden = false;
+  document.body.classList.add("no-scroll");
+  detailMascot = createMascot(document.getElementById("detail-mascot"), ex.id);
+  el.detailOverlay.querySelector(".adventure-close").focus();
+}
+
+function closeMoveDetail() {
+  if (detailMascot) {
+    detailMascot.stop();
+    detailMascot = null;
+  }
+  el.detailOverlay.hidden = true;
+  el.detailOverlay.innerHTML = "";
+  document.body.classList.remove("no-scroll");
+}
+
+el.moveLibrary.addEventListener("click", (event) => {
+  const card = event.target.closest(".library-card[data-exercise]");
+  if (card) openMoveDetail(card.dataset.exercise);
+});
+
+el.detailOverlay.addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-action]");
+  if (!btn) return;
+  if (btn.dataset.action === "close") {
+    closeMoveDetail();
+  } else if (btn.dataset.action === "try") {
+    activeExerciseId = btn.dataset.exercise;
+    closeMoveDetail();
+    renderExerciseBoard();
+    renderActivePanel();
+    switchTab("play");
+  }
+});
+
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && adventure.active) closeAdventure();
+  if (event.key !== "Escape") return;
+  if (adventure.active) closeAdventure();
+  if (!el.detailOverlay.hidden) closeMoveDetail();
 });
 
 el.muteBtn.addEventListener("click", () => {
@@ -1344,6 +1456,7 @@ el.muteBtn.textContent = sound.isMuted() ? "🔇" : "🔊";
 el.muteBtn.setAttribute("aria-pressed", String(sound.isMuted()));
 setSwitcherOpen(false); // drawer starts tucked away — the summary shows who's playing
 setCustomizeOpen(false);
+renderDailyFact();
 renderAdventurePresets();
 renderAll();
 renderMoveLibrary();

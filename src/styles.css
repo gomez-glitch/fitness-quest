@@ -122,11 +122,30 @@ a:focus-visible {
   text-shadow: 0 3px 10px rgba(59, 7, 100, 0.35);
 }
 
-.hero-subtitle {
-  font-size: 1.05rem;
-  max-width: 42ch;
+.hero-fact {
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  max-width: 46ch;
   margin-inline: auto;
-  color: rgba(255, 255, 255, 0.95);
+}
+
+.hero-fact-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--yellow);
+  margin-bottom: 0.25rem;
+}
+
+.hero-fact-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.97);
+  margin: 0;
 }
 
 .hero-actions {
@@ -1171,16 +1190,47 @@ body.no-scroll {
   text-align: center;
   border: 3px solid var(--lavender);
   width: 168px;
+  font-family: inherit;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+}
+
+.library-card:hover {
+  border-color: var(--pink);
+  transform: translateY(-2px);
 }
 
 .library-card-title {
+  display: block;
   font-weight: 800;
   margin-top: 0.6rem;
 }
 
 .library-card-meta {
+  display: block;
   font-size: 0.8rem;
   color: var(--purple-dark);
+  margin-top: 0.2rem;
+}
+
+.detail-meta {
+  font-weight: 700;
+  color: var(--purple);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.detail-steps {
+  text-align: left;
+  margin: 0 auto;
+}
+
+.detail-try {
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  color: var(--white);
+  box-shadow: var(--shadow-pop);
+  margin-top: 0.5rem;
 }
 
 /* ---------- Badges ---------- */

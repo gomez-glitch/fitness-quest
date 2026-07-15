@@ -18,10 +18,10 @@
           <div class="hero-avatar" id="hero-avatar" aria-hidden="true">👟</div>
           <div class="hero-copy">
             <h1>Move Quest</h1>
-            <p class="hero-subtitle">
-              Pick a persona, choose short exercises, tap the dial as reps are finished,
-              and collect XP for healthy habits.
-            </p>
+            <div class="hero-fact">
+              <span class="hero-fact-label">✨ Fun fact of the day</span>
+              <p class="hero-fact-text" id="hero-fact-text"></p>
+            </div>
             <div class="hero-actions">
               <button type="button" class="btn btn-primary" id="start-moving-btn">Start moving</button>
               <button type="button" class="btn btn-secondary" id="customize-hero-btn">Customize hero</button>
@@ -172,7 +172,7 @@
     <div class="tab-view" id="view-library" role="tabpanel" aria-labelledby="tab-library" hidden>
       <section class="card" aria-labelledby="library-heading">
         <h2 id="library-heading">📚 Move library</h2>
-        <p class="daily-intro">Swipe through every move, sorted by muscle group.</p>
+        <p class="daily-intro">Swipe through every move — tap one to see exactly how it's done!</p>
         <div class="move-library" id="move-library"></div>
       </section>
     </div>
@@ -204,6 +204,7 @@
   </main>
 
   <div class="adventure-overlay" id="adventure-overlay" hidden></div>
+  <div class="adventure-overlay" id="detail-overlay" hidden></div>
 
   <nav class="tab-bar" role="tablist" aria-label="App sections">
     <button type="button" class="tab-btn" id="tab-home" role="tab" data-tab="home" aria-selected="true" aria-controls="view-home">
