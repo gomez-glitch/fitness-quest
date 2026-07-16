@@ -121,6 +121,12 @@ works correctly when served from a subpath such as:
 https://<owner>.github.io/move-quest/
 ```
 
+## Docs
+
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — modules, data model, economy, conventions
+- [`docs/BACKLOG.md`](docs/BACKLOG.md) — prioritized backlog and ideas shelf
+- [`docs/ART.md`](docs/ART.md) — art pipeline: specs and copy-paste image-generation prompts
+
 ## Project structure
 
 ```
