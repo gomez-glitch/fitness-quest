@@ -31,6 +31,38 @@ colors, big buttons, and encouraging, positive language throughout.
   narrative line, chains open with a warm-up, halfway cheer bubbles pop up,
   and a combo-bonus celebration ends the quest
 - 21 badges and 52 rotating daily fun facts
+- A last-7-days activity chart on the dashboard with best-day and
+  longest-streak callouts
+- Hero customization: nickname, persona, and avatar, saved to the browser
+- 33 short kid-friendly exercises with muscle-group AND intensity filters
+  (🌱 Easy / ⚡ Steady / 🔥 Spicy), including four timed "hold" challenges
+  (wall sit, plank hold, flamingo balance, farmer hold) with a GO → 3-2-1
+  get-ready lead-in and automatic countdown, plus small-free-weight moves
+  (curls, presses, wing raises, rows, farmer hold) marked with 🏋️
+- Spark, an articulated mascot with real elbow and knee joints, demonstrates
+  each exercise with anatomically-faithful looping animation in the active
+  quest card (side or front view, whichever reads best per move)
+- One shared rotating clicker dial in both the Play panel and Adventure mode:
+  tap it or spin it like a tally counter, with a ratcheting notched ring,
+  springy feedback, and optional sounds
+- Synthesized sound effects (rep tick, target chime, XP fanfare, badge jingle)
+  via the Web Audio API — no audio files — with a persistent mute toggle
+- A voice coach (browser speech synthesis, no assets): counts down the last
+  five seconds of holds, calls "Ready? 3, 2, 1, Go!", cheers at halfway, and
+  celebrates finishes, rests, quest completions, and level-ups — silenced by
+  the same mute toggle
+- Progress dashboard: level, XP, streak, and total reps, with a level-up progress bar
+- Balanced progression: a quadratic level curve (level n costs 50×(n²−1) total
+  XP) keeps early levels quick and later ones earned; rep targets grow +1 per
+  2 levels (capped at 2× base, push ups exempt); and an "energy" system pays
+  full XP for the first 6 claims each day, then half, then a quarter — a
+  gentle nudge to rest and come back tomorrow
+- Daily streak tracking (based on local calendar dates)
+- 21 badges: XP milestones, streaks, daily goals, variety/explorer, levels,
+  holds, and adventures
+- Move library of illustrated cards for every exercise
+- Quest log of the most recent completed challenges
+- Per-hero "reset progress" (with confirmation) that keeps the hero's identity
 
 ## Testing
 
@@ -40,35 +72,11 @@ npm test
 ```
 
 `npm test` builds `dist/`, serves it locally, and drives the real app with
-Playwright: level curve and migration, the rep clicker and claim flow, a full
-timed hold, the energy taper, a complete story adventure, the library detail
-dialog, and badge unlocks. Set `CHROMIUM_PATH` if Playwright's own browser
-download isn't available.
-- A last-7-days activity chart on the dashboard with best-day and
-  longest-streak callouts
-- Hero customization: nickname, persona, and avatar, saved to the browser
-- 23 short kid-friendly exercises with a muscle-group filter (Core / Arms /
-  Legs / Whole body), including three timed "hold" challenges (wall sit, plank
-  hold, flamingo balance) with a ticking countdown, 3-2-1 beeps, and a finish
-  chime instead of rep counting
-- Spark, an articulated mascot with real elbow and knee joints, demonstrates
-  each exercise with anatomically-faithful looping animation in the active
-  quest card (side or front view, whichever reads best per move)
-- A rotating clicker-style rep counter: tap it or spin it like a tally counter,
-  with a ratcheting notched ring, springy feedback, and optional sounds
-- Synthesized sound effects (rep tick, target chime, XP fanfare, badge jingle)
-  via the Web Audio API — no audio files — with a persistent mute toggle
-- Progress dashboard: level, XP, streak, and total reps, with a level-up progress bar
-- Balanced progression: a quadratic level curve (level n costs 50×(n²−1) total
-  XP) keeps early levels quick and later ones earned; rep targets grow +1 per
-  2 levels (capped at 2× base, push ups exempt); and an "energy" system pays
-  full XP for the first 6 claims each day, then half, then a quarter — a
-  gentle nudge to rest and come back tomorrow
-- Daily streak tracking (based on local calendar dates)
-- 15 badges: XP milestones, streaks, daily goals, variety/explorer, and levels
-- Move library of illustrated cards for every exercise
-- Quest log of the most recent completed challenges
-- Per-hero "reset progress" (with confirmation) that keeps the hero's identity
+Playwright: level curve and migration, the shared clicker dial and claim flow,
+a full timed hold with its get-ready lead-in, the energy taper, a complete
+story adventure, intensity filters, the library detail dialog, and badge
+unlocks. Set `CHROMIUM_PATH` if Playwright's own browser download isn't
+available.
 
 ## Tech
 
@@ -118,8 +126,14 @@ https://<owner>.github.io/move-quest/
 ```
 index.html                    Page shell
 src/app.js                    App logic, state, and rendering
+src/mascot.js                 Articulated Spark mascot (FK motion engine)
+src/clicker.js                Shared rotating clicker dial component
+src/sound.js                  Web Audio sound effects
+src/voice.js                  Speech-synthesis voice coach
 src/styles.css                Design system and styles
+tests/e2e.js                  Playwright end-to-end suite (npm test)
 scripts/build.js              Builds dist/
 scripts/dev-server.js         Dependency-free static file server
+manifest.webmanifest, sw.js   PWA install + offline support
 .github/workflows/deploy.yml  GitHub Pages deployment workflow
 ```

@@ -9,7 +9,7 @@
     "build": "node scripts/build.js",
     "preview": "node scripts/dev-server.js dist",
     "test": "npm run build && node tests/e2e.js",
-    "lint": "node --check src/app.js && node --check src/mascot.js && node --check src/sound.js && node --check src/clicker.js && node --check sw.js && node --check scripts/build.js && node --check scripts/dev-server.js && node --check tests/e2e.js"
+    "lint": "node --check src/app.js && node --check src/mascot.js && node --check src/sound.js && node --check src/clicker.js && node --check src/voice.js && node --check sw.js && node --check scripts/build.js && node --check scripts/dev-server.js && node --check tests/e2e.js"
   },
   "devDependencies": {
     "playwright": "^1.61.1"

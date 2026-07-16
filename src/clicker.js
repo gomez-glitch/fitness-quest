@@ -6,6 +6,7 @@
 //    with ticks, urgent beeps for the last seconds, and a finish jingle.
 
 import { sound } from "./sound.js";
+import { voice } from "./voice.js";
 
 const RING_RADIUS = 86;
 const RING_CIRC = 2 * Math.PI * RING_RADIUS;
@@ -130,7 +131,12 @@ export function createClicker(container, { onChange = () => {}, onComplete = () 
       sound.tick();
       if (navigator.vibrate) navigator.vibrate(8);
       bump();
-      if (count === target) sound.chime();
+      if (count === target) {
+        sound.chime();
+        voice.repsDone();
+      } else if (count === Math.ceil(target / 2) && target >= 8) {
+        voice.halfway();
+      }
     }
     render();
     emit();
@@ -155,25 +161,37 @@ export function createClicker(container, { onChange = () => {}, onComplete = () 
     phase = "ready";
     readyLeft = 3;
     sound.beep();
+    voice.ready();
     intervalId = setInterval(() => {
       if (phase === "ready") {
         readyLeft -= 1;
         if (readyLeft > 0) {
           sound.beep();
+          voice.count(readyLeft);
         } else {
           phase = "counting";
           if (remaining <= 0) remaining = target;
           sound.chime();
+          voice.go();
         }
       } else if (phase === "counting") {
         remaining -= 1;
-        if (remaining > 3) sound.tick();
-        else if (remaining > 0) sound.beep();
+        // Voice takes over the countdown for the last five seconds;
+        // the beeps stay as a fallback when the coach is muted/unavailable.
+        if (remaining > 0 && remaining <= 5 && voice.active()) {
+          voice.count(remaining);
+        } else if (remaining > 3) {
+          sound.tick();
+        } else if (remaining > 0) {
+          sound.beep();
+        }
+        if (remaining === Math.ceil(target / 2) && remaining > 5) voice.halfway();
         if (remaining <= 0) {
           pauseTimer();
           remaining = 0;
           count = target;
           sound.badge(); // triumphant finish jingle
+          voice.holdDone();
         }
       }
       render();

@@ -3,6 +3,7 @@
 import { createMascot, renderStaticMascot } from "./mascot.js";
 import { sound } from "./sound.js";
 import { createClicker } from "./clicker.js";
+import { voice } from "./voice.js";
 
 const STORAGE_KEY = "move-quest-progress-v3";
 const LEGACY_KEY = "move-quest-progress-v2";
@@ -1367,6 +1368,7 @@ function adventureMoveDone(ex, target) {
 
 function showAdventureRest() {
   stopAdventureExtras();
+  voice.rest();
   let remaining = 15;
 
   el.adventureOverlay.innerHTML = `
@@ -1427,6 +1429,7 @@ function showAdventureCelebration() {
   `;
 
   sound.fanfare();
+  setTimeout(() => voice.questComplete(), 700);
   spawnConfetti(el.adventureOverlay.querySelector(".adventure-stage"), 22);
 }
 
@@ -1482,6 +1485,7 @@ function maybeShowLevelUp() {
   document.body.classList.add("no-scroll");
   sound.fanfare();
   setTimeout(() => sound.badge(), 500);
+  setTimeout(() => voice.levelUp(), 900);
   spawnConfetti(el.levelupOverlay.querySelector(".adventure-stage"), 24);
 }
 
@@ -1571,7 +1575,7 @@ el.muteBtn.addEventListener("click", () => {
   const muted = sound.toggleMuted();
   el.muteBtn.textContent = muted ? "🔇" : "🔊";
   el.muteBtn.setAttribute("aria-pressed", String(muted));
-  el.muteBtn.setAttribute("aria-label", muted ? "Turn sounds on" : "Turn sounds off");
+  el.muteBtn.setAttribute("aria-label", muted ? "Turn sounds and voice on" : "Turn sounds and voice off");
 });
 
 // Shared completion pipeline used by both the main Claim button and
