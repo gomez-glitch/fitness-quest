@@ -31,7 +31,7 @@ Only local repo files are allowed. Never hotlink external image URLs.
 | `art/dance-party.png` | Dance overlay backdrop | 4:5 portrait | 1024×1280 |
 | `art/celebration.png` | Level-up backdrop | 1:1 | 1024×1024 |
 | `art/app-icon.png` | Painted app icon | 1:1 | 1024×1024 |
-| `art/zone-7-caves.png` … `art/zone-14-galaxy.png` | Expansion zones (backlog) | 3:2 landscape | 1080×720 |
+| `art/zone-7-caves.png` … `art/zone-19-galaxy.png` | Expansion zones (backlog) | 3:2 landscape | 1080×720 |
 
 PNG or JPG (PNG preferred). Keep each file under ~400 KB if possible
 (export at 80–85% quality) — the whole app currently weighs ~200 KB, and
@@ -138,12 +138,36 @@ the series.
     round craters, glowing glass dome habitats in violet and pink, a planted
     flag shape, Earth rising small and blue in the starry sky, footprint
     trails in the moon dust."
-20. **zone-14-galaxy** — "Galaxy gardens, a cosmic finale: swirling nebula
+20. **zone-14-upside** — "An upside-down land: a mirrored world where a
+    second grassy ground hangs from the sky with houses and round trees
+    dangling downward, waterfalls flowing upward, floating rocks drifting
+    between the two grounds, doorways at funny angles. Dreamlike, silly,
+    and wonder-filled."
+21. **zone-15-neon** (older kids) — "A synthwave neon city at night: dark
+    indigo skyline of rounded skyscrapers with glowing violet and pink neon
+    edges, a shining grid road fading to the horizon, floating holographic
+    rings and arrows, a big low retro sun striped pink and gold. Cool,
+    energetic, arcade-like."
+22. **zone-16-dragon** (older kids) — "Dragon peaks at dusk: jagged
+    dark-violet mountain spires wrapped in mist, a giant cliff-side nest
+    holding three glowing golden eggs, dragon-shaped rock silhouettes,
+    scorch marks and drifting embers, torch-lit stone steps winding up the
+    tallest peak. Epic but friendly."
+23. **zone-17-pirate** — "A shipwreck treasure cove: a tilted cartoon pirate
+    ship half-beached on golden sand, an open treasure chest spilling glowing
+    coins, palm trees, a rope bridge to a small lookout rock shaped like a
+    skull (smiling, not scary), turquoise lagoon water, sunset sky."
+24. **zone-18-glitch** (older kids) — "The glitch dimension: a playful
+    video-game world breaking apart — floating pixel cubes and voxel blocks,
+    checkerboard ground tearing into stripes of static, rainbow scan-lines,
+    chunks of landscape hovering at odd angles, a big friendly 8-bit style
+    sun. Digital, mischievous, exciting."
+25. **zone-19-galaxy** — "Galaxy gardens, a cosmic finale: swirling nebula
     beds in pink, violet and gold arranged like flower gardens, small planets
     budding on curving light stems, shooting stars, deep indigo space behind.
     Magical, triumphant, endlessly playful."
 
-When these land in `art/`, the map grows from 6 to 14 zones (36 → 84 steps)
+When these land in `art/`, the map grows from 6 to 19 zones (36 → 114 steps)
 and the lap system carries over automatically.
 
 ## Tips for consistent results

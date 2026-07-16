@@ -18,12 +18,14 @@ Living list, roughly priority-ordered. Move items up/down freely.
    under the journey map path, adventure cards, hero banner, dance overlay,
    and level-up screen, with SVG fallback when a file is missing. Update the
    service-worker precache list.
-3. **World expansion: zones 7–14** — extend Spark's Journey past the Rainbow
-   Castle with eight new lands (Glow Crystal Caves, Dino Jungle, Bubblegum
+3. **World expansion: zones 7–19** — extend Spark's Journey past the Rainbow
+   Castle with thirteen new lands: Glow Crystal Caves, Dino Jungle, Bubblegum
    Canyon, Firefly Forest, Frozen Wonderland, Cloud Kingdom, Moon Base,
-   Galaxy Gardens): 36 → 84 steps, new zone-crossing voice lines, painted
-   backgrounds from the ready-made prompts in `ART.md`, SVG fallback
-   scenery per zone.
+   Upside-Down Land, Neon Cyber City (older kids), Dragon Peaks (older
+   kids), Shipwreck Cove, the Glitch Dimension (older kids), and the Galaxy
+   Gardens finale. 36 → 114 steps, new zone-crossing voice lines, painted
+   backgrounds from the ready-made prompts in `ART.md`, SVG fallback scenery
+   per zone.
 4. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
    added; add a CONTRIBUTING-style note if anyone else joins the project.
 
