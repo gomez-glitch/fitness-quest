@@ -129,6 +129,18 @@
         <p class="daily-intro">Three special moves picked fresh every day. Finish all three to open the bonus chest!</p>
         <div class="daily-board" id="daily-board"></div>
       </section>
+
+      <!-- Mystery Spinner -->
+      <section class="card spinner-card" aria-labelledby="spinner-heading">
+        <h2 id="spinner-heading">🎰 Mystery Spinner</h2>
+        <p class="daily-intro">One spin a day: a surprise move with a silly twist — or a lucky prize!</p>
+        <div class="spinner-area">
+          <div class="spinner-pointer" aria-hidden="true"></div>
+          <div class="spinner-wheel" id="spinner-wheel" aria-hidden="true"></div>
+        </div>
+        <button type="button" class="btn btn-primary spin-btn" id="spin-btn">Spin!</button>
+        <div class="spinner-result" id="spinner-result" aria-live="polite"></div>
+      </section>
     </div>
 
     <!-- ================= PLAY ================= -->
@@ -170,6 +182,13 @@
         <h2 id="adventure-heading">🧭 Adventure mode</h2>
         <p class="daily-intro">A guided mini-workout: Spark leads you through each move with rest breaks between — finish the chain for combo bonus XP!</p>
         <div class="adventure-presets" id="adventure-presets"></div>
+      </section>
+
+      <!-- Dance Party -->
+      <section class="card dance-section" aria-labelledby="dance-heading">
+        <h2 id="dance-heading">🪩 Dance Party</h2>
+        <p class="daily-intro">45 seconds of freestyle! Spark calls the moves — you bring the wiggles. No counting, just dancing!</p>
+        <button type="button" class="btn btn-primary" id="dance-btn">Start the party! 🎶</button>
       </section>
     </div>
 

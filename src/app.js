@@ -296,6 +296,28 @@ const ADVENTURES = [
   { id: "surprise", name: "Surprise Quest", emoji: "🎲", moves: null },
 ];
 
+const DANCE_SECONDS = 45;
+const DANCE_XP = 45;
+const DANCE_COMMANDS = [
+  "Wiggle!", "Spin around!", "Jump!", "Shake it out!",
+  "Silly arms!", "Robot moves!", "Freeze!", "Super speed!",
+];
+const DANCE_MOVES = [
+  "jumping-jacks", "squats", "high-knees", "skater-hops", "arm-circles",
+  "hip-circles", "butt-kicks", "sky-reach", "russian-twists", "marching",
+];
+
+const SPIN_MODS = [
+  { id: "double-xp", emoji: "✨", label: "Double XP!", desc: "This move pays 2× XP today!" },
+  { id: "half-reps", emoji: "🪄", label: "Half the reps!", desc: "Target cut in half — quick win!" },
+  { id: "dino", emoji: "🦖", label: "Dino style!", desc: "Do it roaring like a dinosaur!" },
+  { id: "slow-mo", emoji: "🐢", label: "Slow motion!", desc: "Slooow and suuuper controlled." },
+  { id: "speedy", emoji: "⚡", label: "Super speed!", desc: "Fast as lightning — but safe!" },
+  { id: "animal", emoji: "🐵", label: "Animal noises!", desc: "A different animal sound every rep!" },
+  { id: "hero-pose", emoji: "🦸", label: "Hero pose!", desc: "Strike a superhero pose after each rep!" },
+  { id: "giggle", emoji: "😂", label: "Giggle mode!", desc: "Biggest smile the whole time!" },
+];
+
 const SURPRISE_LINES = [
   "Spark believes in you — go!",
   "A wild challenge appears!",
@@ -357,7 +379,7 @@ function defaultProfileState(nickname = "Spark") {
     counters,
     profile: { nickname, persona: "spark-sprinter", avatar: "👟" },
     stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0, timedDone: 0, adventuresDone: 0 },
-    daily: { date: null, done: [], bonusClaimed: false },
+    daily: { date: null, done: [], bonusClaimed: false, spin: null },
     days: {},
     curve: CURVE_VERSION,
   };
@@ -431,6 +453,14 @@ function normalizeProfile(parsed) {
     if (typeof dl.date === "string") state.daily.date = dl.date;
     if (Array.isArray(dl.done)) state.daily.done = dl.done.filter((id) => ids.includes(id));
     state.daily.bonusClaimed = dl.bonusClaimed === true;
+    const sp = dl.spin;
+    if (
+      sp && typeof sp === "object" &&
+      ids.includes(sp.exerciseId) &&
+      SPIN_MODS.some((m) => m.id === sp.modifier)
+    ) {
+      state.daily.spin = { exerciseId: sp.exerciseId, modifier: sp.modifier, claimed: sp.claimed === true };
+    }
   }
 
   if (parsed.days && typeof parsed.days === "object") {
@@ -551,11 +581,19 @@ function levelForXp(xp) {
 // double the base). Push ups are exempt — they're hard enough already.
 // Timed holds grow faster (+2 seconds per level) under the same cap.
 function targetFor(exercise, level = levelForXp(activeProfile().xp)) {
-  if (exercise.id === "push-ups") return exercise.target;
-  if (exercise.mode === "timed") {
-    return Math.min(exercise.target * 2, exercise.target + (level - 1) * 2);
+  let base;
+  if (exercise.id === "push-ups") base = exercise.target;
+  else if (exercise.mode === "timed") {
+    base = Math.min(exercise.target * 2, exercise.target + (level - 1) * 2);
+  } else {
+    base = Math.min(exercise.target * 2, exercise.target + Math.floor((level - 1) / 2));
   }
-  return Math.min(exercise.target * 2, exercise.target + Math.floor((level - 1) / 2));
+  // Today's Mystery Spinner "half the reps" prize
+  const spin = activeProfile().daily.spin;
+  if (spin && !spin.claimed && spin.exerciseId === exercise.id && spin.modifier === "half-reps") {
+    return Math.max(1, Math.ceil(base / 2));
+  }
+  return base;
 }
 
 // "20s hold" vs "8 reps" — used everywhere a target is displayed.
@@ -599,7 +637,7 @@ function dailyQuestIds(dateStr = todayStr()) {
 function ensureDailyFresh(st) {
   const today = todayStr();
   if (st.daily.date !== today) {
-    st.daily = { date: today, done: [], bonusClaimed: false };
+    st.daily = { date: today, done: [], bonusClaimed: false, spin: null };
   }
 }
 
@@ -696,6 +734,10 @@ const el = {
   detailOverlay: document.getElementById("detail-overlay"),
   levelupOverlay: document.getElementById("levelup-overlay"),
   dailyBoard: document.getElementById("daily-board"),
+  spinBtn: document.getElementById("spin-btn"),
+  spinnerWheel: document.getElementById("spinner-wheel"),
+  spinnerResult: document.getElementById("spinner-result"),
+  danceBtn: document.getElementById("dance-btn"),
   weekChart: document.getElementById("week-chart"),
   weekBests: document.getElementById("week-bests"),
   adventurePresets: document.getElementById("adventure-presets"),
@@ -1010,7 +1052,7 @@ function renderQuestLog() {
       <span class="quest-log-icon" aria-hidden="true">${entry.icon}</span>
       <span class="quest-log-body">
         <span class="quest-log-title">${escapeHtml(entry.title)}</span>
-        <span class="quest-log-meta">${entry.date} · +${entry.xp} XP · ${entry.reps} reps</span>
+        <span class="quest-log-meta">${entry.date} · +${entry.xp} XP · ${entry.reps} ${escapeHtml(entry.unit || "reps")}</span>
       </span>
     </li>
   `).join("");
@@ -1087,6 +1129,7 @@ function renderAll() {
   renderQuestLog();
   renderDaily();
   renderWeekChart();
+  renderSpinner();
 }
 
 // ---------------------------------------------------------------------------
@@ -1445,6 +1488,7 @@ el.adventureOverlay.addEventListener("click", (event) => {
   if (!btn) return;
   const action = btn.dataset.action;
   if (action === "close") closeAdventure();
+  else if (action === "dance-close") closeDance();
   else if (action === "minus" && adventure.clicker) adventure.clicker.changeBy(-1);
   else if (action === "skip-rest") showAdventureMove();
 });
@@ -1498,6 +1542,193 @@ function closeLevelUp() {
 el.levelupOverlay.addEventListener("click", (event) => {
   if (event.target.closest('[data-action="close-levelup"]')) closeLevelUp();
 });
+
+// ---------------------------------------------------------------------------
+// Mystery Spinner: one spin a day for a surprise move with a twist
+// ---------------------------------------------------------------------------
+
+let spinning = false;
+
+function buildSpinnerWheel() {
+  const colors = ["#7c3aed", "#ec4899", "#a78bfa", "#f9a8d4", "#8b5cf6", "#fb7185", "#c4b5fd", "#fbcfe8"];
+  const stops = SPIN_MODS.map((m, i) => `${colors[i]} ${i * 45}deg ${(i + 1) * 45}deg`).join(", ");
+  el.spinnerWheel.style.background = `conic-gradient(${stops})`;
+  el.spinnerWheel.innerHTML = SPIN_MODS.map((m, i) => {
+    const a = i * 45 + 22.5;
+    return `<span class="spinner-emoji" style="transform: rotate(${a}deg) translateY(-62px) rotate(${-a}deg)">${m.emoji}</span>`;
+  }).join("");
+}
+
+function renderSpinner() {
+  const st = activeProfile();
+  ensureDailyFresh(st);
+  const spin = st.daily.spin;
+  el.spinBtn.disabled = Boolean(spin) || spinning;
+  el.spinBtn.textContent = spin ? "Come back tomorrow!" : "Spin!";
+
+  if (spin && !spinning) {
+    const ex = findExercise(spin.exerciseId);
+    const mod = SPIN_MODS.find((m) => m.id === spin.modifier);
+    el.spinnerResult.innerHTML = `
+      <p class="spinner-prize">${mod.emoji} <strong>${ex.title}</strong> — ${mod.label}</p>
+      <p class="spinner-desc">${mod.desc}${spin.claimed ? " ✅ Done!" : ""}</p>
+      ${spin.claimed ? "" : `<button type="button" class="btn btn-primary" data-spin-go="${ex.id}">Go do it! 🎯</button>`}
+    `;
+  } else if (!spin) {
+    el.spinnerResult.innerHTML = "";
+  }
+}
+
+el.spinBtn.addEventListener("click", () => {
+  const st = activeProfile();
+  ensureDailyFresh(st);
+  if (st.daily.spin || spinning) return;
+
+  spinning = true;
+  el.spinBtn.disabled = true;
+  const modIdx = Math.floor(Math.random() * SPIN_MODS.length);
+  const ex = EXERCISES[Math.floor(Math.random() * EXERCISES.length)];
+  const turns = 5 * 360;
+  el.spinnerWheel.style.transform = `rotate(${turns - (modIdx * 45 + 22.5)}deg)`;
+
+  // ticking that slows down as the wheel settles
+  [100, 300, 600, 1000, 1500, 2100, 2700].forEach((ms) => setTimeout(() => sound.tick(), ms));
+
+  setTimeout(() => {
+    spinning = false;
+    st.daily.spin = { exerciseId: ex.id, modifier: SPIN_MODS[modIdx].id, claimed: false };
+    saveData();
+    sound.chime();
+    spawnConfetti(el.spinnerResult.closest("section"), 10);
+    voice.say(`${SPIN_MODS[modIdx].label} ${ex.title}!`);
+    renderSpinner();
+    renderExerciseBoard(); // half-reps prize changes the shown target
+  }, 3400);
+});
+
+el.spinnerResult.addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-spin-go]");
+  if (!btn) return;
+  activeExerciseId = btn.dataset.spinGo;
+  renderExerciseBoard();
+  renderActivePanel();
+  switchTab("play");
+});
+
+// ---------------------------------------------------------------------------
+// Dance Party: 45 seconds of freestyle with Spark calling the moves
+// ---------------------------------------------------------------------------
+
+const dance = { active: false, mascot: null, timers: [], frozen: false };
+
+function clearDanceTimers() {
+  dance.timers.forEach((id) => clearInterval(id));
+  dance.timers = [];
+  if (dance.mascot) {
+    dance.mascot.stop();
+    dance.mascot = null;
+  }
+}
+
+function closeDance() {
+  clearDanceTimers();
+  dance.active = false;
+  el.adventureOverlay.hidden = true;
+  el.adventureOverlay.innerHTML = "";
+  document.body.classList.remove("no-scroll");
+  maybeShowLevelUp();
+}
+
+function randomDanceMove() {
+  return DANCE_MOVES[Math.floor(Math.random() * DANCE_MOVES.length)];
+}
+
+function startDance() {
+  const total = window.__MQ_TEST_DANCE_SECONDS || DANCE_SECONDS;
+  let remaining = total;
+  dance.active = true;
+  dance.frozen = false;
+
+  el.adventureOverlay.innerHTML = `
+    <div class="adventure-card dance-card" role="dialog" aria-modal="true" aria-label="Dance party">
+      <div class="adventure-header">
+        <span class="adventure-title">🪩 Dance Party</span>
+        <span class="dance-countdown" id="dance-countdown" aria-live="polite">${remaining}</span>
+        <button type="button" class="btn btn-round adventure-close" data-action="dance-close" aria-label="Leave the party">✕</button>
+      </div>
+      <div class="adventure-stage">
+        <p class="dance-command" id="dance-command">Move it, move it! 🎶</p>
+        <div class="adventure-mascot dance-floor" id="dance-mascot" role="img" aria-label="Spark dancing"></div>
+        <p class="adventure-cue">Dance however YOU like — there's no wrong way!</p>
+      </div>
+    </div>
+  `;
+  el.adventureOverlay.hidden = false;
+  document.body.classList.add("no-scroll");
+
+  dance.mascot = createMascot(document.getElementById("dance-mascot"), randomDanceMove());
+  voice.say("Dance party! Move it, move it!");
+
+  // beat
+  dance.timers.push(setInterval(() => sound.thump(), 480));
+
+  // Spark changes dance moves
+  dance.timers.push(setInterval(() => {
+    if (!dance.frozen && dance.mascot) dance.mascot.setExercise(randomDanceMove());
+  }, 3000));
+
+  // shouted commands
+  dance.timers.push(setInterval(() => {
+    const cmd = DANCE_COMMANDS[Math.floor(Math.random() * DANCE_COMMANDS.length)];
+    const cmdEl = document.getElementById("dance-command");
+    if (cmdEl) {
+      cmdEl.textContent = cmd;
+      cmdEl.classList.remove("command-pop");
+      void cmdEl.offsetWidth;
+      cmdEl.classList.add("command-pop");
+    }
+    voice.say(cmd);
+    if (cmd === "Freeze!" && dance.mascot) {
+      dance.frozen = true;
+      dance.mascot.stop();
+      setTimeout(() => {
+        dance.frozen = false;
+        if (dance.mascot) dance.mascot.start();
+      }, 1600);
+    }
+  }, 6000));
+
+  // countdown
+  dance.timers.push(setInterval(() => {
+    remaining -= 1;
+    const cd = document.getElementById("dance-countdown");
+    if (cd) cd.textContent = String(Math.max(0, remaining));
+    if (remaining <= 0) finishDance(total);
+  }, 1000));
+}
+
+function finishDance(seconds) {
+  clearDanceTimers();
+  const earned = awardCompletion(
+    { id: "dance-party", title: "Dance Party", icon: "🪩", xp: DANCE_XP, unit: "seconds" },
+    seconds
+  );
+  el.adventureOverlay.innerHTML = `
+    <div class="adventure-card dance-card" role="dialog" aria-modal="true" aria-label="Dance party finished">
+      <div class="adventure-stage adventure-finale">
+        <span class="adventure-trophy" aria-hidden="true">🪩</span>
+        <h3 class="adventure-move-title">What a dance!</h3>
+        <p class="adventure-cue">${seconds} seconds of amazing moves<br /><strong>+${earned} XP!</strong></p>
+        <button type="button" class="btn btn-primary" data-action="dance-close">That was fun! 🎉</button>
+      </div>
+    </div>
+  `;
+  sound.fanfare();
+  setTimeout(() => voice.say("What a dance! Amazing moves!"), 600);
+  spawnConfetti(el.adventureOverlay.querySelector(".adventure-stage"), 22);
+}
+
+el.danceBtn.addEventListener("click", startDance);
 
 // ---------------------------------------------------------------------------
 // Move detail pop-up (opened from the Library)
@@ -1567,6 +1798,7 @@ el.detailOverlay.addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
   if (adventure.active) closeAdventure();
+  if (dance.active) closeDance();
   if (!el.detailOverlay.hidden) closeMoveDetail();
   if (!el.levelupOverlay.hidden) closeLevelUp();
 });
@@ -1585,7 +1817,15 @@ function awardCompletion(exercise, reps) {
   const today = todayStr();
   const badgesBefore = earnedBadgeIds(st);
   const levelBefore = levelForXp(st.xp);
-  const earnedXp = Math.round(exercise.xp * energyMultiplier(st));
+  let earnedXp = Math.round(exercise.xp * energyMultiplier(st));
+
+  // Mystery Spinner prizes are one-shot: apply/claim on the spun move.
+  ensureDailyFresh(st);
+  const spin = st.daily.spin;
+  if (spin && !spin.claimed && spin.exerciseId === exercise.id) {
+    if (spin.modifier === "double-xp") earnedXp *= 2;
+    spin.claimed = true;
+  }
 
   st.xp += earnedXp;
   st.reps += reps;
@@ -1597,6 +1837,7 @@ function awardCompletion(exercise, reps) {
     date: today,
     xp: earnedXp,
     reps,
+    unit: exercise.unit || "reps",
   });
   st.completed = st.completed.slice(0, HISTORY_LIMIT);
 
@@ -1609,9 +1850,9 @@ function awardCompletion(exercise, reps) {
   }
   st.lastCompletedDate = today;
 
-  // Lifetime stats for badges
-  if (!st.stats.tried.includes(exercise.id)) st.stats.tried.push(exercise.id);
-  st.stats.groups[exercise.group] = (st.stats.groups[exercise.group] || 0) + 1;
+  // Lifetime stats for badges (guards let pseudo-moves like Dance Party pass through)
+  if (findExercise(exercise.id) && !st.stats.tried.includes(exercise.id)) st.stats.tried.push(exercise.id);
+  if (exercise.group) st.stats.groups[exercise.group] = (st.stats.groups[exercise.group] || 0) + 1;
   if (exercise.mode === "timed") st.stats.timedDone = (st.stats.timedDone || 0) + 1;
   if (st.stats.todayDate === today) {
     st.stats.todayCount += 1;
@@ -1702,6 +1943,7 @@ el.resetBtn.addEventListener("click", () => {
 // ---------------------------------------------------------------------------
 
 initPlayClicker();
+buildSpinnerWheel();
 el.muteBtn.textContent = sound.isMuted() ? "🔇" : "🔊";
 el.muteBtn.setAttribute("aria-pressed", String(sound.isMuted()));
 setSwitcherOpen(false); // drawer starts tucked away — the summary shows who's playing

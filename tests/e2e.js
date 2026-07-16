@@ -217,6 +217,45 @@ async function main() {
     check("all levels shows 33 moves", (await page.$$("#exercise-board .exercise-tile")).length === 33,
       String((await page.$$("#exercise-board .exercise-tile")).length));
 
+    console.log("# Mystery Spinner");
+    await freshPage(page);
+    await page.click("#spin-btn");
+    await page.waitForTimeout(3800);
+    const spinState = await page.evaluate(() => {
+      const d = JSON.parse(localStorage.getItem("move-quest-progress-v3"));
+      return d.profiles[d.activeProfileId].daily.spin;
+    });
+    check("spin stores a result", spinState && typeof spinState.exerciseId === "string");
+    check("second spin blocked", await page.$eval("#spin-btn", (b) => b.disabled));
+    // Seed a double-XP prize on sit-ups and claim it
+    await page.evaluate(() => {
+      const d = JSON.parse(localStorage.getItem("move-quest-progress-v3"));
+      const p = d.profiles[d.activeProfileId];
+      p.daily.spin = { exerciseId: "sit-ups", modifier: "double-xp", claimed: false };
+      localStorage.setItem("move-quest-progress-v3", JSON.stringify(d));
+    });
+    await page.reload();
+    await page.waitForSelector(".tab-bar");
+    const xpBeforeSpin = Number(await page.textContent("#stat-xp"));
+    await claimReps(page, "sit-ups");
+    check("double-XP prize pays 70", Number(await page.textContent("#stat-xp")) - xpBeforeSpin === 70,
+      String(Number(await page.textContent("#stat-xp")) - xpBeforeSpin));
+
+    console.log("# Dance Party");
+    await freshPage(page);
+    await page.evaluate(() => { window.__MQ_TEST_DANCE_SECONDS = 3; });
+    await page.click("#tab-adventure");
+    await page.click("#dance-btn");
+    await page.waitForSelector(".dance-card");
+    check("dance overlay opens with countdown", (await page.textContent("#dance-countdown")) === "3");
+    await page.waitForSelector(".adventure-trophy", { timeout: 8000 });
+    check("dance finishes with reward screen", true);
+    await page.click('[data-action="dance-close"]');
+    check("dance awards XP", (await page.textContent("#stat-xp")) === "45");
+    await page.click("#tab-awards");
+    const danceLog = await page.textContent(".quest-log-item .quest-log-meta");
+    check("dance logged in seconds", danceLog.includes("seconds"), danceLog.trim());
+
     console.log("# Badges");
     await seedProfile(page, {
       xp: 2500, streak: 7, reps: 600,

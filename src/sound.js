@@ -63,6 +63,12 @@ export const sound = {
     note(988, 0, 0.12, "square", 0.14);
   },
 
+  // Dance-party beat: a soft kick thump.
+  thump() {
+    if (muted) return;
+    note(130, 0, 0.1, "sine", 0.22);
+  },
+
   // Rep target reached — Claim XP is ready.
   chime() {
     if (muted) return;
