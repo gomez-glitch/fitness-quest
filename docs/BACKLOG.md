@@ -18,14 +18,20 @@ Living list, roughly priority-ordered. Move items up/down freely.
    under the journey map path, adventure cards, hero banner, dance overlay,
    and level-up screen, with SVG fallback when a file is missing. Update the
    service-worker precache list.
-3. **World expansion: zones 7–19** — extend Spark's Journey past the Rainbow
-   Castle with thirteen new lands: Glow Crystal Caves, Dino Jungle, Bubblegum
-   Canyon, Firefly Forest, Frozen Wonderland, Cloud Kingdom, Moon Base,
-   Upside-Down Land, Neon Cyber City (older kids), Dragon Peaks (older
-   kids), Shipwreck Cove, the Glitch Dimension (older kids), and the Galaxy
-   Gardens finale. 36 → 114 steps, new zone-crossing voice lines, painted
-   backgrounds from the ready-made prompts in `ART.md`, SVG fallback scenery
-   per zone.
+3. **World expansion: zones 7–19** — NOT in the live build (by design).
+   Ship as staged content drops so the app keeps feeling new:
+   - **Live today:** zones 1–6 (through Rainbow Castle), 36 steps.
+   - **Drop A — "Beneath the Castle":** Glow Crystal Caves, Dino Jungle,
+     Bubblegum Canyon (zones 7–9).
+   - **Drop B — "Into the Sky":** Firefly Forest, Frozen Wonderland,
+     Cloud Kingdom, Moon Base (zones 10–13).
+   - **Drop C — "The Strange Lands"** (older-kid drop): Upside-Down Land,
+     Neon Cyber City, Dragon Peaks (zones 14–16).
+   - **Drop D — "The Final Frontier":** Shipwreck Cove, Glitch Dimension,
+     Galaxy Gardens finale (zones 17–19).
+   Each drop: new zone-crossing voice lines, painted backgrounds from the
+   ready-made prompts in `ART.md`, SVG fallback scenery per zone. Heroes
+   already past the old finale roll their lap progress into the new lands.
 4. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
    added; add a CONTRIBUTING-style note if anyone else joins the project.
 
