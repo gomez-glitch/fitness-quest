@@ -31,12 +31,17 @@ Only local repo files are allowed. Never hotlink external image URLs.
 | `art/dance-party.png` | Dance overlay backdrop | 4:5 portrait | 1024×1280 |
 | `art/celebration.png` | Level-up backdrop | 1:1 | 1024×1024 |
 | `art/app-icon.png` | Painted app icon | 1:1 | 1024×1024 |
+| `art/zone-7-caves.png` … `art/zone-14-galaxy.png` | Expansion zones (backlog) | 3:2 landscape | 1080×720 |
 
 PNG or JPG (PNG preferred). Keep each file under ~400 KB if possible
 (export at 80–85% quality) — the whole app currently weighs ~200 KB, and
 the service worker precaches everything for offline use.
 
 ## Copy-paste prompts
+
+**Status: prompt set below delivered ✅ (done) — first images being generated.**
+Future-zone prompts (world expansion, zones 7–14) are at the bottom, ready
+for the next generation session.
 
 ### Shared style block — prepend to every prompt
 
@@ -98,6 +103,48 @@ toward a plain sky tone so tiles blend when stacked vertically.")
     lightning-bolt tuft on top of its head, on a diagonal violet-to-pink
     gradient background, flat vector style, bold and readable at small
     sizes, centred, no text. Square 1:1."
+
+## Future zones — world expansion (backlog, prompts ready)
+
+The journey continues past the Rainbow Castle. Same rules: prepend the shared
+style block, add *"Landscape 3:2. Soften the top and bottom edges toward a
+plain sky tone so tiles blend when stacked vertically."* File names continue
+the series.
+
+13. **zone-7-caves** (underground) — "A magical underground crystal cave:
+    deep violet rock walls, clusters of glowing pink and turquoise crystals,
+    softly glowing round mushrooms along the floor, gentle light shafts from
+    a hole above, sparkling mineral dust in the air. Cosy and wonder-filled,
+    not dark or scary."
+14. **zone-8-jungle** — "A friendly dinosaur-age jungle: giant ferns and
+    rounded prehistoric leaves in layered greens, a smoking volcano far in
+    the background, big cartoon dinosaur footprints pressed into a mud path,
+    hanging vines, warm dappled light."
+15. **zone-9-canyon** — "A playful bubblegum canyon: rounded rock towers in
+    pastel pink and lavender stripes, giant swirly lollipop-shaped rock
+    formations, a winding bubblegum-pink river, floating bubbles, soft peach
+    sky."
+16. **zone-10-forest** — "An enchanted firefly forest at dusk: giant friendly
+    mushroom-trees with glowing spots, deep teal and violet foliage, dozens
+    of warm floating firefly lights, a winding mossy path, magical and calm."
+17. **zone-11-ice** — "A frozen wonderland: smooth ice hills in pale blue and
+    white, sparkling icicles, a frozen lake reflecting colour, gentle falling
+    snowflakes, a soft green-and-purple aurora ribbon across the sky."
+18. **zone-12-clouds** — "A kingdom in the clouds: bouncy rounded cloud
+    platforms in white and pale pink, short rainbow bridges connecting them,
+    golden sunbeams, tiny floating islands with grass tufts, dreamy pastel
+    sky."
+19. **zone-13-moon** — "A cheerful moon base: pale grey moon surface with
+    round craters, glowing glass dome habitats in violet and pink, a planted
+    flag shape, Earth rising small and blue in the starry sky, footprint
+    trails in the moon dust."
+20. **zone-14-galaxy** — "Galaxy gardens, a cosmic finale: swirling nebula
+    beds in pink, violet and gold arranged like flower gardens, small planets
+    budding on curving light stems, shooting stars, deep indigo space behind.
+    Magical, triumphant, endlessly playful."
+
+When these land in `art/`, the map grows from 6 to 14 zones (36 → 84 steps)
+and the lap system carries over automatically.
 
 ## Tips for consistent results
 

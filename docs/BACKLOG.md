@@ -13,11 +13,18 @@ Living list, roughly priority-ordered. Move items up/down freely.
      Remove hero, so siblings can't wipe each other.
    - Streak shield: earn one per active week; auto-spends to protect one
      missed day (Duolingo-style kindness).
-2. **Painted art integration** — once PNGs land in `art/` (see `ART.md`):
-   layer paintings under the journey map path, adventure cards, hero banner,
-   dance overlay, and level-up screen, with SVG fallback when a file is
-   missing. Update the service-worker precache list.
-3. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
+2. **Painted art integration** — prompts delivered ✅ (done); images being
+   generated now. Once PNGs land in `art/` (see `ART.md`): layer paintings
+   under the journey map path, adventure cards, hero banner, dance overlay,
+   and level-up screen, with SVG fallback when a file is missing. Update the
+   service-worker precache list.
+3. **World expansion: zones 7–14** — extend Spark's Journey past the Rainbow
+   Castle with eight new lands (Glow Crystal Caves, Dino Jungle, Bubblegum
+   Canyon, Firefly Forest, Frozen Wonderland, Cloud Kingdom, Moon Base,
+   Galaxy Gardens): 36 → 84 steps, new zone-crossing voice lines, painted
+   backgrounds from the ready-made prompts in `ART.md`, SVG fallback
+   scenery per zone.
+4. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
    added; add a CONTRIBUTING-style note if anyone else joins the project.
 
 ## Ideas shelf
