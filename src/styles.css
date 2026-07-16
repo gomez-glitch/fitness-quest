@@ -1116,6 +1116,32 @@ body.no-scroll {
   font-weight: 600;
 }
 
+/* ---------- Spark's Journey (world map) ---------- */
+
+.journey-map {
+  max-height: 420px;
+  overflow-y: auto;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--lavender);
+  scrollbar-width: thin;
+  scrollbar-color: var(--purple) var(--lavender);
+}
+
+.journey-map svg {
+  display: block;
+}
+
+.journey-pulse {
+  animation: journey-pulse 1.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes journey-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.35); opacity: 0.2; }
+}
+
 /* ---------- Dance Party ---------- */
 
 .dance-card {

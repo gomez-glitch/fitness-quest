@@ -4,6 +4,7 @@ import { createMascot, renderStaticMascot } from "./mascot.js";
 import { sound } from "./sound.js";
 import { createClicker } from "./clicker.js";
 import { voice } from "./voice.js";
+import { renderJourneyMap, zoneForStep, TOTAL_STEPS } from "./journey.js";
 
 const STORAGE_KEY = "move-quest-progress-v3";
 const LEGACY_KEY = "move-quest-progress-v2";
@@ -378,7 +379,7 @@ function defaultProfileState(nickname = "Spark") {
     lastCompletedDate: null,
     counters,
     profile: { nickname, persona: "spark-sprinter", avatar: "👟" },
-    stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0, timedDone: 0, adventuresDone: 0 },
+    stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0, timedDone: 0, adventuresDone: 0, journey: 0 },
     daily: { date: null, done: [], bonusClaimed: false, spin: null },
     days: {},
     curve: CURVE_VERSION,
@@ -445,6 +446,12 @@ function normalizeProfile(parsed) {
     if (typeof st.bestStreak === "number" && st.bestStreak >= 0) state.stats.bestStreak = st.bestStreak;
     if (typeof st.timedDone === "number" && st.timedDone >= 0) state.stats.timedDone = st.timedDone;
     if (typeof st.adventuresDone === "number" && st.adventuresDone >= 0) state.stats.adventuresDone = st.adventuresDone;
+    if (typeof st.journey === "number" && st.journey >= 0) {
+      state.stats.journey = st.journey;
+    } else {
+      // Backfill for profiles created before the journey existed.
+      state.stats.journey = Object.values(state.stats.groups).reduce((a, b) => a + b, 0);
+    }
   }
 
   const dl = parsed.daily;
@@ -738,6 +745,8 @@ const el = {
   spinnerWheel: document.getElementById("spinner-wheel"),
   spinnerResult: document.getElementById("spinner-result"),
   danceBtn: document.getElementById("dance-btn"),
+  journeyMap: document.getElementById("journey-map"),
+  journeyStatus: document.getElementById("journey-status"),
   weekChart: document.getElementById("week-chart"),
   weekBests: document.getElementById("week-bests"),
   adventurePresets: document.getElementById("adventure-presets"),
@@ -829,6 +838,7 @@ function switchTab(name) {
     else mascot.stop();
   }
   if (name !== "play" && playClicker) playClicker.pauseTimer();
+  if (name === "adventure") renderJourney(); // re-render so auto-scroll works once visible
 }
 
 function renderProfileForm() {
@@ -1117,6 +1127,15 @@ function renderWeekChart() {
     `Best day: ${bestDayXp} XP · Longest streak: ${st.stats.bestStreak} day${st.stats.bestStreak === 1 ? "" : "s"}`;
 }
 
+function renderJourney() {
+  const st = activeProfile();
+  const { step, lap, zone } = renderJourneyMap(el.journeyMap, st.stats.journey || 0);
+  const left = TOTAL_STEPS - step;
+  el.journeyStatus.textContent =
+    `${zone.emoji} ${activeProfile().profile.nickname} is exploring ${zone.name}` +
+    `${lap > 1 ? ` (lap ${lap}!)` : ""} — ${left} quest${left === 1 ? "" : "s"} to the castle!`;
+}
+
 function renderAll() {
   renderHero();
   renderProfileSwitcher();
@@ -1130,6 +1149,7 @@ function renderAll() {
   renderDaily();
   renderWeekChart();
   renderSpinner();
+  renderJourney();
 }
 
 // ---------------------------------------------------------------------------
@@ -1863,6 +1883,14 @@ function awardCompletion(exercise, reps) {
   st.stats.bestDay = Math.max(st.stats.bestDay, st.stats.todayCount);
   st.stats.bestStreak = Math.max(st.stats.bestStreak, st.streak);
 
+  // Spark's Journey: every completion is one step along the world map.
+  const zoneBefore = zoneForStep(st.stats.journey);
+  st.stats.journey = (st.stats.journey || 0) + 1;
+  const zoneAfter = zoneForStep(st.stats.journey);
+  if (zoneAfter !== zoneBefore) {
+    setTimeout(() => voice.say(`New land discovered! Welcome to the ${zoneAfter.name}!`), 1300);
+  }
+
   // Per-day history for the weekly chart
   if (!st.days[today]) st.days[today] = { xp: 0, reps: 0 };
   st.days[today].xp += earnedXp;
@@ -1902,6 +1930,7 @@ function awardCompletion(exercise, reps) {
   renderQuestLog();
   renderDaily();
   renderWeekChart();
+  renderJourney();
   maybeShowLevelUp();
   return earnedXp;
 }

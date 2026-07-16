@@ -256,6 +256,19 @@ async function main() {
     const danceLog = await page.textContent(".quest-log-item .quest-log-meta");
     check("dance logged in seconds", danceLog.includes("seconds"), danceLog.trim());
 
+    console.log("# Spark's Journey");
+    await freshPage(page);
+    await page.click("#tab-adventure");
+    check("journey map renders 36 nodes", (await page.$$("#journey-map .journey-node, #journey-map circle.journey-node")).length >= 36,
+      String((await page.$$("#journey-map circle.journey-node, #journey-map g.journey-node")).length));
+    check("journey status at start", (await page.textContent("#journey-status")).includes("Sunny Meadows"));
+    await claimReps(page, "sit-ups");
+    const journeyStep = await page.evaluate(() => {
+      const d = JSON.parse(localStorage.getItem("move-quest-progress-v3"));
+      return d.profiles[d.activeProfileId].stats.journey;
+    });
+    check("completion advances the journey", journeyStep === 1, String(journeyStep));
+
     console.log("# Badges");
     await seedProfile(page, {
       xp: 2500, streak: 7, reps: 600,
