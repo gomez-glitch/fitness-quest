@@ -145,9 +145,13 @@ async function main() {
     console.log("# Timed hold challenge");
     await page.click('.exercise-tile[data-exercise="flamingo-balance"]');
     check("timed hint shows tap to start", (await page.textContent("#clicker-hint")) === "tap to start");
+    check("timed dial shows GO", (await page.textContent("#dial-count")) === "GO");
     const holdSeconds = Number((await page.textContent("#dial-target")).replace("s", ""));
     await page.click("#rep-clicker", { position: { x: 85, y: 85 } });
-    await page.waitForTimeout((holdSeconds + 1.5) * 1000);
+    await page.waitForTimeout(1200);
+    check("get-ready phase runs first", (await page.textContent("#clicker-hint")) === "get ready…");
+    // 3s ready lead-in + the hold itself + a little slack
+    await page.waitForTimeout((holdSeconds + 3.5) * 1000);
     check("hold completes and is claimable", !(await page.$eval("#claim-xp-btn", (b) => b.disabled)));
     await page.click("#claim-xp-btn");
     await page.waitForTimeout(80);

@@ -838,12 +838,14 @@ function buildRingNotches() {
 }
 
 // Countdown engine for timed "hold" challenges (wall sit, plank, flamingo).
-const hold = { running: false, remaining: 0, intervalId: null };
+// Flow: tap GO -> 3-2-1 "get ready" (time to get into position) -> the hold
+// countdown runs automatically -> finish jingle. Tapping mid-way pauses.
+const hold = { phase: "idle", readyLeft: 0, remaining: 0, intervalId: null };
 
 function pauseHold() {
   if (hold.intervalId) clearInterval(hold.intervalId);
   hold.intervalId = null;
-  hold.running = false;
+  hold.phase = "idle"; // any banked `remaining` seconds survive a pause
 }
 
 function resetHold() {
@@ -854,7 +856,7 @@ function resetHold() {
 function toggleHold() {
   const exercise = findExercise(activeExerciseId);
   if (!exercise || exercise.mode !== "timed") return;
-  if (hold.running) {
+  if (hold.phase !== "idle") {
     pauseHold();
     renderClicker();
     return;
@@ -863,19 +865,30 @@ function toggleHold() {
   const st = activeProfile();
   if ((st.counters[exercise.id] || 0) >= target) return; // already claim-ready
 
-  if (hold.remaining <= 0) hold.remaining = target;
-  hold.running = true;
-  sound.tick();
+  hold.phase = "ready";
+  hold.readyLeft = 3;
+  sound.beep();
   hold.intervalId = setInterval(() => {
-    hold.remaining -= 1;
-    if (hold.remaining > 3) sound.tick();
-    else if (hold.remaining > 0) sound.beep();
-    if (hold.remaining <= 0) {
-      resetHold();
-      st.counters[exercise.id] = target;
-      saveData();
-      sound.chime();
-      spawnConfetti();
+    if (hold.phase === "ready") {
+      hold.readyLeft -= 1;
+      if (hold.readyLeft > 0) {
+        sound.beep();
+      } else {
+        hold.phase = "counting";
+        if (hold.remaining <= 0) hold.remaining = target;
+        sound.chime();
+      }
+    } else if (hold.phase === "counting") {
+      hold.remaining -= 1;
+      if (hold.remaining > 3) sound.tick();
+      else if (hold.remaining > 0) sound.beep();
+      if (hold.remaining <= 0) {
+        resetHold();
+        st.counters[exercise.id] = target;
+        saveData();
+        sound.badge(); // triumphant finish jingle
+        spawnConfetti();
+      }
     }
     renderClicker();
   }, 1000);
@@ -895,18 +908,37 @@ function renderClicker() {
     : (target > 0 ? Math.min(1, count / target) : 0);
 
   if (timed) {
-    el.dialCount.textContent = done ? "✓" : String(hold.remaining > 0 ? hold.remaining : target);
+    if (done) {
+      el.dialCount.textContent = "✓";
+      el.clickerHint.textContent = "amazing hold!";
+    } else if (hold.phase === "ready") {
+      el.dialCount.textContent = String(hold.readyLeft);
+      el.clickerHint.textContent = "get ready…";
+    } else if (hold.phase === "counting") {
+      el.dialCount.textContent = String(hold.remaining);
+      el.clickerHint.textContent = "hold on!";
+    } else {
+      el.dialCount.textContent = hold.remaining > 0 ? String(hold.remaining) : "GO";
+      el.clickerHint.textContent = hold.remaining > 0 ? "tap to keep going" : "tap to start";
+    }
     el.dialTarget.textContent = `${target}s`;
-    el.clickerHint.textContent = done ? "amazing hold!" : hold.running ? "hold on!" : "tap to start";
     el.clicker.setAttribute("aria-valuenow", String(done ? target : target - (hold.remaining || target)));
+    if (!REDUCED_MOTION && (hold.phase === "ready" || hold.phase === "counting")) {
+      el.dialCount.classList.remove("count-pop");
+      void el.dialCount.offsetWidth;
+      el.dialCount.classList.add("count-pop");
+    }
+    el.dialCount.classList.toggle("count-urgent", hold.phase === "counting" && hold.remaining <= 3);
   } else {
     el.dialCount.textContent = String(count);
     el.dialTarget.textContent = String(target);
     el.clickerHint.textContent = "tap or spin";
     el.clicker.setAttribute("aria-valuenow", String(count));
+    el.dialCount.classList.remove("count-pop", "count-urgent");
   }
   el.clicker.setAttribute("aria-valuemax", String(target));
   el.clicker.classList.toggle("clicker-full", done);
+  el.clicker.classList.toggle("timed-mode", timed);
   el.dialMinus.style.display = timed ? "none" : "";
 
   el.clickerProgress.style.strokeDasharray = String(RING_CIRC);
@@ -1012,10 +1044,11 @@ function changeCount(delta, opts = {}) {
     dragging = false;
     spinAngleOffset = 0;
     const quick = performance.now() - startTime < 400;
-    if (!moved && quick) {
-      const active = findExercise(activeExerciseId);
-      if (active && active.mode === "timed") toggleHold();
-      else changeCount(1);
+    const active = findExercise(activeExerciseId);
+    if (!moved && active && active.mode === "timed") {
+      toggleHold(); // any press counts as GO/pause for holds
+    } else if (!moved && quick) {
+      changeCount(1);
     }
     renderClicker();
   }
@@ -1416,8 +1449,8 @@ function showAdventureMove() {
   const counter = timed
     ? `
       <div class="adventure-counter">
-        <span class="adventure-count" aria-live="polite"><b id="adventure-count">${target}</b>s</span>
-        <button type="button" class="btn adventure-plus" data-action="hold-start" id="adventure-hold-btn">Start! ⏱️</button>
+        <span class="adventure-count adventure-count-big" aria-live="polite"><b id="adventure-count">${target}</b>s</span>
+        <button type="button" class="btn adventure-plus" data-action="hold-start" id="adventure-hold-btn">GO! ▶</button>
       </div>
     `
     : `
@@ -1482,21 +1515,36 @@ function adventureStartHold() {
   const ex = findExercise(adventure.moves[adventure.index].id);
   if (ex.mode !== "timed" || adventure.holdId) return;
   const target = targetFor(ex);
+  let readyLeft = 3;
   let remaining = target;
   const btn = document.getElementById("adventure-hold-btn");
+  const countEl = document.getElementById("adventure-count");
   if (btn) btn.disabled = true;
-  sound.tick();
+  if (countEl) countEl.innerHTML = `<b>${readyLeft}</b>`;
+  showCheer("Get into position! 🧘");
+  sound.beep();
 
   adventure.holdId = setInterval(() => {
+    if (readyLeft > 0) {
+      readyLeft -= 1;
+      if (readyLeft > 0) {
+        sound.beep();
+        if (countEl) countEl.innerHTML = `<b>${readyLeft}</b>`;
+        return;
+      }
+      sound.chime();
+      if (countEl) countEl.innerHTML = `<b>${remaining}</b>s`;
+      return;
+    }
     remaining -= 1;
     if (remaining > 3) sound.tick();
     else if (remaining > 0) sound.beep();
-    const countEl = document.getElementById("adventure-count");
-    if (countEl) countEl.textContent = String(Math.max(0, remaining));
+    if (countEl) countEl.innerHTML = `<b>${Math.max(0, remaining)}</b>s`;
     if (remaining === Math.ceil(target / 2)) showCheer("Halfway — hold strong! 💪");
     if (remaining <= 0) {
       clearInterval(adventure.holdId);
       adventure.holdId = null;
+      sound.badge();
       adventureMoveDone(ex, target);
     }
   }, 1000);

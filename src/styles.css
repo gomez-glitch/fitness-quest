@@ -926,6 +926,15 @@ body.no-scroll {
   min-width: 4.5rem;
 }
 
+.adventure-count-big {
+  font-size: 1.5rem;
+}
+
+.adventure-count-big b {
+  font-size: 2.8rem;
+  color: var(--purple-dark);
+}
+
 .adventure-plus {
   background: linear-gradient(135deg, var(--pink), var(--purple));
   color: var(--white);
@@ -1274,6 +1283,26 @@ body.no-scroll {
   font-size: 2rem;
   font-weight: 900;
   color: var(--ink);
+}
+
+/* Timed holds get a big, prominent countdown number */
+.clicker.timed-mode .dial-count {
+  font-size: 2.9rem;
+  line-height: 1;
+  color: var(--purple-dark);
+}
+
+.count-pop {
+  animation: count-pop 0.35s ease;
+}
+
+@keyframes count-pop {
+  0% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+.count-urgent {
+  color: var(--pink) !important;
 }
 
 .dial-target {
