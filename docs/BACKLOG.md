@@ -32,7 +32,37 @@ Living list, roughly priority-ordered. Move items up/down freely.
    Each drop: new zone-crossing voice lines, painted backgrounds from the
    ready-made prompts in `ART.md`, SVG fallback scenery per zone. Heroes
    already past the old finale roll their lap progress into the new lands.
-4. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
+4. **Stretch & Calm pack** — easy pose stretches as timed holds (20–30s),
+   🌱 Easy intensity, built on the existing GO → 3-2-1 → countdown engine:
+   - **Downward Dog** 🐕 (30s) — hands and feet down, hips high in a
+     mountain shape. Side-view FK pose: inverted V.
+   - **Cobra** 🐍 (20s) — lie on tummy, press chest up, look ahead.
+     Side-view: prone with lifted torso arc.
+   - **Child's Pose** 🧸 (30s) — kneel, fold forward, arms long. The rest
+     pose — great adventure-ender.
+   - **Tree Pose** 🌳 (20s/side) — one foot to the other leg, arms grow up
+     like branches (Flamingo's calmer big sibling).
+   - **Butterfly Stretch** 🦋 (25s) — seated, soles of feet together,
+     knees flutter gently like wings.
+   - **Star Pose** ⭐ (20s) — stand wide in a big X and shine.
+   - **Brave Warrior** 🗡️ (20s/side) — strong lunge, arms reaching front
+     and back, gaze forward.
+   - **Sleepy Sloth Fold** 🦥 (25s) — stand and dangle forward, arms heavy,
+     knees soft.
+   - **Frog Pose** 🐸 (20s) — low squat hold, elbows inside knees, hips say
+     hello.
+   - **Cat-Cow** 🐱 (8 slow reps, not a hold) — on all fours, arch up like a
+     scared cat, dip down like a happy cow. Lovely alternating FK animation.
+   Extras that make it sing:
+   - New **"Stretch" group filter** alongside Core/Arms/Legs/Whole body.
+   - **Breathing cues in holds**: for stretch-mode holds the voice coach
+     says "breathe in… breathe out…" every ~4 seconds instead of ticks.
+   - **"Sunset Stretch" adventure**: a calm 3-pose wind-down chain (softer
+     voice, no beat) — the bedtime counterpart to Morning Spark; opens with
+     Sky Reach, ends in Child's Pose.
+   - Warm-up tie-in: Marching + Arm Circles + two stretches could form an
+     auto-suggested warm-up row at the top of Play.
+5. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
    added; add a CONTRIBUTING-style note if anyone else joins the project.
 
 ## Ideas shelf
