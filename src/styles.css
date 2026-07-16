@@ -926,13 +926,14 @@ body.no-scroll {
   min-width: 4.5rem;
 }
 
-.adventure-count-big {
-  font-size: 1.5rem;
+.adventure-clicker .clicker {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
 }
 
-.adventure-count-big b {
-  font-size: 2.8rem;
-  color: var(--purple-dark);
+.adventure-clicker .clicker-center {
+  inset: 23px;
 }
 
 .adventure-plus {
@@ -1045,9 +1046,15 @@ body.no-scroll {
 
 .filter-chips {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 1rem;
+}
+
+.filter-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .filter-chip {

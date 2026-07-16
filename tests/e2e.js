@@ -72,8 +72,8 @@ async function seedProfile(page, patch) {
 async function claimReps(page, exerciseId) {
   await page.click("#tab-play");
   await page.click(`.exercise-tile[data-exercise="${exerciseId}"]`);
-  const target = Number(await page.textContent("#dial-target"));
-  await page.focus("#rep-clicker");
+  const target = Number(await page.textContent("#view-play .dial-target-val"));
+  await page.focus("#view-play .clicker");
   for (let i = 0; i < target; i++) await page.keyboard.press("ArrowUp");
   await page.click("#claim-xp-btn");
   await page.waitForTimeout(80);
@@ -130,26 +130,26 @@ async function main() {
     console.log("# Scaled targets");
     await page.click("#tab-play");
     await page.click('.exercise-tile[data-exercise="squats"]');
-    check("squats scale with level", (await page.textContent("#dial-target")) === "10");
+    check("squats scale with level", (await page.textContent("#view-play .dial-target-val")) === "12");
     await page.click('.exercise-tile[data-exercise="push-ups"]');
-    check("push-ups exempt from scaling", (await page.textContent("#dial-target")) === "3");
+    check("push-ups exempt from scaling", (await page.textContent("#view-play .dial-target-val")) === "3");
 
     console.log("# Rep clicker & claim");
     await freshPage(page);
     const xpBefore = Number(await page.textContent("#stat-xp"));
     await claimReps(page, "sit-ups");
     check("claim awards XP", Number(await page.textContent("#stat-xp")) === xpBefore + 35);
-    check("counter resets after claim", (await page.textContent("#dial-count")) === "0");
+    check("counter resets after claim", (await page.textContent("#view-play .dial-count")) === "0");
     check("quest log has entry", (await page.$$(".quest-log-item")).length === 1);
 
     console.log("# Timed hold challenge");
     await page.click('.exercise-tile[data-exercise="flamingo-balance"]');
-    check("timed hint shows tap to start", (await page.textContent("#clicker-hint")) === "tap to start");
-    check("timed dial shows GO", (await page.textContent("#dial-count")) === "GO");
-    const holdSeconds = Number((await page.textContent("#dial-target")).replace("s", ""));
-    await page.click("#rep-clicker", { position: { x: 85, y: 85 } });
+    check("timed hint shows tap to start", (await page.textContent("#view-play .clicker-hint")) === "tap to start");
+    check("timed dial shows GO", (await page.textContent("#view-play .dial-count")) === "GO");
+    const holdSeconds = Number((await page.textContent("#view-play .dial-target-val")).replace("s", ""));
+    await page.click("#view-play .clicker", { position: { x: 85, y: 85 } });
     await page.waitForTimeout(1200);
-    check("get-ready phase runs first", (await page.textContent("#clicker-hint")) === "get ready…");
+    check("get-ready phase runs first", (await page.textContent("#view-play .clicker-hint")) === "get ready…");
     // 3s ready lead-in + the hold itself + a little slack
     await page.waitForTimeout((holdSeconds + 3.5) * 1000);
     check("hold completes and is claimable", !(await page.$eval("#claim-xp-btn", (b) => b.disabled)));
@@ -174,12 +174,14 @@ async function main() {
     await page.click('.adventure-preset[data-adventure="lava-volcano"]');
     await page.waitForSelector(".adventure-card");
     check("story line shown", (await page.textContent(".story-line")).includes("mountain"));
+    check("adventure uses the rotating dial", !!(await page.$(".adventure-card .clicker")));
     for (let move = 0; move < 4; move++) {
-      await page.waitForSelector('[data-action="plus"]');
-      const targetTxt = await page.textContent(".adventure-count");
-      const target = Number(targetTxt.split("/")[1]);
-      for (let i = 0; i < target; i++) await page.click('[data-action="plus"]');
-      await page.waitForTimeout(100);
+      await page.waitForSelector(".adventure-card .clicker");
+      const target = Number(await page.textContent(".adventure-card .dial-target-val"));
+      for (let i = 0; i < target; i++) {
+        await page.click(".adventure-card .clicker", { position: { x: 75, y: 75 } });
+      }
+      await page.waitForTimeout(900); // completion advances after a short beat
       if (move < 3) await page.click('[data-action="skip-rest"]');
     }
     await page.waitForSelector(".adventure-trophy");
@@ -202,6 +204,18 @@ async function main() {
     check("detail dialog opens with mascot", true);
     await page.click('[data-action="try"]');
     check("try-it-now lands on play", await page.evaluate(() => !document.getElementById("view-play").hidden));
+
+    console.log("# Intensity filter");
+    await page.click("#tab-play");
+    await page.click('.filter-chip[data-filter-intensity="3"]');
+    check("spicy filter shows 6 moves", (await page.$$("#exercise-board .exercise-tile")).length === 6,
+      String((await page.$$("#exercise-board .exercise-tile")).length));
+    await page.click('.filter-chip[data-filter-intensity="1"]');
+    check("easy filter shows 8 moves", (await page.$$("#exercise-board .exercise-tile")).length === 8,
+      String((await page.$$("#exercise-board .exercise-tile")).length));
+    await page.click('.filter-chip[data-filter-intensity="All"]');
+    check("all levels shows 33 moves", (await page.$$("#exercise-board .exercise-tile")).length === 33,
+      String((await page.$$("#exercise-board .exercise-tile")).length));
 
     console.log("# Badges");
     await seedProfile(page, {

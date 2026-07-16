@@ -2,6 +2,7 @@
 
 import { createMascot, renderStaticMascot } from "./mascot.js";
 import { sound } from "./sound.js";
+import { createClicker } from "./clicker.js";
 
 const STORAGE_KEY = "move-quest-progress-v3";
 const LEGACY_KEY = "move-quest-progress-v2";
@@ -28,121 +29,177 @@ const GROUPS = ["All", "Core", "Arms", "Legs", "Whole body"];
 
 const EXERCISES = [
   {
-    id: "marching", title: "Marching", target: 16, xp: 40, icon: "🥁", group: "Whole body",
+    id: "marching", title: "Marching", target: 20, xp: 40, icon: "🥁", group: "Whole body", intensity: 1,
     muscles: "Warm-up", cue: "March on the spot standing proud and tall — the perfect warm-up.",
     steps: ["Stand tall", "Lift knees gently", "Swing your arms"],
   },
   {
-    id: "arm-circles", title: "Arm Circles", target: 10, xp: 40, icon: "🌀", group: "Arms",
+    id: "arm-circles", title: "Arm Circles", target: 14, xp: 40, icon: "🌀", group: "Arms", intensity: 1,
     muscles: "Shoulders", cue: "Stretch your arms wide and draw big slow circles in the air.",
     steps: ["Arms out like wings", "Big slow circles", "Switch direction halfway"],
   },
   {
-    id: "sit-ups", title: "Sit Ups", target: 5, xp: 35, icon: "🧘", group: "Core",
+    id: "sit-ups", title: "Sit Ups", target: 8, xp: 35, icon: "🧘", group: "Core", intensity: 2,
     muscles: "Core", cue: "Cross arms, curl up slowly, and lower with control.",
     steps: ["Feet planted", "Belly button gently tucked", "Exhale as you sit up"],
   },
   {
-    id: "push-ups", title: "Push Ups", target: 3, xp: 35, icon: "💪", group: "Arms",
+    id: "push-ups", title: "Push Ups", target: 3, xp: 35, icon: "💪", group: "Arms", intensity: 3,
     muscles: "Chest + arms", cue: "Keep a straight body line. Knees-down push ups count too.",
     steps: ["Hands under shoulders", "Lower like an elevator", "Press the floor away"],
   },
   {
-    id: "squats", title: "Squats", target: 8, xp: 50, icon: "🐸", group: "Legs",
+    id: "squats", title: "Squats", target: 10, xp: 50, icon: "🐸", group: "Legs", intensity: 2,
     muscles: "Legs + glutes", cue: "Sit back like there's an invisible chair behind you.",
     steps: ["Feet shoulder-width", "Knees track over toes", "Push the floor to stand"],
   },
   {
-    id: "side-lunges", title: "Side Lunges", target: 8, xp: 50, icon: "↔️", group: "Legs",
+    id: "side-lunges", title: "Side Lunges", target: 10, xp: 50, icon: "↔️", group: "Legs", intensity: 2,
     muscles: "Legs", cue: "Step wide, bend one knee, and keep the other leg long.",
     steps: ["Toes point forward", "Hips move back", "Switch sides each rep"],
   },
   {
-    id: "jumping-jacks", title: "Jumping Jacks", target: 12, xp: 55, icon: "⭐", group: "Whole body",
+    id: "jumping-jacks", title: "Jumping Jacks", target: 16, xp: 55, icon: "⭐", group: "Whole body", intensity: 2,
     muscles: "Whole body", cue: "Jump feet wide while your arms make a star, then back together.",
     steps: ["Soft bouncy knees", "Arms like a star", "Find a steady rhythm"],
   },
   {
-    id: "high-knees", title: "High Knees", target: 16, xp: 60, icon: "🏃", group: "Whole body",
+    id: "high-knees", title: "High Knees", target: 20, xp: 60, icon: "🏃", group: "Whole body", intensity: 3,
     muscles: "Legs + heart", cue: "Run on the spot, lifting your knees toward hip height.",
     steps: ["Stand tall", "Drive knees up", "Pump your arms"],
   },
   {
-    id: "mountain-climbers", title: "Mountain Climbers", target: 10, xp: 55, icon: "⛰️", group: "Whole body",
+    id: "mountain-climbers", title: "Mountain Climbers", target: 12, xp: 55, icon: "⛰️", group: "Whole body", intensity: 3,
     muscles: "Whole body", cue: "In a push up position, walk or run your knees toward your chest.",
     steps: ["Strong straight back", "One knee in at a time", "Go your own speed"],
   },
   {
-    id: "flutter-kicks", title: "Flutter Kicks", target: 10, xp: 55, icon: "🏊", group: "Core",
+    id: "flutter-kicks", title: "Flutter Kicks", target: 12, xp: 55, icon: "🏊", group: "Core", intensity: 2,
     muscles: "Lower core", cue: "Small quick kicks while your back stays comfortable.",
     steps: ["Hands under hips", "Tiny alternating kicks", "Rest if your back arches"],
   },
   {
-    id: "glute-bridge", title: "Glute Bridge", target: 8, xp: 45, icon: "🌉", group: "Legs",
+    id: "glute-bridge", title: "Glute Bridge", target: 10, xp: 45, icon: "🌉", group: "Legs", intensity: 2,
     muscles: "Glutes + back", cue: "Lie on your back and lift your hips up like a bridge.",
     steps: ["Feet flat near bottom", "Squeeze as you lift", "Lower slowly"],
   },
   {
-    id: "superman", title: "Superman", target: 5, xp: 40, icon: "🦸", group: "Core",
+    id: "superman", title: "Superman", target: 6, xp: 40, icon: "🦸", group: "Core", intensity: 2,
     muscles: "Back + core", cue: "Lie on your tummy and lift arms and legs like flying.",
     steps: ["Look at the floor", "Reach long, not high", "Hold for one breath"],
   },
   {
-    id: "chair-dips", title: "Chair Dips", target: 5, xp: 45, icon: "🪑", group: "Arms",
+    id: "chair-dips", title: "Chair Dips", target: 6, xp: 45, icon: "🪑", group: "Arms", intensity: 2,
     muscles: "Triceps", cue: "Use a sturdy chair and bend elbows straight back.",
     steps: ["Chair against a wall", "Shoulders relaxed", "Move slowly"],
   },
   {
-    id: "oblique-raises", title: "Oblique Raises", target: 8, xp: 45, icon: "🌙", group: "Core",
+    id: "oblique-raises", title: "Oblique Raises", target: 10, xp: 45, icon: "🌙", group: "Core", intensity: 2,
     muscles: "Side core", cue: "Reach tall, then lift through one side of your waist.",
     steps: ["Stand proud", "Slide hand toward knee", "Switch sides"],
   },
   {
-    id: "russian-twists", title: "Russian Twists", target: 10, xp: 60, icon: "🔄", group: "Core",
+    id: "russian-twists", title: "Russian Twists", target: 12, xp: 60, icon: "🔄", group: "Core", intensity: 2,
     muscles: "Core rotation", cue: "Sit tall and rotate side to side with gentle control.",
     steps: ["Heels can stay down", "Chest stays lifted", "Tap both sides"],
   },
   {
-    id: "weight-curls", title: "Light Weight Curls", target: 8, xp: 50, icon: "🏋️", group: "Arms",
+    id: "weight-curls", title: "Light Weight Curls", target: 10, xp: 50, icon: "🏋️", group: "Arms", intensity: 2,
     muscles: "Biceps", cue: "Use small weights or water bottles and move smoothly.",
     steps: ["Elbows near ribs", "Curl to shoulders", "Lower for two counts"],
   },
   {
-    id: "overhead-press", title: "Mini Overhead Press", target: 6, xp: 50, icon: "🙆", group: "Arms",
+    id: "overhead-press", title: "Mini Overhead Press", target: 8, xp: 50, icon: "🙆", group: "Arms", intensity: 2,
     muscles: "Shoulders", cue: "Press light weights upward without shrugging.",
     steps: ["Soft knees", "Start at shoulders", "Press and return"],
   },
   {
-    id: "calf-raises", title: "Calf Raises", target: 10, xp: 45, icon: "🦶", group: "Legs",
+    id: "calf-raises", title: "Calf Raises", target: 14, xp: 45, icon: "🦶", group: "Legs", intensity: 1,
     muscles: "Calves", cue: "Rise up onto tiptoes slowly, then lower with control.",
     steps: ["Hold a wall if wobbly", "Pause at the top", "Heels down softly"],
   },
   {
-    id: "toe-touches", title: "Toe Touches", target: 8, xp: 45, icon: "🙇", group: "Legs",
+    id: "toe-touches", title: "Toe Touches", target: 12, xp: 45, icon: "🙇", group: "Legs", intensity: 1,
     muscles: "Hamstrings", cue: "Bend forward gently and reach toward your toes, then stand tall.",
     steps: ["Soft knees", "Reach down slowly", "Roll back up tall"],
   },
   {
-    id: "skater-hops", title: "Skater Hops", target: 10, xp: 55, icon: "⛸️", group: "Whole body",
+    id: "skater-hops", title: "Skater Hops", target: 12, xp: 55, icon: "⛸️", group: "Whole body", intensity: 2,
     muscles: "Legs + balance", cue: "Hop side to side like a speed skater gliding on ice.",
     steps: ["Push off one foot", "Land softly", "Swing arms across"],
   },
   {
-    id: "wall-sit", title: "Wall Sit", mode: "timed", target: 20, xp: 55, icon: "🧱", group: "Legs",
+    id: "wall-sit", title: "Wall Sit", mode: "timed", target: 20, xp: 55, icon: "🧱", group: "Legs", intensity: 2,
     muscles: "Legs", cue: "Slide down a wall until your legs make a chair shape — and hold!",
     steps: ["Back flat on the wall", "Knees over ankles", "Breathe and hold"],
   },
   {
-    id: "plank-hold", title: "Plank Hold", mode: "timed", target: 15, xp: 55, icon: "🛡️", group: "Core",
+    id: "plank-hold", title: "Plank Hold", mode: "timed", target: 15, xp: 55, icon: "🛡️", group: "Core", intensity: 3,
     muscles: "Core", cue: "Hold your body straight and strong like a wooden plank.",
     steps: ["Elbows or hands down", "Body in one line", "Squeeze your tummy"],
   },
   {
-    id: "flamingo-balance", title: "Flamingo Balance", mode: "timed", target: 10, xp: 40, icon: "🦩", group: "Legs",
+    id: "flamingo-balance", title: "Flamingo Balance", mode: "timed", target: 10, xp: 40, icon: "🦩", group: "Legs", intensity: 1,
     muscles: "Balance", cue: "Stand on one leg like a flamingo — switch legs next time!",
     steps: ["Stare at one spot", "Arms out wide", "Wobbling means it's working!"],
   },
+  {
+    id: "knee-ups", title: "Knee Ups", target: 14, xp: 40, icon: "🚶", group: "Legs", intensity: 1,
+    muscles: "Hips + balance", cue: "Slowly lift one knee to hip height, lower it, and switch.",
+    steps: ["Stand tall", "Lift slow and steady", "Switch legs each rep"],
+  },
+  {
+    id: "hip-circles", title: "Hip Circles", target: 10, xp: 35, icon: "🪩", group: "Legs", intensity: 1,
+    muscles: "Hips (mobility)", cue: "Hands on hips and draw big slow circles with your middle.",
+    steps: ["Feet planted wide", "Circle one way, then back", "Keep it smooth"],
+  },
+  {
+    id: "sky-reach", title: "Sky Reach Stretch", target: 10, xp: 35, icon: "🌤️", group: "Whole body", intensity: 1,
+    muscles: "Full-body stretch", cue: "Sweep your arms up and reach for the sky on tiptoes, then float back down.",
+    steps: ["Big breath in going up", "Stretch super tall", "Breathe out floating down"],
+  },
+  {
+    id: "dead-bugs", title: "Dead Bugs", target: 8, xp: 50, icon: "🪲", group: "Core", intensity: 2,
+    muscles: "Deep core", cue: "On your back, stretch one arm and the opposite leg away, then swap.",
+    steps: ["Back stays flat", "Move slow like a robot", "Opposite arm and leg"],
+  },
+  {
+    id: "butt-kicks", title: "Butt Kicks", target: 16, xp: 50, icon: "💨", group: "Legs", intensity: 2,
+    muscles: "Legs + heart", cue: "Jog on the spot, flicking your heels up toward your bottom.",
+    steps: ["Light bouncy steps", "Heels kick back", "Pump your arms"],
+  },
+  {
+    id: "lateral-raises", title: "Wing Raises", target: 10, xp: 50, icon: "🦅", group: "Arms", intensity: 2, weights: true,
+    muscles: "Shoulders", cue: "Lift your light weights out to the sides like spreading wings.",
+    steps: ["Tiny bend in elbows", "Lift to shoulder height", "Lower slowly"],
+  },
+  {
+    id: "bent-over-rows", title: "Rowing Champions", target: 10, xp: 55, icon: "🚣", group: "Arms", intensity: 2, weights: true,
+    muscles: "Back + arms", cue: "Lean forward with a flat back and row your weights up to your ribs.",
+    steps: ["Flat proud back", "Pull elbows behind you", "Lower with control"],
+  },
+  {
+    id: "farmer-hold", title: "Farmer Hold", mode: "timed", target: 20, xp: 60, icon: "🧑‍🌾", group: "Whole body", intensity: 2, weights: true,
+    muscles: "Grip + posture", cue: "Stand statue-still holding your weights by your sides.",
+    steps: ["Shoulders back", "Squeeze the weights", "Strong and still"],
+  },
+  {
+    id: "jump-lunges", title: "Jump Lunges", target: 8, xp: 65, icon: "🦘", group: "Legs", intensity: 3,
+    muscles: "Legs + power", cue: "Lunge, hop, and switch legs in the air — land soft like a ninja.",
+    steps: ["Small hops are fine", "Switch legs mid-air", "Land quiet and soft"],
+  },
+  {
+    id: "burpees", title: "Burpees", target: 6, xp: 70, icon: "💥", group: "Whole body", intensity: 3,
+    muscles: "Everything!", cue: "Squat down, hop back to a plank, hop in, and jump up tall!",
+    steps: ["Four beats: down-back-in-up", "Step back instead of hop is fine", "Reach high on the jump"],
+  },
 ];
+
+const INTENSITY_META = {
+  1: { label: "Easy", emoji: "🌱" },
+  2: { label: "Steady", emoji: "⚡" },
+  3: { label: "Spicy", emoji: "🔥" },
+};
 
 const DAILY_QUEST_COUNT = 3;
 const DAILY_BONUS_XP = 40;
@@ -572,6 +629,7 @@ let data = loadData();
 saveData(); // persist immediately so migrated/repaired data survives a reload
 let activeExerciseId = EXERCISES[0].id;
 let activeFilter = "All";
+let activeIntensity = "All";
 let profileDraft = null;
 
 function activeProfile() {
@@ -622,12 +680,7 @@ const el = {
   activeSteps: document.getElementById("active-steps"),
 
   dialArea: document.getElementById("quest-dial-area"),
-  clicker: document.getElementById("rep-clicker"),
-  clickerRing: document.getElementById("clicker-ring"),
-  clickerProgress: document.getElementById("clicker-progress"),
-  dialCount: document.getElementById("dial-count"),
-  dialTarget: document.getElementById("dial-target"),
-  clickerHint: document.getElementById("clicker-hint"),
+  clickerMount: document.getElementById("clicker-mount"),
   dialMinus: document.getElementById("dial-minus"),
   muteBtn: document.getElementById("mute-btn"),
   energyNote: document.getElementById("energy-note"),
@@ -732,8 +785,7 @@ function switchTab(name) {
     if (name === "play") mascot.start();
     else mascot.stop();
   }
-  if (name !== "play") pauseHold();
-  renderClicker();
+  if (name !== "play" && playClicker) playClicker.pauseTimer();
 }
 
 function renderProfileForm() {
@@ -773,25 +825,40 @@ function renderDashboard() {
 }
 
 function renderFilterChips() {
-  el.filterChips.innerHTML = GROUPS.map((g) => `
-    <button type="button" class="filter-chip" data-filter="${g}" aria-pressed="${g === activeFilter}">${g}</button>
+  const groupRow = GROUPS.map((g) => `
+    <button type="button" class="filter-chip" data-filter-group="${g}" aria-pressed="${g === activeFilter}">${g}</button>
   `).join("");
+  const intensityRow = ["All", 1, 2, 3].map((i) => {
+    const label = i === "All" ? "All levels" : `${INTENSITY_META[i].emoji} ${INTENSITY_META[i].label}`;
+    return `<button type="button" class="filter-chip" data-filter-intensity="${i}" aria-pressed="${String(i) === String(activeIntensity)}">${label}</button>`;
+  }).join("");
+  el.filterChips.innerHTML = `
+    <div class="filter-chip-row" role="group" aria-label="Filter by muscle group">${groupRow}</div>
+    <div class="filter-chip-row" role="group" aria-label="Filter by intensity">${intensityRow}</div>
+  `;
 }
 
 function renderExerciseBoard() {
-  const list = EXERCISES.filter((ex) => activeFilter === "All" || ex.group === activeFilter);
-  el.exerciseBoard.innerHTML = list.map((ex) => {
-    const pressed = ex.id === activeExerciseId;
-    return `
-      <button type="button" class="exercise-tile" data-exercise="${ex.id}" aria-pressed="${pressed}">
-        <span class="exercise-tile-icon" aria-hidden="true">${ex.icon}</span>
-        <span class="exercise-tile-body">
-          <span class="exercise-tile-title">${ex.title}</span>
-          <span class="exercise-tile-meta">${targetLabel(ex)} · ${ex.xp} XP · ${ex.muscles}</span>
-        </span>
-      </button>
-    `;
-  }).join("");
+  const list = EXERCISES.filter((ex) =>
+    (activeFilter === "All" || ex.group === activeFilter) &&
+    (activeIntensity === "All" || ex.intensity === Number(activeIntensity))
+  );
+  el.exerciseBoard.innerHTML = list.length === 0
+    ? `<p class="quest-log-empty">No moves match those filters — try widening them!</p>`
+    : list.map((ex) => {
+      const pressed = ex.id === activeExerciseId;
+      const meta = INTENSITY_META[ex.intensity];
+      return `
+        <button type="button" class="exercise-tile" data-exercise="${ex.id}" aria-pressed="${pressed}">
+          <span class="exercise-tile-icon" aria-hidden="true">${ex.icon}</span>
+          <span class="exercise-tile-body">
+            <span class="exercise-tile-title">${ex.title}</span>
+            <span class="exercise-tile-meta">${targetLabel(ex)} · ${ex.xp} XP · ${ex.muscles}</span>
+            <span class="exercise-tile-meta">${meta.emoji} ${meta.label}${ex.weights ? " · 🏋️ weights" : ""}</span>
+          </span>
+        </button>
+      `;
+    }).join("");
 }
 
 let mascot = null;
@@ -799,7 +866,7 @@ let mascot = null;
 function renderActivePanel() {
   const exercise = findExercise(activeExerciseId);
   if (!exercise) return;
-  resetHold(); // switching moves cancels any running hold countdown
+
 
   el.activeHeadingText.textContent = `${activeProfile().profile.nickname}'s move: ${exercise.title}`;
   el.activeIllustration.setAttribute(
@@ -815,139 +882,24 @@ function renderActivePanel() {
     mascot.setExercise(exercise.id);
   }
 
-  renderClicker();
+  syncPlayClicker();
 }
 
 // ---------------------------------------------------------------------------
-// Clicker (rotating tally counter)
+// Play-panel clicker (shared rotating dial component)
 // ---------------------------------------------------------------------------
 
-const RING_RADIUS = 86;
-const RING_CIRC = 2 * Math.PI * RING_RADIUS;
-let spinAngleOffset = 0; // live extra rotation while dragging
+let playClicker = null;
 
-function buildRingNotches() {
-  const NOTCHES = 16;
-  let html = "";
-  for (let i = 0; i < NOTCHES; i++) {
-    const a = (i * 360) / NOTCHES;
-    const major = i % 4 === 0;
-    html += `<line x1="100" y1="${major ? 18 : 22}" x2="100" y2="30" transform="rotate(${a} 100 100)" />`;
-  }
-  el.clickerRing.innerHTML = html;
-}
-
-// Countdown engine for timed "hold" challenges (wall sit, plank, flamingo).
-// Flow: tap GO -> 3-2-1 "get ready" (time to get into position) -> the hold
-// countdown runs automatically -> finish jingle. Tapping mid-way pauses.
-const hold = { phase: "idle", readyLeft: 0, remaining: 0, intervalId: null };
-
-function pauseHold() {
-  if (hold.intervalId) clearInterval(hold.intervalId);
-  hold.intervalId = null;
-  hold.phase = "idle"; // any banked `remaining` seconds survive a pause
-}
-
-function resetHold() {
-  pauseHold();
-  hold.remaining = 0;
-}
-
-function toggleHold() {
-  const exercise = findExercise(activeExerciseId);
-  if (!exercise || exercise.mode !== "timed") return;
-  if (hold.phase !== "idle") {
-    pauseHold();
-    renderClicker();
-    return;
-  }
-  const target = targetFor(exercise);
-  const st = activeProfile();
-  if ((st.counters[exercise.id] || 0) >= target) return; // already claim-ready
-
-  hold.phase = "ready";
-  hold.readyLeft = 3;
-  sound.beep();
-  hold.intervalId = setInterval(() => {
-    if (hold.phase === "ready") {
-      hold.readyLeft -= 1;
-      if (hold.readyLeft > 0) {
-        sound.beep();
-      } else {
-        hold.phase = "counting";
-        if (hold.remaining <= 0) hold.remaining = target;
-        sound.chime();
-      }
-    } else if (hold.phase === "counting") {
-      hold.remaining -= 1;
-      if (hold.remaining > 3) sound.tick();
-      else if (hold.remaining > 0) sound.beep();
-      if (hold.remaining <= 0) {
-        resetHold();
-        st.counters[exercise.id] = target;
-        saveData();
-        sound.badge(); // triumphant finish jingle
-        spawnConfetti();
-      }
-    }
-    renderClicker();
-  }, 1000);
-  renderClicker();
-}
-
-function renderClicker() {
+function renderPlayMeta() {
   const exercise = findExercise(activeExerciseId);
   if (!exercise) return;
   const st = activeProfile();
-  const target = targetFor(exercise);
   const timed = exercise.mode === "timed";
   const count = st.counters[exercise.id] || 0;
-  const done = count >= target;
-  const pct = timed
-    ? (done ? 1 : hold.remaining > 0 ? (target - hold.remaining) / target : 0)
-    : (target > 0 ? Math.min(1, count / target) : 0);
 
-  if (timed) {
-    if (done) {
-      el.dialCount.textContent = "✓";
-      el.clickerHint.textContent = "amazing hold!";
-    } else if (hold.phase === "ready") {
-      el.dialCount.textContent = String(hold.readyLeft);
-      el.clickerHint.textContent = "get ready…";
-    } else if (hold.phase === "counting") {
-      el.dialCount.textContent = String(hold.remaining);
-      el.clickerHint.textContent = "hold on!";
-    } else {
-      el.dialCount.textContent = hold.remaining > 0 ? String(hold.remaining) : "GO";
-      el.clickerHint.textContent = hold.remaining > 0 ? "tap to keep going" : "tap to start";
-    }
-    el.dialTarget.textContent = `${target}s`;
-    el.clicker.setAttribute("aria-valuenow", String(done ? target : target - (hold.remaining || target)));
-    if (!REDUCED_MOTION && (hold.phase === "ready" || hold.phase === "counting")) {
-      el.dialCount.classList.remove("count-pop");
-      void el.dialCount.offsetWidth;
-      el.dialCount.classList.add("count-pop");
-    }
-    el.dialCount.classList.toggle("count-urgent", hold.phase === "counting" && hold.remaining <= 3);
-  } else {
-    el.dialCount.textContent = String(count);
-    el.dialTarget.textContent = String(target);
-    el.clickerHint.textContent = "tap or spin";
-    el.clicker.setAttribute("aria-valuenow", String(count));
-    el.dialCount.classList.remove("count-pop", "count-urgent");
-  }
-  el.clicker.setAttribute("aria-valuemax", String(target));
-  el.clicker.classList.toggle("clicker-full", done);
-  el.clicker.classList.toggle("timed-mode", timed);
+  el.claimBtn.disabled = count < targetFor(exercise);
   el.dialMinus.style.display = timed ? "none" : "";
-
-  el.clickerProgress.style.strokeDasharray = String(RING_CIRC);
-  el.clickerProgress.style.strokeDashoffset = String(RING_CIRC * (1 - pct));
-
-  const angle = count * DEG_PER_REP + spinAngleOffset;
-  el.clickerRing.setAttribute("transform", `rotate(${angle} 100 100)`);
-
-  el.claimBtn.disabled = count < target;
 
   const mult = energyMultiplier(st);
   el.energyNote.textContent =
@@ -957,118 +909,36 @@ function renderClicker() {
   el.energyNote.classList.toggle("energy-low", mult < 1);
 }
 
-function changeCount(delta, opts = {}) {
+// Push the active exercise's target/count into the dial (resets any timer).
+function syncPlayClicker() {
   const exercise = findExercise(activeExerciseId);
-  if (!exercise || exercise.mode === "timed") return; // holds use the timer
+  if (!exercise || !playClicker) return;
   const st = activeProfile();
-  const target = targetFor(exercise);
-  const current = st.counters[exercise.id] || 0;
-  const next = Math.max(0, Math.min(target, current + delta));
-  if (next === current) return;
-
-  st.counters[exercise.id] = next;
-  saveData();
-
-  if (delta > 0) {
-    sound.tick();
-    if (navigator.vibrate && !opts.quiet) navigator.vibrate(8);
-    if (!REDUCED_MOTION) {
-      el.clicker.classList.remove("clicker-bump");
-      void el.clicker.offsetWidth; // restart animation
-      el.clicker.classList.add("clicker-bump");
-    }
-    if (next === target) {
-      sound.chime();
-      spawnConfetti();
-    }
-  }
-
-  renderClicker();
+  playClicker.configure({
+    target: targetFor(exercise),
+    timed: exercise.mode === "timed",
+    count: st.counters[exercise.id] || 0,
+  });
+  renderPlayMeta();
 }
 
-// Pointer interaction: tap = +1, spin around the centre = ratchet up/down.
-(function setupClickerPointer() {
-  let dragging = false;
-  let startX = 0;
-  let startY = 0;
-  let startTime = 0;
-  let lastAngle = 0;
-  let accumulated = 0;
-  let moved = false;
-
-  function pointerAngle(event) {
-    const rect = el.clicker.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    return (Math.atan2(event.clientY - cy, event.clientX - cx) * 180) / Math.PI;
-  }
-
-  el.clicker.addEventListener("pointerdown", (event) => {
-    dragging = true;
-    moved = false;
-    startX = event.clientX;
-    startY = event.clientY;
-    startTime = performance.now();
-    lastAngle = pointerAngle(event);
-    accumulated = 0;
-    el.clicker.setPointerCapture(event.pointerId);
+function initPlayClicker() {
+  playClicker = createClicker(el.clickerMount, {
+    onChange: ({ count, done, timed }) => {
+      const exercise = findExercise(activeExerciseId);
+      if (!exercise) return;
+      const st = activeProfile();
+      // Timed holds only bank progress once finished; reps persist as they go.
+      st.counters[exercise.id] = timed ? (done ? targetFor(exercise) : 0) : count;
+      saveData();
+      renderPlayMeta();
+    },
+    onComplete: () => {
+      spawnConfetti();
+      renderPlayMeta();
+    },
   });
-
-  el.clicker.addEventListener("pointermove", (event) => {
-    if (!dragging) return;
-    const active = findExercise(activeExerciseId);
-    if (active && active.mode === "timed") return; // holds don't spin
-    if (Math.hypot(event.clientX - startX, event.clientY - startY) > 10) moved = true;
-    if (!moved) return;
-
-    let delta = pointerAngle(event) - lastAngle;
-    if (delta > 180) delta -= 360;
-    if (delta < -180) delta += 360;
-    lastAngle = pointerAngle(event);
-    accumulated += delta;
-    spinAngleOffset = accumulated % SPIN_STEP_DEG;
-
-    while (accumulated >= SPIN_STEP_DEG) {
-      accumulated -= SPIN_STEP_DEG;
-      changeCount(1);
-    }
-    while (accumulated <= -SPIN_STEP_DEG) {
-      accumulated += SPIN_STEP_DEG;
-      changeCount(-1);
-    }
-    renderClicker();
-  });
-
-  function endDrag(event) {
-    if (!dragging) return;
-    dragging = false;
-    spinAngleOffset = 0;
-    const quick = performance.now() - startTime < 400;
-    const active = findExercise(activeExerciseId);
-    if (!moved && active && active.mode === "timed") {
-      toggleHold(); // any press counts as GO/pause for holds
-    } else if (!moved && quick) {
-      changeCount(1);
-    }
-    renderClicker();
-  }
-
-  el.clicker.addEventListener("pointerup", endDrag);
-  el.clicker.addEventListener("pointercancel", endDrag);
-})();
-
-el.clicker.addEventListener("keydown", (event) => {
-  const active = findExercise(activeExerciseId);
-  const timed = active && active.mode === "timed";
-  if (["ArrowUp", "ArrowRight", " ", "Enter"].includes(event.key)) {
-    event.preventDefault();
-    if (timed) toggleHold();
-    else changeCount(1);
-  } else if (["ArrowDown", "ArrowLeft"].includes(event.key)) {
-    event.preventDefault();
-    if (!timed) changeCount(-1);
-  }
-});
+}
 
 function spawnConfetti(host = el.dialArea, count = 14) {
   if (REDUCED_MOTION) return;
@@ -1310,7 +1180,8 @@ el.profileForm.addEventListener("submit", (event) => {
 el.filterChips.addEventListener("click", (event) => {
   const chip = event.target.closest(".filter-chip");
   if (!chip) return;
-  activeFilter = chip.dataset.filter;
+  if (chip.dataset.filterGroup) activeFilter = chip.dataset.filterGroup;
+  if (chip.dataset.filterIntensity) activeIntensity = chip.dataset.filterIntensity;
   renderFilterChips();
   renderExerciseBoard();
 });
@@ -1324,7 +1195,7 @@ el.exerciseBoard.addEventListener("click", (event) => {
   document.getElementById("active-panel").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
-el.dialMinus.addEventListener("click", () => changeCount(-1));
+el.dialMinus.addEventListener("click", () => playClicker.changeBy(-1));
 
 el.dailyBoard.addEventListener("click", (event) => {
   const quest = event.target.closest(".daily-quest[data-exercise]");
@@ -1344,10 +1215,10 @@ const adventure = {
   name: "",
   moves: [],
   index: 0,
-  count: 0,
   xpEarned: 0,
   mascot: null,
   restTimer: null,
+  clicker: null,
 };
 
 function renderAdventurePresets() {
@@ -1401,9 +1272,9 @@ function stopAdventureExtras() {
     clearInterval(adventure.restTimer);
     adventure.restTimer = null;
   }
-  if (adventure.holdId) {
-    clearInterval(adventure.holdId);
-    adventure.holdId = null;
+  if (adventure.clicker) {
+    adventure.clicker.pauseTimer();
+    adventure.clicker = null;
   }
 }
 
@@ -1415,7 +1286,7 @@ function startAdventure(preset) {
   adventure.xpEarned = 0;
   el.adventureOverlay.hidden = false;
   document.body.classList.add("no-scroll");
-  resetHold();
+  if (playClicker) playClicker.pauseTimer();
   showAdventureMove();
 }
 
@@ -1440,26 +1311,10 @@ function adventureHeader() {
 
 function showAdventureMove() {
   stopAdventureExtras();
-  adventure.count = 0;
   const move = adventure.moves[adventure.index];
   const ex = findExercise(move.id);
   const target = targetFor(ex);
   const timed = ex.mode === "timed";
-
-  const counter = timed
-    ? `
-      <div class="adventure-counter">
-        <span class="adventure-count adventure-count-big" aria-live="polite"><b id="adventure-count">${target}</b>s</span>
-        <button type="button" class="btn adventure-plus" data-action="hold-start" id="adventure-hold-btn">GO! ▶</button>
-      </div>
-    `
-    : `
-      <div class="adventure-counter">
-        <button type="button" class="btn btn-round" data-action="minus" aria-label="Remove one rep">−</button>
-        <span class="adventure-count" aria-live="polite"><b id="adventure-count">0</b> / ${target}</span>
-        <button type="button" class="btn adventure-plus" data-action="plus" aria-label="Count one rep">+1</button>
-      </div>
-    `;
 
   el.adventureOverlay.innerHTML = `
     <div class="adventure-card" role="dialog" aria-modal="true" aria-label="Adventure: ${escapeHtml(ex.title)}">
@@ -1470,16 +1325,37 @@ function showAdventureMove() {
              aria-label="Spark demonstrating the ${ex.title} movement"></div>
         <h3 class="adventure-move-title">${ex.icon} ${ex.title}</h3>
         <p class="adventure-cue">${ex.cue}</p>
-        ${counter}
+        <div class="adventure-clicker" id="adventure-clicker-mount"></div>
+        ${timed ? "" : `<button type="button" class="btn btn-round" data-action="minus" aria-label="Remove one rep">−</button>`}
       </div>
     </div>
   `;
 
   adventure.mascot = createMascot(document.getElementById("adventure-mascot"), ex.id);
+
+  let cheered = false;
+  adventure.clicker = createClicker(document.getElementById("adventure-clicker-mount"), {
+    onChange: ({ count, remaining, phase, timed: isTimed, done }) => {
+      if (done || cheered || target < 6) return;
+      const halfway = isTimed
+        ? phase === "counting" && remaining === Math.ceil(target / 2)
+        : count === Math.ceil(target / 2);
+      if (halfway) {
+        cheered = true;
+        showCheer(isTimed ? "Halfway — hold strong! 💪" : "Halfway there — keep going! 🔥");
+      }
+    },
+    onComplete: () => {
+      const clicker = adventure.clicker;
+      adventure.clicker = null; // avoid pausing a finished dial during teardown
+      setTimeout(() => adventureMoveDone(ex, target), 650);
+    },
+  });
+  adventure.clicker.configure({ target, timed, count: 0 });
 }
 
 function adventureMoveDone(ex, target) {
-  sound.chime();
+  if (!adventure.active) return;
   adventure.xpEarned += awardCompletion(ex, target);
   adventure.index += 1;
   if (adventure.index >= adventure.moves.length) {
@@ -1487,67 +1363,6 @@ function adventureMoveDone(ex, target) {
   } else {
     showAdventureRest();
   }
-}
-
-function adventureTap(delta) {
-  const ex = findExercise(adventure.moves[adventure.index].id);
-  if (ex.mode === "timed") return;
-  const target = targetFor(ex);
-  const next = Math.max(0, Math.min(target, adventure.count + delta));
-  if (next === adventure.count) return;
-  adventure.count = next;
-  if (delta > 0) {
-    sound.tick();
-    if (navigator.vibrate) navigator.vibrate(8);
-    if (adventure.count === Math.ceil(target / 2) && target >= 6) {
-      showCheer("Halfway there — keep going! 🔥");
-    }
-  }
-  const countEl = document.getElementById("adventure-count");
-  if (countEl) countEl.textContent = String(adventure.count);
-
-  if (adventure.count >= target) {
-    adventureMoveDone(ex, target);
-  }
-}
-
-function adventureStartHold() {
-  const ex = findExercise(adventure.moves[adventure.index].id);
-  if (ex.mode !== "timed" || adventure.holdId) return;
-  const target = targetFor(ex);
-  let readyLeft = 3;
-  let remaining = target;
-  const btn = document.getElementById("adventure-hold-btn");
-  const countEl = document.getElementById("adventure-count");
-  if (btn) btn.disabled = true;
-  if (countEl) countEl.innerHTML = `<b>${readyLeft}</b>`;
-  showCheer("Get into position! 🧘");
-  sound.beep();
-
-  adventure.holdId = setInterval(() => {
-    if (readyLeft > 0) {
-      readyLeft -= 1;
-      if (readyLeft > 0) {
-        sound.beep();
-        if (countEl) countEl.innerHTML = `<b>${readyLeft}</b>`;
-        return;
-      }
-      sound.chime();
-      if (countEl) countEl.innerHTML = `<b>${remaining}</b>s`;
-      return;
-    }
-    remaining -= 1;
-    if (remaining > 3) sound.tick();
-    else if (remaining > 0) sound.beep();
-    if (countEl) countEl.innerHTML = `<b>${Math.max(0, remaining)}</b>s`;
-    if (remaining === Math.ceil(target / 2)) showCheer("Halfway — hold strong! 💪");
-    if (remaining <= 0) {
-      clearInterval(adventure.holdId);
-      adventure.holdId = null;
-      sound.badge();
-      adventureMoveDone(ex, target);
-    }
-  }, 1000);
 }
 
 function showAdventureRest() {
@@ -1627,9 +1442,7 @@ el.adventureOverlay.addEventListener("click", (event) => {
   if (!btn) return;
   const action = btn.dataset.action;
   if (action === "close") closeAdventure();
-  else if (action === "plus") adventureTap(1);
-  else if (action === "minus") adventureTap(-1);
-  else if (action === "hold-start") adventureStartHold();
+  else if (action === "minus" && adventure.clicker) adventure.clicker.changeBy(-1);
   else if (action === "skip-rest") showAdventureMove();
 });
 
@@ -1857,12 +1670,11 @@ el.claimBtn.addEventListener("click", () => {
 
   awardCompletion(exercise, current);
   st.counters[exercise.id] = 0;
-  resetHold();
   saveData();
 
   sound.fanfare();
   spawnConfetti();
-  renderClicker();
+  syncPlayClicker();
 });
 
 el.resetBtn.addEventListener("click", () => {
@@ -1885,7 +1697,7 @@ el.resetBtn.addEventListener("click", () => {
 // Init
 // ---------------------------------------------------------------------------
 
-buildRingNotches();
+initPlayClicker();
 el.muteBtn.textContent = sound.isMuted() ? "🔇" : "🔊";
 el.muteBtn.setAttribute("aria-pressed", String(sound.isMuted()));
 setSwitcherOpen(false); // drawer starts tucked away — the summary shows who's playing
