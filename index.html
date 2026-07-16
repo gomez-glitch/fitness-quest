@@ -9,9 +9,11 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Move Quest" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="./icons/icon.svg" />
+  <link rel="icon" href="./icons/icon-192.png" type="image/png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
   <link rel="stylesheet" href="./src/styles.css" />
 </head>
 <body>
@@ -80,6 +82,13 @@
             </form>
           </div>
         </div>
+      </section>
+
+      <!-- Install prompt (shown only when installable / not yet installed) -->
+      <section class="card install-card" id="install-card" hidden aria-labelledby="install-heading">
+        <h2 id="install-heading">📲 Put Move Quest on your home screen</h2>
+        <p class="daily-intro" id="install-text">Install the app for one-tap access — it works offline too!</p>
+        <button type="button" class="btn btn-primary" id="install-btn">Install app</button>
       </section>
 
       <!-- Progress dashboard -->

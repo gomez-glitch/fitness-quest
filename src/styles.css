@@ -625,6 +625,18 @@ fieldset.avatar-field {
   font-weight: 600;
 }
 
+/* ---------- Install card ---------- */
+
+.install-card {
+  border: 3px solid var(--yellow);
+  background: linear-gradient(160deg, var(--white), #fef9c3);
+}
+
+.install-card .btn-primary {
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  color: var(--white);
+}
+
 /* ---------- Weekly chart ---------- */
 
 .week-heading {

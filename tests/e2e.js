@@ -105,6 +105,13 @@ async function main() {
     check("daily fact rendered", (await page.textContent("#hero-fact-text")).trim().length > 10);
     check("rank pill shows level 1", (await page.textContent("#hero-rank")).includes("Lv 1"));
 
+    await page.goto(`${BASE}?tab=adventure`);
+    await page.waitForSelector(".tab-bar");
+    check("deep link opens requested tab", await page.evaluate(() =>
+      !document.getElementById("view-adventure").hidden));
+    await page.goto(BASE);
+    await page.waitForSelector(".tab-bar");
+
     console.log("# Level curve & migration");
     await seedProfile(page, { xp: 400, curve: 2 });
     check("400 XP = level 3", (await page.textContent("#stat-level")) === "3");

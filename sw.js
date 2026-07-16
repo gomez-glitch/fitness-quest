@@ -1,7 +1,7 @@
 // Move Quest service worker — network-first with cache fallback, so the app
 // always gets fresh code when online but still opens fully offline.
 
-const CACHE_NAME = "move-quest-v1";
+const CACHE_NAME = "move-quest-v2";
 
 const PRECACHE = [
   "./",
@@ -13,6 +13,10 @@ const PRECACHE = [
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-maskable.svg",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png",
+  "./icons/icon-maskable-512.png",
+  "./icons/apple-touch-icon.png",
 ];
 
 self.addEventListener("install", (event) => {

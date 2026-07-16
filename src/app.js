@@ -634,6 +634,9 @@ const el = {
   claimBtn: document.getElementById("claim-xp-btn"),
 
   tabBar: document.querySelector(".tab-bar"),
+  installCard: document.getElementById("install-card"),
+  installText: document.getElementById("install-text"),
+  installBtn: document.getElementById("install-btn"),
   heroFactText: document.getElementById("hero-fact-text"),
   heroRank: document.getElementById("hero-rank"),
   detailOverlay: document.getElementById("detail-overlay"),
@@ -1841,6 +1844,13 @@ setSwitcherOpen(false); // drawer starts tucked away — the summary shows who's
 setCustomizeOpen(false);
 renderDailyFact();
 
+// Deep links: app shortcuts and bookmarks can open a specific tab
+// (./?tab=play, ./?tab=adventure, ...).
+const requestedTab = new URLSearchParams(window.location.search).get("tab");
+if (requestedTab && TABS.includes(requestedTab) && requestedTab !== "home") {
+  switchTab(requestedTab);
+}
+
 // Installable app: register the service worker (relative path so it works
 // under a GitHub Pages subpath).
 if ("serviceWorker" in navigator) {
@@ -1849,6 +1859,40 @@ if ("serviceWorker" in navigator) {
       // Offline support is a bonus — the app works fine without it.
     });
   });
+}
+
+// "Install app" card: real prompt where supported, instructions on iOS.
+const isStandalone =
+  window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+let installPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  if (!isStandalone) el.installCard.hidden = false;
+});
+
+window.addEventListener("appinstalled", () => {
+  el.installCard.hidden = true;
+  installPrompt = null;
+});
+
+el.installBtn.addEventListener("click", async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  const choice = await installPrompt.userChoice.catch(() => null);
+  if (choice && choice.outcome === "accepted") el.installCard.hidden = true;
+  installPrompt = null;
+});
+
+// iOS never fires beforeinstallprompt — show Share-menu instructions instead.
+const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+if (isIos && !isStandalone) {
+  el.installCard.hidden = false;
+  el.installBtn.hidden = true;
+  el.installText.textContent =
+    "On iPhone or iPad: tap the Share button, then \"Add to Home Screen\" — Move Quest gets its own app icon and works offline!";
 }
 renderAdventurePresets();
 renderAll();
