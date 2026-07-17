@@ -70,6 +70,13 @@ export const sound = {
     note(130, 0, 0.1, "sine", 0.22);
   },
 
+  // Boop reaction: a quick happy giggle.
+  giggle() {
+    if (muted) return;
+    note(523, 0, 0.09, "triangle", 0.16);
+    note(784, 0.09, 0.12, "triangle", 0.16);
+  },
+
   // Calm music: a generative lullaby — a soft drifting pad with occasional
   // pentatonic bell notes. Fully synthesized, loops until stopped.
   startCalm() {

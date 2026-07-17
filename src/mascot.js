@@ -560,6 +560,66 @@ export const MOTIONS = {
     ],
   },
 
+  "pet-happy": {
+    view: "front", duration: 1900, poster: 0, face: "happy",
+    base: { ...FRONT_BASE, y: 76 },
+    frames: [
+      { t: 0, y: 76, a1: [14, 8], a2: [14, 8], torso: -2 },
+      { t: 0.5, y: 73.5, a1: [30, 10], a2: [30, 10], torso: 2 },
+      { t: 1, y: 76, a1: [14, 8], a2: [14, 8], torso: -2 },
+    ],
+  },
+
+  "pet-super": {
+    view: "front", duration: 750, poster: 0, face: "star",
+    base: { ...FRONT_BASE },
+    frames: [
+      { t: 0, y: 76, a1: [20, 8], a2: [20, 8], l1: [6, 4, 0], l2: [6, 4, 0] },
+      { t: 0.5, y: 66, a1: [162, 6], a2: [162, 6], l1: [16, 2, 0], l2: [16, 2, 0] },
+      { t: 1, y: 76, a1: [20, 8], a2: [20, 8], l1: [6, 4, 0], l2: [6, 4, 0] },
+    ],
+  },
+
+  "pet-okay": {
+    view: "front", duration: 3000, poster: 0,
+    base: { ...FRONT_BASE, y: 76 },
+    frames: [
+      { t: 0, torso: -4, a1: [10, 6], a2: [10, 6] },
+      { t: 0.5, torso: 4, a1: [12, 6], a2: [12, 6] },
+      { t: 1, torso: -4, a1: [10, 6], a2: [10, 6] },
+    ],
+  },
+
+  "pet-sleepy": {
+    view: "front", duration: 3600, poster: 0, face: "sleepy",
+    base: { ...FRONT_BASE, y: 77, neck: -14 },
+    frames: [
+      { t: 0, torso: 5, a1: [4, -18], a2: [4, -18], y: 77 },
+      { t: 0.5, torso: 7, a1: [3, -20], a2: [3, -20], y: 78 },
+      { t: 1, torso: 5, a1: [4, -18], a2: [4, -18], y: 77 },
+    ],
+  },
+
+  "pet-tickle": {
+    view: "front", duration: 450, poster: 0, face: "happy",
+    base: { ...FRONT_BASE, y: 75 },
+    frames: [
+      { t: 0, torso: -9, a1: [70, 40], a2: [110, 30] },
+      { t: 0.5, torso: 9, a1: [110, 30], a2: [70, 40] },
+      { t: 1, torso: -9, a1: [70, 40], a2: [110, 30] },
+    ],
+  },
+
+  "pet-wave": {
+    view: "front", duration: 1000, poster: 0, face: "happy",
+    base: { ...FRONT_BASE, y: 76, a1: [12, 6] },
+    frames: [
+      { t: 0, a2: [150, 35] },
+      { t: 0.5, a2: [150, 5] },
+      { t: 1, a2: [150, 35] },
+    ],
+  },
+
   "burpees": {
     view: "side", duration: 2600, poster: 0.45,
     base: { ...SIDE_BASE },
@@ -684,6 +744,74 @@ function svgEl(tag, attrs) {
   return node;
 }
 
+function drawFace(headG, view, face) {
+  const eye = (cx) => {
+    if (face === "closed") {
+      headG.appendChild(svgEl("path", {
+        d: `M ${cx - 1.8} -1.5 Q ${cx} 0.3 ${cx + 1.8} -1.5`, fill: "none",
+        stroke: COLORS.face, "stroke-width": 1.5, "stroke-linecap": "round",
+      }));
+    } else if (face === "sleepy") {
+      headG.appendChild(svgEl("path", {
+        d: `M ${cx - 1.9} -1.8 L ${cx + 1.9} -1.8`, fill: "none",
+        stroke: COLORS.face, "stroke-width": 1.6, "stroke-linecap": "round",
+      }));
+    } else if (face === "happy") {
+      headG.appendChild(svgEl("path", {
+        d: `M ${cx - 1.9} -0.6 Q ${cx} -3.2 ${cx + 1.9} -0.6`, fill: "none",
+        stroke: COLORS.face, "stroke-width": 1.6, "stroke-linecap": "round",
+      }));
+    } else if (face === "star") {
+      headG.appendChild(svgEl("path", {
+        d: `M ${cx} -3.6 L ${cx + 0.9} -1.8 L ${cx + 2.6} -1.6 L ${cx + 1.3} -0.4 L ${cx + 1.7} 1.4 L ${cx} 0.4 L ${cx - 1.7} 1.4 L ${cx - 1.3} -0.4 L ${cx - 2.6} -1.6 L ${cx - 0.9} -1.8 Z`,
+        fill: "#fbbf24",
+      }));
+    } else {
+      headG.appendChild(svgEl("circle", { cx, cy: -1.5, r: 1.7, fill: COLORS.face }));
+    }
+  };
+
+  if (view === "side") {
+    eye(5);
+    headG.appendChild(svgEl("path", {
+      d: face === "sleepy" || face === "closed" ? "M 3.5 4.2 Q 5.5 5 7.5 4.2" : "M 3 3.5 Q 5.5 6 8 3.5",
+      fill: "none", stroke: COLORS.face, "stroke-width": 1.6, "stroke-linecap": "round",
+    }));
+  } else {
+    eye(-3.5);
+    eye(3.5);
+    headG.appendChild(svgEl("path", {
+      d: face === "sleepy" || face === "closed" ? "M -2.5 4 Q 0 5 2.5 4"
+        : face === "star" || face === "happy" ? "M -3.5 3 Q 0 7.5 3.5 3"
+        : "M -3 3.5 Q 0 6.5 3 3.5",
+      fill: "none", stroke: COLORS.face, "stroke-width": 1.6, "stroke-linecap": "round",
+    }));
+  }
+}
+
+function drawAccessory(headG, accessory) {
+  if (accessory === "nightcap") {
+    headG.appendChild(svgEl("path", {
+      d: "M -8 -6 Q 0 -13 8 -6 L 12 -14 Z", fill: "#5b21b6",
+    }));
+    headG.appendChild(svgEl("path", {
+      d: "M -8.5 -5.5 Q 0 -10.5 8.5 -5.5", fill: "none", stroke: "#fde68a",
+      "stroke-width": 2.4, "stroke-linecap": "round",
+    }));
+    headG.appendChild(svgEl("circle", { cx: 12.5, cy: -14.5, r: 2.6, fill: "#fde68a" }));
+  } else if (accessory === "crown") {
+    headG.appendChild(svgEl("path", {
+      d: "M -7 -8 L -7 -14 L -3.5 -10.5 L 0 -15.5 L 3.5 -10.5 L 7 -14 L 7 -8 Z",
+      fill: "#fbbf24", stroke: "#d97706", "stroke-width": 1,
+    }));
+  } else if (accessory === "headband") {
+    headG.appendChild(svgEl("path", {
+      d: "M -9.4 -3.4 Q 0 -8.4 9.4 -3.4", fill: "none", stroke: "#ec4899",
+      "stroke-width": 3, "stroke-linecap": "round",
+    }));
+  }
+}
+
 function limbPath(color, width) {
   return svgEl("path", {
     d: "", fill: "none", stroke: color, "stroke-width": width,
@@ -691,7 +819,7 @@ function limbPath(color, width) {
   });
 }
 
-function buildFigure(svg, view, motion) {
+function buildFigure(svg, view, motion, accessory = null) {
   svg.textContent = "";
 
   const parts = { view };
@@ -737,20 +865,8 @@ function buildFigure(svg, view, motion) {
     d: "M -3 -13 L 0 -8 L 3 -13 Z", fill: COLORS.emblem,
     transform: "translate(0 1)",
   }));
-  if (view === "side") {
-    parts.headG.appendChild(svgEl("circle", { cx: 5, cy: -1.5, r: 1.7, fill: COLORS.face }));
-    parts.headG.appendChild(svgEl("path", {
-      d: "M 3 3.5 Q 5.5 6 8 3.5", fill: "none", stroke: COLORS.face,
-      "stroke-width": 1.6, "stroke-linecap": "round",
-    }));
-  } else {
-    parts.headG.appendChild(svgEl("circle", { cx: -3.5, cy: -1.5, r: 1.7, fill: COLORS.face }));
-    parts.headG.appendChild(svgEl("circle", { cx: 3.5, cy: -1.5, r: 1.7, fill: COLORS.face }));
-    parts.headG.appendChild(svgEl("path", {
-      d: "M -3 3.5 Q 0 6.5 3 3.5", fill: "none", stroke: COLORS.face,
-      "stroke-width": 1.6, "stroke-linecap": "round",
-    }));
-  }
+  drawFace(parts.headG, view, motion.face || "normal");
+  if (accessory) drawAccessory(parts.headG, accessory);
 
   parts.weights = [
     svgEl("circle", { r: 4.5, fill: COLORS.weight, display: "none" }),
@@ -850,7 +966,7 @@ export function renderStaticMascot(container, exerciseId) {
 }
 
 // Animated mascot for the active quest card. Returns a controller.
-export function createMascot(container, exerciseId) {
+export function createMascot(container, exerciseId, opts = {}) {
   const svg = makeSvg();
   container.textContent = "";
   container.appendChild(svg);
@@ -860,6 +976,8 @@ export function createMascot(container, exerciseId) {
   let frames = null;
   let rafId = null;
   let startTime = 0;
+  let accessory = opts.accessory || null;
+  let currentId = exerciseId;
 
   function tick(now) {
     const t = ((now - startTime) % motion.duration) / motion.duration;
@@ -884,11 +1002,18 @@ export function createMascot(container, exerciseId) {
     const next = MOTIONS[id];
     if (!next) return;
     stop();
+    currentId = id;
     motion = next;
-    parts = buildFigure(svg, motion.view, motion);
+    parts = buildFigure(svg, motion.view, motion, accessory);
     frames = expandFrames(motion);
     renderPose(parts, samplePose(frames, motion.poster ?? 0.5), motion);
     start();
+  }
+
+  function setAccessory(next) {
+    if (next === accessory) return;
+    accessory = next;
+    setExercise(currentId);
   }
 
   document.addEventListener("visibilitychange", () => {
@@ -898,5 +1023,5 @@ export function createMascot(container, exerciseId) {
 
   setExercise(exerciseId);
 
-  return { setExercise, start, stop };
+  return { setExercise, setAccessory, start, stop };
 }

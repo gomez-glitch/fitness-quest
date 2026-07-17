@@ -438,7 +438,7 @@ function defaultProfileState(nickname = "Spark") {
     lastCompletedDate: null,
     counters,
     profile: { nickname, persona: "spark-sprinter", avatar: "👟" },
-    stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0, timedDone: 0, adventuresDone: 0, journey: 0, seenJourney: 0 },
+    stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0, timedDone: 0, adventuresDone: 0, journey: 0, seenJourney: 0, boops: 0 },
     daily: { date: null, done: [], bonusClaimed: false, spin: null },
     days: {},
     curve: CURVE_VERSION,
@@ -515,6 +515,7 @@ function normalizeProfile(parsed) {
       typeof st.seenJourney === "number" && st.seenJourney >= 0
         ? Math.min(st.seenJourney, state.stats.journey)
         : state.stats.journey;
+    if (typeof st.boops === "number" && st.boops >= 0) state.stats.boops = st.boops;
   }
 
   const dl = parsed.daily;
@@ -812,6 +813,12 @@ const el = {
   hero2Rank: document.getElementById("hero2-rank"),
   energyMood: document.getElementById("energy-mood"),
   energyFill: document.getElementById("energy-fill"),
+  petScene: document.getElementById("pet-scene"),
+  petStage: document.getElementById("pet-stage"),
+  petOrb: document.getElementById("pet-orb"),
+  petZzz: document.getElementById("pet-zzz"),
+  petBubble: document.getElementById("pet-bubble"),
+  petStats: document.getElementById("pet-stats"),
   detailOverlay: document.getElementById("detail-overlay"),
   levelupOverlay: document.getElementById("levelup-overlay"),
   dailyBoard: document.getElementById("daily-board"),
@@ -852,19 +859,17 @@ function renderHero() {
 }
 
 // Spark's energy: fills with today's activity, drains on quiet days.
+function sparkEnergy(st) {
+  const today = todayStr();
+  if (st.lastCompletedDate === today) return Math.min(100, 40 + todayClaimCount(st) * 12);
+  if (wasYesterday(st.lastCompletedDate, today)) return 35;
+  if (st.lastCompletedDate) return 15;
+  return 25; // brand-new hero, full of potential
+}
+
 function renderEnergyMeter() {
   const st = activeProfile();
-  const today = todayStr();
-  let energy;
-  if (st.lastCompletedDate === today) {
-    energy = Math.min(100, 40 + todayClaimCount(st) * 12);
-  } else if (wasYesterday(st.lastCompletedDate, today)) {
-    energy = 35;
-  } else if (st.lastCompletedDate) {
-    energy = 15;
-  } else {
-    energy = 25; // brand-new hero, full of potential
-  }
+  const energy = sparkEnergy(st);
 
   el.energyFill.style.width = `${energy}%`;
   el.energyFill.classList.toggle("energy-high", energy >= 80);
@@ -968,7 +973,12 @@ function switchTab(name) {
     if (!adventure.active) sound.stopCalm();
   }
   if (name === "adventure") renderJourney(); // re-render so auto-scroll works once visible
-  if (name === "home") updateHomeDots();
+  if (name === "home") {
+    updateHomeDots();
+    startPetLife();
+  } else {
+    stopPetLife();
+  }
 }
 
 function renderProfileForm() {
@@ -1305,6 +1315,7 @@ function renderAll() {
   renderWeekChart();
   renderSpinner();
   renderJourney();
+  renderPet();
 }
 
 // ---------------------------------------------------------------------------
@@ -1336,12 +1347,12 @@ el.homeDots.addEventListener("click", (event) => {
 
 el.homePager.addEventListener("keydown", (event) => {
   if (event.target !== el.homePager) return; // don't hijack form fields
-  if (event.key === "ArrowRight") goHomePanel(Math.min(3, currentHomePanel() + 1));
+  if (event.key === "ArrowRight") goHomePanel(Math.min(4, currentHomePanel() + 1));
   if (event.key === "ArrowLeft") goHomePanel(Math.max(0, currentHomePanel() - 1));
 });
 
 el.customizeHeroBtn.addEventListener("click", () => {
-  goHomePanel(1); // hero panel
+  goHomePanel(2); // hero panel
   setSwitcherOpen(true);
   setCustomizeOpen(true);
   el.nicknameInput.focus({ preventScroll: true });
@@ -1783,6 +1794,184 @@ function closeLevelUp() {
 
 el.levelupOverlay.addEventListener("click", (event) => {
   if (event.target.closest('[data-action="close-levelup"]')) closeLevelUp();
+});
+
+// ---------------------------------------------------------------------------
+// Spark's Corner: a living, boopable Spark whose mood follows the energy bar
+// ---------------------------------------------------------------------------
+
+const pet = { mascot: null, behaviorTimer: null, bubbleTimer: null, busy: false, mood: "" };
+
+function petMood() {
+  const energy = sparkEnergy(activeProfile());
+  if (energy >= 80) return "super";
+  if (energy >= 40) return "happy";
+  if (energy >= 25) return "okay";
+  return "sleepy";
+}
+
+function petTimeClass() {
+  const h = new Date().getHours();
+  if (h >= 19 || h < 6) return "pet-night";
+  if (h >= 17) return "pet-evening";
+  if (h < 9) return "pet-morning";
+  return "pet-day";
+}
+
+function petAccessoryFor() {
+  if (petTimeClass() === "pet-night") return "nightcap";
+  const tier = heroRank(levelForXp(activeProfile().xp)).tier;
+  if (tier === "rainbow") return "crown";
+  if (tier === "gold") return "headband";
+  return null;
+}
+
+const PET_SHOWOFFS = ["jumping-jacks", "squats", "arm-circles", "high-knees", "star-pose"];
+
+function petIdleMotion() {
+  const mood = pet.mood;
+  const roll = Math.random();
+  if (mood === "super") {
+    if (roll < 0.35) return PET_SHOWOFFS[Math.floor(Math.random() * PET_SHOWOFFS.length)];
+    return roll < 0.75 ? "pet-super" : "pet-happy";
+  }
+  if (mood === "happy") {
+    if (roll < 0.15) return "pet-wave";
+    if (roll < 0.25) return "pet-super";
+    return "pet-happy";
+  }
+  if (mood === "okay") return roll < 0.2 ? "pet-happy" : "pet-okay";
+  return roll < 0.12 ? "pet-okay" : "pet-sleepy";
+}
+
+function petBubbleLine() {
+  const st = activeProfile();
+  const name = st.profile.nickname;
+  const time = petTimeClass();
+  const mood = pet.mood;
+  ensureDailyFresh(st);
+  const questsLeft = DAILY_QUEST_COUNT - st.daily.done.length;
+  const pools = [];
+
+  if (time === "pet-night") pools.push([
+    "Getting sleepy… one Sunset Stretch before bed? 🌙",
+    "The stars are out! Gentle stretches only… 💫",
+  ]);
+  if (time === "pet-morning") pools.push([
+    `Good morning, ${name}! Let's wiggle awake! ☀️`,
+    "Morning! My favourite time for marching! 🥁",
+  ]);
+  if (mood === "sleepy") pools.push([
+    "*yawn* … moving would wake me right up 🥱",
+    "My batteries are low… exercise charges me! ⚡",
+  ]);
+  if (mood === "super") pools.push([
+    "I'M SUPERCHARGED! Watch THIS!",
+    "So much energy! Race you to the next quest! 🚀",
+  ]);
+  if (st.streak >= 3) pools.push([`Day ${st.streak} streak! We're unstoppable! 🔥`]);
+  if (questsLeft === 0) pools.push(["All of today's quests done — you're my hero! 🏆"]);
+  else if (mood !== "sleepy") pools.push([`${questsLeft} daily quest${questsLeft === 1 ? "" : "s"} to go — let's do it!`]);
+  pools.push([
+    "What should we play today?",
+    "Boop me! Go on, I dare you. Hehe.",
+    "I love adventures. And snacks. Mostly adventures!",
+  ]);
+
+  const pool = pools[Math.floor(Math.random() * pools.length)];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function renderPet() {
+  if (!el.petStage) return;
+  pet.mood = petMood();
+
+  el.petScene.className = `pet-scene ${petTimeClass()} pet-mood-${pet.mood}`;
+  el.petOrb.textContent = petTimeClass() === "pet-night" ? "🌙" : "☀️";
+  el.petZzz.hidden = pet.mood !== "sleepy";
+
+  if (!pet.mascot) {
+    pet.mascot = createMascot(el.petStage, petIdleMotion(), { accessory: petAccessoryFor() });
+  } else {
+    pet.mascot.setAccessory(petAccessoryFor());
+  }
+
+  const st = activeProfile();
+  el.petStats.textContent =
+    `Booped ${st.stats.boops || 0} time${(st.stats.boops || 0) === 1 ? "" : "s"} · ` +
+    `${st.stats.journey || 0} quest steps together`;
+  renderEnergyMeter();
+}
+
+function petSay(text) {
+  el.petBubble.textContent = text;
+  el.petBubble.classList.remove("bubble-pop");
+  void el.petBubble.offsetWidth;
+  el.petBubble.classList.add("bubble-pop");
+}
+
+function boopSpark() {
+  if (!pet.mascot || pet.busy) return;
+  pet.busy = true;
+  const st = activeProfile();
+  st.stats.boops = (st.stats.boops || 0) + 1;
+  saveData();
+  el.petStats.textContent =
+    `Booped ${st.stats.boops} time${st.stats.boops === 1 ? "" : "s"} · ` +
+    `${st.stats.journey || 0} quest steps together`;
+
+  pet.mascot.setExercise("pet-tickle");
+  sound.giggle();
+  if (navigator.vibrate) navigator.vibrate(10);
+  petSay(["Hehe! That tickles!", "Boop! 🥰", "Again, again!", "*giggle*"][Math.floor(Math.random() * 4)]);
+
+  // heart burst
+  if (!REDUCED_MOTION) {
+    for (let i = 0; i < 5; i++) {
+      const heart = document.createElement("span");
+      heart.className = "pet-heart";
+      heart.textContent = ["💜", "💖", "✨"][i % 3];
+      heart.style.setProperty("--dx", `${(Math.random() - 0.5) * 90}px`);
+      heart.style.setProperty("--delay", `${Math.random() * 0.15}s`);
+      el.petScene.appendChild(heart);
+      setTimeout(() => heart.remove(), 1300);
+    }
+  }
+
+  setTimeout(() => {
+    pet.busy = false;
+    if (pet.mascot) pet.mascot.setExercise(petIdleMotion());
+    renderPet();
+  }, 1400);
+}
+
+function startPetLife() {
+  if (pet.behaviorTimer) return;
+  renderPet();
+  petSay(petBubbleLine());
+  if (pet.mascot) pet.mascot.start();
+  pet.behaviorTimer = setInterval(() => {
+    if (!pet.busy && pet.mascot) pet.mascot.setExercise(petIdleMotion());
+  }, 7000);
+  pet.bubbleTimer = setInterval(() => {
+    if (!pet.busy) petSay(petBubbleLine());
+  }, 13000);
+}
+
+function stopPetLife() {
+  if (pet.behaviorTimer) clearInterval(pet.behaviorTimer);
+  if (pet.bubbleTimer) clearInterval(pet.bubbleTimer);
+  pet.behaviorTimer = null;
+  pet.bubbleTimer = null;
+  if (pet.mascot) pet.mascot.stop();
+}
+
+el.petScene.addEventListener("click", boopSpark);
+el.petScene.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    boopSpark();
+  }
 });
 
 // ---------------------------------------------------------------------------
@@ -2286,3 +2475,4 @@ if (isIos && !isStandalone) {
 renderAdventurePresets();
 renderAll();
 renderMoveLibrary();
+startPetLife(); // home is the landing tab

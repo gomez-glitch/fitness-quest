@@ -52,7 +52,29 @@
           </section>
         </section>
 
-        <!-- Panel 2: My Hero -->
+        <!-- Panel 2: Spark's Corner -->
+        <section class="home-panel" aria-label="Spark's corner">
+          <section class="card pet-card" aria-labelledby="pet-heading">
+            <h2 id="pet-heading">🐣 Spark's Corner</h2>
+            <div class="pet-scene" id="pet-scene" role="button" tabindex="0"
+                 aria-label="Boop Spark to say hello">
+              <span class="pet-orb" id="pet-orb" aria-hidden="true">☀️</span>
+              <div class="pet-stage" id="pet-stage"></div>
+              <span class="pet-zzz" id="pet-zzz" aria-hidden="true" hidden>💤</span>
+            </div>
+            <p class="pet-bubble" id="pet-bubble" aria-live="polite"></p>
+            <div class="energy-block">
+              <p class="energy-mood" id="energy-mood" aria-live="polite"></p>
+              <div class="energy-track" role="img" aria-label="Spark's energy level">
+                <div class="energy-fill" id="energy-fill"></div>
+              </div>
+            </div>
+            <p class="pet-stats" id="pet-stats"></p>
+            <p class="field-hint">Exercise feeds Spark's energy — and Spark loves a boop!</p>
+          </section>
+        </section>
+
+        <!-- Panel 3: My Hero -->
         <section class="home-panel" aria-label="My hero">
           <section class="card hero-feature" aria-labelledby="hero-feature-heading">
             <h2 id="hero-feature-heading" class="visually-hidden">My hero</h2>
@@ -61,12 +83,6 @@
               <div class="hero-feature-id">
                 <p class="hero-feature-name" id="hero2-name">Spark</p>
                 <p class="hero-feature-rank" id="hero2-rank"></p>
-              </div>
-            </div>
-            <div class="energy-block">
-              <p class="energy-mood" id="energy-mood" aria-live="polite"></p>
-              <div class="energy-track" role="img" aria-label="Spark's energy level">
-                <div class="energy-fill" id="energy-fill"></div>
               </div>
             </div>
             <div class="stat-grid">
@@ -140,7 +156,7 @@
           </section>
         </section>
 
-        <!-- Panel 3: Today -->
+        <!-- Panel 4: Today -->
         <section class="home-panel" aria-label="Today">
           <section class="card daily-card" aria-labelledby="daily-heading">
             <h2 id="daily-heading">⚡ Today's quests</h2>
@@ -155,7 +171,7 @@
           </section>
         </section>
 
-        <!-- Panel 4: Mystery Spinner -->
+        <!-- Panel 5: Mystery Spinner -->
         <section class="home-panel" aria-label="Mystery spinner">
           <section class="card spinner-card" aria-labelledby="spinner-heading">
             <h2 id="spinner-heading">🎰 Mystery Spinner</h2>
@@ -172,9 +188,10 @@
 
       <div class="home-dots" id="home-dots" aria-label="Home panel position">
         <button type="button" class="home-dot active" data-panel="0" aria-label="Welcome panel"></button>
-        <button type="button" class="home-dot" data-panel="1" aria-label="My hero panel"></button>
-        <button type="button" class="home-dot" data-panel="2" aria-label="Today panel"></button>
-        <button type="button" class="home-dot" data-panel="3" aria-label="Mystery spinner panel"></button>
+        <button type="button" class="home-dot" data-panel="1" aria-label="Spark's corner panel"></button>
+        <button type="button" class="home-dot" data-panel="2" aria-label="My hero panel"></button>
+        <button type="button" class="home-dot" data-panel="3" aria-label="Today panel"></button>
+        <button type="button" class="home-dot" data-panel="4" aria-label="Mystery spinner panel"></button>
       </div>
     </div>
 

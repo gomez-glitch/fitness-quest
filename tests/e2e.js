@@ -116,14 +116,30 @@ async function main() {
     await page.waitForSelector(".tab-bar");
 
     console.log("# Home pager");
-    check("home has 4 swipe panels", (await page.$$(".home-panel")).length === 4);
-    check("pager dots present", (await page.$$(".home-dot")).length === 4);
+    check("home has 5 swipe panels", (await page.$$(".home-panel")).length === 5);
+    check("pager dots present", (await page.$$(".home-dot")).length === 5);
     check("energy meter renders", (await page.textContent("#energy-mood")).length > 5);
-    await page.click('.home-dot[data-panel="3"]');
+    await page.click('.home-dot[data-panel="4"]');
     await page.waitForTimeout(700);
     const panelIdx = await page.evaluate(() =>
       Math.round(document.getElementById("home-pager").scrollLeft / document.getElementById("home-pager").clientWidth));
-    check("dot navigation reaches spinner panel", panelIdx === 3, String(panelIdx));
+    check("dot navigation reaches spinner panel", panelIdx === 4, String(panelIdx));
+
+    console.log("# Spark's Corner (pet)");
+    await page.click('.home-dot[data-panel="1"]');
+    await page.waitForTimeout(700);
+    check("pet mascot lives on its panel", !!(await page.$("#pet-stage svg")));
+    check("pet speech bubble talks", (await page.textContent("#pet-bubble")).trim().length > 3);
+    await page.click("#pet-scene");
+    await page.waitForTimeout(300);
+    const boops = await page.evaluate(() => {
+      const d = JSON.parse(localStorage.getItem("move-quest-progress-v3"));
+      return d.profiles[d.activeProfileId].stats.boops;
+    });
+    check("boop is counted", boops === 1, String(boops));
+    check("boop stat shown", (await page.textContent("#pet-stats")).includes("Booped 1"));
+    await page.click('.home-dot[data-panel="0"]');
+    await page.waitForTimeout(500);
     await page.click('.home-dot[data-panel="0"]');
     await page.waitForTimeout(700);
 
