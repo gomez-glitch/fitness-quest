@@ -439,6 +439,7 @@ function defaultProfileState(nickname = "Spark") {
     counters,
     profile: { nickname, persona: "spark-sprinter", avatar: "👟" },
     stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0, timedDone: 0, adventuresDone: 0, journey: 0, seenJourney: 0, boops: 0 },
+    pet: { tummy: 60, tummyAt: Date.now(), meals: 0, favDate: null },
     daily: { date: null, done: [], bonusClaimed: false, spin: null },
     days: {},
     curve: CURVE_VERSION,
@@ -516,6 +517,14 @@ function normalizeProfile(parsed) {
         ? Math.min(st.seenJourney, state.stats.journey)
         : state.stats.journey;
     if (typeof st.boops === "number" && st.boops >= 0) state.stats.boops = st.boops;
+  }
+
+  const pt = parsed.pet;
+  if (pt && typeof pt === "object") {
+    if (typeof pt.tummy === "number" && pt.tummy >= 0 && pt.tummy <= 100) state.pet.tummy = pt.tummy;
+    if (typeof pt.tummyAt === "number" && pt.tummyAt > 0 && pt.tummyAt <= Date.now()) state.pet.tummyAt = pt.tummyAt;
+    if (typeof pt.meals === "number" && pt.meals >= 0) state.pet.meals = pt.meals;
+    if (typeof pt.favDate === "string") state.pet.favDate = pt.favDate;
   }
 
   const dl = parsed.daily;
@@ -819,6 +828,9 @@ const el = {
   petZzz: document.getElementById("pet-zzz"),
   petBubble: document.getElementById("pet-bubble"),
   petStats: document.getElementById("pet-stats"),
+  petTray: document.getElementById("pet-tray"),
+  tummyMood: document.getElementById("tummy-mood"),
+  tummyFill: document.getElementById("tummy-fill"),
   detailOverlay: document.getElementById("detail-overlay"),
   levelupOverlay: document.getElementById("levelup-overlay"),
   dailyBoard: document.getElementById("daily-board"),
@@ -1797,10 +1809,63 @@ el.levelupOverlay.addEventListener("click", (event) => {
 });
 
 // ---------------------------------------------------------------------------
-// Spark's Corner: a living, boopable Spark whose mood follows the energy bar
+// Spark's Corner: a living, boopable, feedable Spark — mood follows the
+// energy bar, tummy follows snacks, and sometimes he just needs a nap.
 // ---------------------------------------------------------------------------
 
-const pet = { mascot: null, behaviorTimer: null, bubbleTimer: null, busy: false, mood: "" };
+const pet = {
+  mascot: null,
+  behaviorTimer: null,
+  bubbleTimer: null,
+  napTimer: null,
+  busy: false,
+  napping: false,
+  mood: "",
+};
+
+// The snack tray. Everyday foods fill more, treats a little less — but a
+// treat is always a happy treat, never a lecture.
+const PET_FOODS = [
+  { id: "apple", emoji: "🍎", name: "apple", fill: 30 },
+  { id: "banana", emoji: "🍌", name: "banana", fill: 30 },
+  { id: "carrot", emoji: "🥕", name: "carrot", fill: 28 },
+  { id: "strawberry", emoji: "🍓", name: "strawberry", fill: 26 },
+  { id: "watermelon", emoji: "🍉", name: "watermelon", fill: 30 },
+  { id: "broccoli", emoji: "🥦", name: "broccoli", fill: 32 },
+  { id: "cheese", emoji: "🧀", name: "cheese", fill: 28 },
+  { id: "sandwich", emoji: "🥪", name: "sandwich", fill: 34 },
+  { id: "milk", emoji: "🥛", name: "milk", fill: 24 },
+  { id: "popcorn", emoji: "🍿", name: "popcorn", fill: 20 },
+  { id: "cupcake", emoji: "🧁", name: "cupcake", fill: 18 },
+  { id: "ice-cream", emoji: "🍦", name: "ice cream", fill: 18 },
+];
+
+// Spark's tummy slowly empties over real time (~11 points an hour), so he
+// greets you hungry after school even if he was stuffed at breakfast.
+function tummyNow(st) {
+  const hours = Math.max(0, (Date.now() - (st.pet.tummyAt || Date.now())) / 3600000);
+  return Math.max(0, Math.min(100, Math.round(st.pet.tummy - hours * 11)));
+}
+
+// Every profile gets its own secret favourite food each day — finding it is
+// the mini-game. Deterministic, so it survives reloads.
+function favoriteFoodFor() {
+  let seed = Number(todayStr().replace(/-/g, ""));
+  const id = String(data.activeProfileId || "");
+  for (let i = 0; i < id.length; i++) seed = (seed * 31 + id.charCodeAt(i)) | 0;
+  const rand = mulberry32(seed);
+  return PET_FOODS[Math.floor(rand() * PET_FOODS.length)];
+}
+
+function renderTummyMeter() {
+  const st = activeProfile();
+  const tummy = tummyNow(st);
+  el.tummyFill.style.width = `${tummy}%`;
+  el.tummyMood.textContent =
+    tummy >= 75 ? "😋 Yummy — Spark is full!"
+    : tummy >= 35 ? "🙂 Spark's tummy is happy"
+    : "🍽️ Spark is getting hungry!";
+}
 
 function petMood() {
   const energy = sparkEnergy(activeProfile());
@@ -1872,6 +1937,16 @@ function petBubbleLine() {
   if (st.streak >= 3) pools.push([`Day ${st.streak} streak! We're unstoppable! 🔥`]);
   if (questsLeft === 0) pools.push(["All of today's quests done — you're my hero! 🏆"]);
   else if (mood !== "sleepy") pools.push([`${questsLeft} daily quest${questsLeft === 1 ? "" : "s"} to go — let's do it!`]);
+  const tummy = tummyNow(st);
+  if (tummy < 35) pools.push([
+    "My tummy is rumbling… got a snack for me? 🍎",
+    "So hungry I could eat a WHOLE watermelon! 🍉",
+    "*grumble grumble* …that was my tummy, not a monster!",
+  ]);
+  if (st.pet.favDate !== todayStr()) pools.push([
+    "I have a secret favourite food today… can you guess it? 😏",
+    "Psst — one snack on the tray is my favourite today!",
+  ]);
   pools.push([
     "What should we play today?",
     "Boop me! Go on, I dare you. Hehe.",
@@ -1882,13 +1957,23 @@ function petBubbleLine() {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
+function petStatsText(st) {
+  const boops = st.stats.boops || 0;
+  const meals = st.pet.meals || 0;
+  return (
+    `Booped ${boops} time${boops === 1 ? "" : "s"} · ` +
+    `${meals} snack${meals === 1 ? "" : "s"} shared · ` +
+    `${st.stats.journey || 0} quest steps together`
+  );
+}
+
 function renderPet() {
   if (!el.petStage) return;
   pet.mood = petMood();
 
   el.petScene.className = `pet-scene ${petTimeClass()} pet-mood-${pet.mood}`;
   el.petOrb.textContent = petTimeClass() === "pet-night" ? "🌙" : "☀️";
-  el.petZzz.hidden = pet.mood !== "sleepy";
+  el.petZzz.hidden = !pet.napping && pet.mood !== "sleepy";
 
   if (!pet.mascot) {
     pet.mascot = createMascot(el.petStage, petIdleMotion(), { accessory: petAccessoryFor() });
@@ -1896,11 +1981,9 @@ function renderPet() {
     pet.mascot.setAccessory(petAccessoryFor());
   }
 
-  const st = activeProfile();
-  el.petStats.textContent =
-    `Booped ${st.stats.boops || 0} time${(st.stats.boops || 0) === 1 ? "" : "s"} · ` +
-    `${st.stats.journey || 0} quest steps together`;
+  el.petStats.textContent = petStatsText(activeProfile());
   renderEnergyMeter();
+  renderTummyMeter();
 }
 
 function petSay(text) {
@@ -1910,33 +1993,37 @@ function petSay(text) {
   el.petBubble.classList.add("bubble-pop");
 }
 
+function burstHearts(emojis = ["💜", "💖", "✨"]) {
+  if (REDUCED_MOTION) return;
+  for (let i = 0; i < 5; i++) {
+    const heart = document.createElement("span");
+    heart.className = "pet-heart";
+    heart.textContent = emojis[i % emojis.length];
+    heart.style.setProperty("--dx", `${(Math.random() - 0.5) * 90}px`);
+    heart.style.setProperty("--delay", `${Math.random() * 0.15}s`);
+    el.petScene.appendChild(heart);
+    setTimeout(() => heart.remove(), 1300);
+  }
+}
+
 function boopSpark() {
-  if (!pet.mascot || pet.busy) return;
+  if (!pet.mascot) return;
+  if (pet.napping) {
+    wakeSpark(true);
+    return;
+  }
+  if (pet.busy) return;
   pet.busy = true;
   const st = activeProfile();
   st.stats.boops = (st.stats.boops || 0) + 1;
   saveData();
-  el.petStats.textContent =
-    `Booped ${st.stats.boops} time${st.stats.boops === 1 ? "" : "s"} · ` +
-    `${st.stats.journey || 0} quest steps together`;
+  el.petStats.textContent = petStatsText(st);
 
   pet.mascot.setExercise("pet-tickle");
   sound.giggle();
   if (navigator.vibrate) navigator.vibrate(10);
   petSay(["Hehe! That tickles!", "Boop! 🥰", "Again, again!", "*giggle*"][Math.floor(Math.random() * 4)]);
-
-  // heart burst
-  if (!REDUCED_MOTION) {
-    for (let i = 0; i < 5; i++) {
-      const heart = document.createElement("span");
-      heart.className = "pet-heart";
-      heart.textContent = ["💜", "💖", "✨"][i % 3];
-      heart.style.setProperty("--dx", `${(Math.random() - 0.5) * 90}px`);
-      heart.style.setProperty("--delay", `${Math.random() * 0.15}s`);
-      el.petScene.appendChild(heart);
-      setTimeout(() => heart.remove(), 1300);
-    }
-  }
+  burstHearts();
 
   setTimeout(() => {
     pet.busy = false;
@@ -1945,13 +2032,138 @@ function boopSpark() {
   }, 1400);
 }
 
+// --- feeding ---
+
+function flyFood(emoji) {
+  if (REDUCED_MOTION) return;
+  const bite = document.createElement("span");
+  bite.className = "food-fly";
+  bite.textContent = emoji;
+  el.petScene.appendChild(bite);
+  setTimeout(() => bite.remove(), 800);
+}
+
+function feedSpark(foodId) {
+  if (!pet.mascot) return;
+  const food = PET_FOODS.find((f) => f.id === foodId);
+  if (!food) return;
+  if (pet.napping) {
+    wakeSpark(true);
+    return;
+  }
+  if (pet.busy) return;
+
+  const st = activeProfile();
+  const tummy = tummyNow(st);
+  if (tummy >= 85) {
+    petSay(["I'm all full! Maybe after some exercise? 🤭", "Oof, no room left! Let's move first! 😅"][Math.floor(Math.random() * 2)]);
+    return;
+  }
+
+  pet.busy = true;
+  const isFav = food.id === favoriteFoodFor().id && st.pet.favDate !== todayStr();
+  st.pet.tummy = Math.min(100, tummy + Math.round(food.fill * (isFav ? 1.5 : 1)));
+  st.pet.tummyAt = Date.now();
+  st.pet.meals = (st.pet.meals || 0) + 1;
+  if (isFav) st.pet.favDate = todayStr();
+  saveData();
+  el.petStats.textContent = petStatsText(st);
+
+  flyFood(food.emoji);
+  petSay(`Ooh, ${food.name}! 👀`);
+
+  setTimeout(() => {
+    if (!pet.mascot) return;
+    pet.mascot.setExercise("pet-chomp");
+    sound.chomp();
+  }, 450);
+
+  setTimeout(() => {
+    if (!pet.mascot) return;
+    if (isFav) {
+      pet.mascot.setExercise("pet-super");
+      sound.badge();
+      burstHearts([food.emoji, "💜", "⭐"]);
+      petSay(`${food.emoji} ${food.name.toUpperCase()}! My FAVOURITE today! You found it! 💜`);
+    } else {
+      petSay([
+        "Om nom nom… so good! 😋",
+        `Mmm, ${food.name}! Thank you!`,
+        "Chomp chomp… delicious!",
+        "Tasty! You're the best chef ever!",
+      ][Math.floor(Math.random() * 4)]);
+      if (Math.random() < 0.3) {
+        setTimeout(() => {
+          sound.burp();
+          petSay("…excuse me! 🤭");
+        }, 900);
+      }
+    }
+    renderTummyMeter();
+  }, 1500);
+
+  setTimeout(() => {
+    pet.busy = false;
+    if (pet.mascot) pet.mascot.setExercise(petIdleMotion());
+    renderPet();
+  }, 2800);
+}
+
+function renderPetTray() {
+  if (!el.petTray) return;
+  el.petTray.innerHTML = PET_FOODS.map(
+    (f) => `<button type="button" class="pet-food" data-food="${f.id}" aria-label="Feed Spark a ${f.name}">${f.emoji}</button>`
+  ).join("");
+}
+
+// --- naps ---
+
+function startNap() {
+  if (!pet.mascot || pet.busy || pet.napping) return;
+  pet.napping = true;
+  pet.busy = true;
+  pet.mascot.setExercise("pet-nap");
+  el.petZzz.hidden = false;
+  petSay("*snore* … zzz … 💤");
+  pet.napTimer = setTimeout(() => wakeSpark(false), 22000);
+}
+
+function wakeSpark(gentle) {
+  if (!pet.napping) return;
+  if (pet.napTimer) clearTimeout(pet.napTimer);
+  pet.napTimer = null;
+  pet.napping = false;
+  if (!pet.mascot) {
+    pet.busy = false;
+    return;
+  }
+  pet.mascot.setExercise("pet-yawn");
+  petSay(gentle ? "*yawwwn* Oh, hello! 😊" : "*stretch* That was a lovely nap!");
+  setTimeout(() => {
+    pet.busy = false;
+    if (pet.mascot) pet.mascot.setExercise(petIdleMotion());
+    renderPet();
+  }, 1500);
+}
+
 function startPetLife() {
   if (pet.behaviorTimer) return;
   renderPet();
   petSay(petBubbleLine());
   if (pet.mascot) pet.mascot.start();
   pet.behaviorTimer = setInterval(() => {
-    if (!pet.busy && pet.mascot) pet.mascot.setExercise(petIdleMotion());
+    if (pet.busy || !pet.mascot) return;
+    // Test hook: true forces a nap on the next tick, false suppresses naps.
+    const napChance = window.__MQ_TEST_FORCE_NAP !== undefined
+      ? (window.__MQ_TEST_FORCE_NAP ? 1 : 0)
+      : pet.mood === "sleepy" ? 0.22
+      : pet.mood === "okay" ? 0.1
+      : 0.04;
+    if (Math.random() < napChance) {
+      startNap();
+      return;
+    }
+    pet.mascot.setExercise(petIdleMotion());
   }, 7000);
   pet.bubbleTimer = setInterval(() => {
     if (!pet.busy) petSay(petBubbleLine());
@@ -1961,8 +2173,12 @@ function startPetLife() {
 function stopPetLife() {
   if (pet.behaviorTimer) clearInterval(pet.behaviorTimer);
   if (pet.bubbleTimer) clearInterval(pet.bubbleTimer);
+  if (pet.napTimer) clearTimeout(pet.napTimer);
   pet.behaviorTimer = null;
   pet.bubbleTimer = null;
+  pet.napTimer = null;
+  pet.napping = false;
+  pet.busy = false;
   if (pet.mascot) pet.mascot.stop();
 }
 
@@ -1973,6 +2189,11 @@ el.petScene.addEventListener("keydown", (event) => {
     boopSpark();
   }
 });
+el.petTray.addEventListener("click", (event) => {
+  const btn = event.target.closest(".pet-food");
+  if (btn) feedSpark(btn.dataset.food);
+});
+renderPetTray();
 
 // ---------------------------------------------------------------------------
 // Mystery Spinner: one spin a day for a surprise move with a twist

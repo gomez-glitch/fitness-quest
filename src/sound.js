@@ -70,6 +70,20 @@ export const sound = {
     note(130, 0, 0.1, "sine", 0.22);
   },
 
+  // Munch munch.
+  chomp() {
+    if (muted) return;
+    note(180, 0, 0.06, "square", 0.14);
+    note(150, 0.1, 0.06, "square", 0.14);
+    note(165, 0.2, 0.06, "square", 0.12);
+  },
+
+  // A tiny comedy burp. Excuse me!
+  burp() {
+    if (muted) return;
+    note(95, 0, 0.22, "sawtooth", 0.12);
+  },
+
   // Boop reaction: a quick happy giggle.
   giggle() {
     if (muted) return;

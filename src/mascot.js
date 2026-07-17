@@ -600,6 +600,40 @@ export const MOTIONS = {
     ],
   },
 
+  "pet-chomp": {
+    view: "front", duration: 550, poster: 0, face: "happy",
+    base: { ...FRONT_BASE, y: 75 },
+    frames: [
+      { t: 0, a1: [48, 96], a2: [48, 96], neck: -6 },
+      { t: 0.5, a1: [52, 104], a2: [52, 104], neck: 7 },
+      { t: 1, a1: [48, 96], a2: [48, 96], neck: -6 },
+    ],
+  },
+
+  "pet-nap": {
+    view: "side", duration: 4000, poster: 0, face: "closed",
+    base: {
+      ...SIDE_BASE, x: 58, y: 95,
+      a1: [-130, 65], a2: [-124, 60],
+      l1: [95, 45, 20], l2: [90, 42, 20],
+    },
+    frames: [
+      { t: 0, torso: -86, neck: 14 },
+      { t: 0.5, torso: -84, neck: 16 },
+      { t: 1, torso: -86, neck: 14 },
+    ],
+  },
+
+  "pet-yawn": {
+    view: "front", duration: 1300, poster: 0, face: "closed",
+    base: { ...FRONT_BASE, y: 76 },
+    frames: [
+      { t: 0, a1: [30, 20], a2: [30, 20], neck: 0 },
+      { t: 0.55, a1: [155, 12], a2: [155, 12], neck: -12, y: 74 },
+      { t: 1, a1: [40, 15], a2: [40, 15], neck: 0 },
+    ],
+  },
+
   "pet-tickle": {
     view: "front", duration: 450, poster: 0, face: "happy",
     base: { ...FRONT_BASE, y: 75 },

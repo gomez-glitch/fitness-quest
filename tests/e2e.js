@@ -126,6 +126,7 @@ async function main() {
     check("dot navigation reaches spinner panel", panelIdx === 4, String(panelIdx));
 
     console.log("# Spark's Corner (pet)");
+    await page.evaluate(() => { window.__MQ_TEST_FORCE_NAP = false; }); // no surprise naps mid-test
     await page.click('.home-dot[data-panel="1"]');
     await page.waitForTimeout(700);
     check("pet mascot lives on its panel", !!(await page.$("#pet-stage svg")));
@@ -138,6 +139,30 @@ async function main() {
     });
     check("boop is counted", boops === 1, String(boops));
     check("boop stat shown", (await page.textContent("#pet-stats")).includes("Booped 1"));
+
+    console.log("# Tamagotchi: snacks & naps");
+    check("snack tray offers 12 foods", (await page.$$("#pet-tray .pet-food")).length === 12);
+    await page.waitForTimeout(1300); // let the boop reaction finish (busy flag)
+    await page.click('#pet-tray .pet-food[data-food="apple"]');
+    await page.waitForTimeout(400);
+    const petState = await page.evaluate(() => {
+      const d = JSON.parse(localStorage.getItem("move-quest-progress-v3"));
+      return d.profiles[d.activeProfileId].pet;
+    });
+    check("feeding fills tummy and counts the meal", petState.meals === 1 && petState.tummy > 60,
+      JSON.stringify(petState));
+    check("meal stat shown", (await page.textContent("#pet-stats")).includes("1 snack"));
+    await page.waitForTimeout(2600); // let the munch sequence finish
+    await page.evaluate(() => { window.__MQ_TEST_FORCE_NAP = true; });
+    await page.waitForTimeout(7400); // behaviour tick fires every 7s
+    check("Spark takes a nap (zzz visible)", await page.evaluate(() =>
+      !document.getElementById("pet-zzz").hidden));
+    await page.evaluate(() => { window.__MQ_TEST_FORCE_NAP = false; });
+    await page.click("#pet-scene");
+    await page.waitForTimeout(200);
+    check("boop wakes Spark gently", (await page.textContent("#pet-bubble")).includes("yaw"));
+    await page.waitForTimeout(1600); // let the wake-up finish
+
     await page.click('.home-dot[data-panel="0"]');
     await page.waitForTimeout(500);
     await page.click('.home-dot[data-panel="0"]');

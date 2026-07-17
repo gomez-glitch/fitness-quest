@@ -91,9 +91,12 @@ Living list, roughly priority-ordered. Move items up/down freely.
 - **Weekly Boss Battle** — deterministic weekly boss with an HP bar; every
   rep from every hero on the device deals damage; beat it by Sunday for a
   boss badge + bonus chest.
-- **Spark is alive** — tamagotchi-lite: exercise feeds Spark's energy; a
-  quiet few days makes Spark sleepy (never sad/sick). Home-screen idle
-  animations driven by the energy level.
+- **Spark is alive** ✅ SHIPPED (and upgraded to a full tamagotchi) —
+  Spark's Corner home panel: time-of-day scene, mood-driven idle animations,
+  boops, speech bubbles, a snack tray + tummy meter with real-time hunger,
+  a daily secret favourite food mini-game, comedy burps, and naps with a
+  gentle boop-to-wake. Energy stays exercise-driven; food is pure fun
+  (never sad/sick, treats always welcome).
 - **Trophy share cards** — canvas-generated celebration card (avatar, rank,
   stat) shared via the Web Share API on level-ups and boss kills.
 - **Secret moves** — hidden exercises unlocked by feats ("all three holds in

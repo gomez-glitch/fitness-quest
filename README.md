@@ -20,9 +20,19 @@ colors, big buttons, and encouraging, positive language throughout.
 - App-style shell: a fixed bottom tab bar (Home / Play / Adventure / Library /
   Awards) keeps every screen short, and long card sets (exercise picker, move
   library, badge case) are swipeable horizontal snap rows
-- Swipeable Home: four full-screen panels (Welcome + daily fact → My Hero
-  with stats and Spark's energy meter → Today's quests + weekly chart →
-  a super-sized Mystery Spinner) with snap paging and dot navigation
+- Swipeable Home: five full-screen panels (Welcome + daily fact → Spark's
+  Corner → My Hero with stats → Today's quests + weekly chart → a super-sized
+  Mystery Spinner) with snap paging and dot navigation
+- Spark's Corner, a full tamagotchi home for the mascot: Spark lives in a
+  scene that shifts with the real time of day (sunny day → sunset → starry
+  night with a nightcap), his mood follows the energy meter, and he chats in
+  a speech bubble about streaks, quests, and snacks. Boop him for giggles and
+  hearts. A 12-snack tray feeds his tummy meter (which slowly empties over
+  real hours): he munches with a chomp animation and sound, occasionally
+  burps ("…excuse me! 🤭"), politely refuses food when full, and hides a
+  secret favourite food each day per hero — find it for a jackpot celebration.
+  Sometimes he simply lies down for a nap (more likely when sleepy); booping
+  a napping Spark wakes him gently with a yawn
 - Spark's energy meter: a colorful bar that fills with today's activity and
   drains on quiet days, with mood messages ("Spark is SUPERCHARGED!" /
   "Spark is sleepy — let's move!")
@@ -40,7 +50,7 @@ colors, big buttons, and encouraging, positive language throughout.
 - A last-7-days activity chart on the dashboard with best-day and
   longest-streak callouts
 - Hero customization: nickname, persona, and avatar, saved to the browser
-- 33 short kid-friendly exercises with muscle-group AND intensity filters
+- 43 short kid-friendly exercises with muscle-group AND intensity filters
   (🌱 Easy / ⚡ Steady / 🔥 Spicy), including four timed "hold" challenges
   (wall sit, plank hold, flamingo balance, farmer hold) with a GO → 3-2-1
   get-ready lead-in and automatic countdown, plus small-free-weight moves
