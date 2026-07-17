@@ -1282,6 +1282,29 @@ body.no-scroll {
   50% { transform: scale(1.35); opacity: 0.2; }
 }
 
+/* ---------- Spark reactions ---------- */
+
+.mascot-party svg {
+  animation: mascot-party 0.7s ease 2;
+}
+
+@keyframes mascot-party {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  30% { transform: translateY(-14px) rotate(-6deg); }
+  60% { transform: translateY(-4px) rotate(6deg); }
+}
+
+.mascot-wave svg {
+  animation: mascot-wave 1.4s ease;
+}
+
+@keyframes mascot-wave {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-5deg) scale(1.04); }
+  50% { transform: rotate(5deg) scale(1.04); }
+  75% { transform: rotate(-3deg); }
+}
+
 /* ---------- Discovery + journey token animation ---------- */
 
 .discovery-card {

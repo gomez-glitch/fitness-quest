@@ -4,6 +4,7 @@ const MUTE_KEY = "move-quest-muted";
 
 let ctx = null;
 let muted = false;
+let calm = null;
 
 try {
   muted = localStorage.getItem(MUTE_KEY) === "1";
@@ -67,6 +68,66 @@ export const sound = {
   thump() {
     if (muted) return;
     note(130, 0, 0.1, "sine", 0.22);
+  },
+
+  // Calm music: a generative lullaby — a soft drifting pad with occasional
+  // pentatonic bell notes. Fully synthesized, loops until stopped.
+  startCalm() {
+    if (calm || muted) return;
+    const ac = audioCtx();
+    if (!ac) return;
+
+    const master = ac.createGain();
+    master.gain.setValueAtTime(0, ac.currentTime);
+    master.gain.linearRampToValueAtTime(1, ac.currentTime + 2);
+    master.connect(ac.destination);
+
+    const padGain = ac.createGain();
+    padGain.gain.value = 0.035;
+    padGain.connect(master);
+    const oscs = [130.81, 196.0].map((freq, i) => {
+      const osc = ac.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      osc.detune.value = i === 0 ? -4 : 4;
+      osc.connect(padGain);
+      osc.start();
+      return osc;
+    });
+    // slow breathing swell on the pad
+    const lfo = ac.createOscillator();
+    lfo.frequency.value = 0.08;
+    const lfoGain = ac.createGain();
+    lfoGain.gain.value = 0.012;
+    lfo.connect(lfoGain).connect(padGain.gain);
+    lfo.start();
+
+    const BELLS = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25];
+    const bellTimer = setInterval(() => {
+      if (muted) return;
+      const freq = BELLS[Math.floor(Math.random() * BELLS.length)];
+      note(freq, 0, 2.8, "triangle", 0.045);
+    }, 3400);
+
+    calm = { master, oscs, lfo, bellTimer };
+  },
+
+  stopCalm() {
+    if (!calm) return;
+    const { master, oscs, lfo, bellTimer } = calm;
+    calm = null;
+    clearInterval(bellTimer);
+    try {
+      const ac = audioCtx();
+      master.gain.linearRampToValueAtTime(0, ac.currentTime + 0.6);
+      setTimeout(() => {
+        oscs.forEach((o) => o.stop());
+        lfo.stop();
+        master.disconnect();
+      }, 700);
+    } catch (err) {
+      // best-effort teardown
+    }
   },
 
   // Rep target reached — Claim XP is ready.

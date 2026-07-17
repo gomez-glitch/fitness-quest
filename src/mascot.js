@@ -429,6 +429,137 @@ export const MOTIONS = {
     ],
   },
 
+  "downward-dog": {
+    view: "side", duration: 3200, poster: 0.5,
+    base: {
+      ...SIDE_BASE, x: 62, torso: 132, neck: 28,
+      a1: [22, 4], a2: [26, 5],
+      l1: [-32, 6, -20], l2: [-35, 7, -20],
+    },
+    frames: [
+      { t: 0, y: 62 },
+      { t: 0.5, y: 64 },
+      { t: 1, y: 62 },
+    ],
+  },
+
+  "cobra": {
+    view: "side", duration: 3000, poster: 0.5,
+    base: {
+      ...SIDE_BASE, x: 56, y: 97,
+      a1: [30, 45], a2: [34, 48],
+      l1: [-92, 3, -80], l2: [-95, 4, -80],
+    },
+    frames: [
+      { t: 0, torso: 58, neck: 24 },
+      { t: 0.5, torso: 48, neck: 32 },
+      { t: 1, torso: 58, neck: 24 },
+    ],
+  },
+
+  "childs-pose": {
+    view: "side", duration: 3400, poster: 0.5,
+    base: {
+      ...SIDE_BASE, x: 66, y: 88,
+      a1: [62, 4], a2: [66, 5],
+      l1: [-14, 112, -60], l2: [-17, 114, -60],
+    },
+    frames: [
+      { t: 0, torso: 102, neck: -6 },
+      { t: 0.5, torso: 106, neck: -4 },
+      { t: 1, torso: 102, neck: -6 },
+    ],
+  },
+
+  "tree-pose": {
+    view: "front", duration: 3000, poster: 0.5,
+    base: { ...FRONT_BASE, y: 75, a1: [162, 10], a2: [162, 10], l1: [4, 2, 0] },
+    frames: [
+      { t: 0, torso: -2, l2: [48, 98, 0] },
+      { t: 0.5, torso: 2, l2: [50, 100, 0] },
+      { t: 1, torso: -2, l2: [48, 98, 0] },
+    ],
+  },
+
+  "butterfly": {
+    view: "front", duration: 2400, poster: 0,
+    base: {
+      ...FRONT_BASE, y: 86, torso: 0,
+      a1: [38, -25], a2: [38, -25],
+    },
+    frames: [
+      { t: 0, l1: [58, 118, 0], l2: [58, 118, 0] },
+      { t: 0.5, l1: [70, 130, 0], l2: [70, 130, 0] },
+      { t: 1, l1: [58, 118, 0], l2: [58, 118, 0] },
+    ],
+  },
+
+  "star-pose": {
+    view: "front", duration: 3200, poster: 0.5,
+    base: { ...FRONT_BASE, y: 74, l1: [24, 2, 0], l2: [24, 2, 0] },
+    frames: [
+      { t: 0, a1: [112, 4], a2: [112, 4] },
+      { t: 0.5, a1: [118, 4], a2: [118, 4] },
+      { t: 1, a1: [112, 4], a2: [112, 4] },
+    ],
+  },
+
+  "warrior": {
+    view: "side", duration: 3000, poster: 0.5,
+    base: {
+      ...SIDE_BASE, torso: 2, neck: 0,
+      a1: [88, 4], a2: [-88, 4],
+      l1: [36, 26, 0], l2: [-36, 5, -25],
+    },
+    frames: [
+      { t: 0, y: 78 },
+      { t: 0.5, y: 80 },
+      { t: 1, y: 78 },
+    ],
+  },
+
+  "sloth-fold": {
+    view: "side", duration: 3200, poster: 0.5,
+    base: {
+      ...SIDE_BASE, y: 75,
+      a1: [28, 3], a2: [32, 4],
+      l1: [2, 6, 0], l2: [4, 8, 0],
+    },
+    frames: [
+      { t: 0, torso: 158, neck: -8 },
+      { t: 0.5, torso: 166, neck: -6 },
+      { t: 1, torso: 158, neck: -8 },
+    ],
+  },
+
+  "frog-pose": {
+    view: "side", duration: 3000, poster: 0.5,
+    base: {
+      ...SIDE_BASE, x: 58,
+      a1: [52, 18], a2: [56, 20],
+      l1: [92, 118, 0], l2: [88, 114, 0],
+    },
+    frames: [
+      { t: 0, y: 89, torso: 26, neck: -12 },
+      { t: 0.5, y: 90.5, torso: 28, neck: -10 },
+      { t: 1, y: 89, torso: 26, neck: -12 },
+    ],
+  },
+
+  "cat-cow": {
+    view: "side", duration: 3000, poster: 0,
+    base: {
+      ...SIDE_BASE, x: 58,
+      a1: [16, 4], a2: [20, 5],
+      l1: [-12, 96, -55], l2: [-15, 98, -55],
+    },
+    frames: [
+      { t: 0, y: 86, torso: 94, neck: 30 },
+      { t: 0.5, y: 82, torso: 84, neck: -32 },
+      { t: 1, y: 86, torso: 94, neck: 30 },
+    ],
+  },
+
   "burpees": {
     view: "side", duration: 2600, poster: 0.45,
     base: { ...SIDE_BASE },

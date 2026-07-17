@@ -32,8 +32,9 @@ Living list, roughly priority-ordered. Move items up/down freely.
    Each drop: new zone-crossing voice lines, painted backgrounds from the
    ready-made prompts in `ART.md`, SVG fallback scenery per zone. Heroes
    already past the old finale roll their lap progress into the new lands.
-4. **Stretch & Calm pack** — easy pose stretches as timed holds (20–30s),
-   🌱 Easy intensity, built on the existing GO → 3-2-1 → countdown engine:
+4. **Stretch & Calm pack** ✅ SHIPPED — 10 poses live as a "Stretch" group
+   with calm generative music, breathing cues, and the Sunset Stretch
+   adventure. Original spec kept below for reference:
    - **Downward Dog** 🐕 (30s) — hands and feet down, hips high in a
      mountain shape. Side-view FK pose: inverted V.
    - **Cobra** 🐍 (20s) — lie on tummy, press chest up, look ahead.
@@ -62,7 +63,24 @@ Living list, roughly priority-ordered. Move items up/down freely.
      Sky Reach, ends in Child's Pose.
    - Warm-up tie-in: Marching + Arm Circles + two stretches could form an
      auto-suggested warm-up row at the top of Play.
-5. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
+5. **Foam roller set** — gentle roller moves as 20–30s timed items in the
+   Stretch group, tagged with a 🪵 roller gear marker (like the 🏋️ weights
+   tag). Mascot motions add a roller ellipse prop under the body part:
+   - **Calf Rollers** (30s) — sit, roller under calves, roll ankle-to-knee.
+   - **Thigh Rollers** (30s) — face down, roller under thighs, slow rolls.
+   - **Hamstring Rollers** (30s) — seated, roller under the backs of legs.
+   - **Back Massage Roll** (30s) — lie back, roller under upper back,
+     gentle up-and-down "massage machine".
+   - **Superhero Side Roll** (20s/side) — roller under the side, arm
+     stretched long like flying.
+   - **Foot Wake-Up** (20s/foot) — standing, roll the sole of one foot
+     (hold a wall!).
+   - **Rolling Bridge** (20s) — bridge hold with feet resting on the roller
+     (older kids — balance spice).
+   - **Roller Reach-Over** (20s) — kneel, roller ahead, roll it away and
+     reach into a long stretch.
+   Safety copy: "roll slowly", "skip anything that hurts", "grown-up nearby".
+6. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
    added; add a CONTRIBUTING-style note if anyone else joins the project.
 
 ## Ideas shelf

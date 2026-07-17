@@ -49,6 +49,22 @@ export const voice = {
     ]));
   },
 
+  breatheIn() {
+    this.say("Breathe in…", { interrupt: false });
+  },
+
+  breatheOut() {
+    this.say("And breathe out…", { interrupt: false });
+  },
+
+  stretchDone() {
+    this.say(pick([
+      "Beautiful stretching!",
+      "So calm and strong!",
+      "Lovely — your muscles say thank you!",
+    ]));
+  },
+
   holdDone() {
     this.say(pick([
       "Amazing hold! Well done!",

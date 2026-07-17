@@ -21,6 +21,7 @@ const REDUCED_MOTION =
 export function createClicker(container, { onChange = () => {}, onComplete = () => {} } = {}) {
   let target = 1;
   let timed = false;
+  let calm = false; // stretch holds: breathing cues instead of ticking
   let count = 0;
   let phase = "idle"; // idle | ready | counting (timed only)
   let readyLeft = 0;
@@ -176,22 +177,37 @@ export function createClicker(container, { onChange = () => {}, onComplete = () 
         }
       } else if (phase === "counting") {
         remaining -= 1;
-        // Voice takes over the countdown for the last five seconds;
-        // the beeps stay as a fallback when the coach is muted/unavailable.
-        if (remaining > 0 && remaining <= 5 && voice.active()) {
-          voice.count(remaining);
-        } else if (remaining > 3) {
-          sound.tick();
-        } else if (remaining > 0) {
-          sound.beep();
+        if (calm) {
+          // Stretch holds: no ticking — gentle alternating breath cues.
+          const elapsed = target - remaining;
+          if (remaining > 2 && elapsed % 4 === 1) {
+            if (Math.floor(elapsed / 4) % 2 === 0) voice.breatheIn();
+            else voice.breatheOut();
+          }
+          if (remaining > 0 && remaining <= 3 && voice.active()) voice.count(remaining);
+        } else {
+          // Voice takes over the countdown for the last five seconds;
+          // the beeps stay as a fallback when the coach is muted/unavailable.
+          if (remaining > 0 && remaining <= 5 && voice.active()) {
+            voice.count(remaining);
+          } else if (remaining > 3) {
+            sound.tick();
+          } else if (remaining > 0) {
+            sound.beep();
+          }
+          if (remaining === Math.ceil(target / 2) && remaining > 5) voice.halfway();
         }
-        if (remaining === Math.ceil(target / 2) && remaining > 5) voice.halfway();
         if (remaining <= 0) {
           pauseTimer();
           remaining = 0;
           count = target;
-          sound.badge(); // triumphant finish jingle
-          voice.holdDone();
+          if (calm) {
+            sound.chime();
+            voice.stretchDone();
+          } else {
+            sound.badge(); // triumphant finish jingle
+            voice.holdDone();
+          }
         }
       }
       render();
@@ -279,6 +295,7 @@ export function createClicker(container, { onChange = () => {}, onComplete = () 
       pauseTimer();
       target = Math.max(1, opts.target);
       timed = Boolean(opts.timed);
+      calm = Boolean(opts.calm);
       count = Math.max(0, Math.min(target, opts.count || 0));
       readyLeft = 0;
       remaining = 0;

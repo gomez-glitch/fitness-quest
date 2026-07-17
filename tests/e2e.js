@@ -172,6 +172,14 @@ async function main() {
     await page.waitForTimeout(80);
     check("timed claim recorded", (await page.$$(".quest-log-item")).length === 2);
 
+    console.log("# Stretch & calm");
+    await page.click('.exercise-tile[data-exercise="cobra"]');
+    check("stretch hold shows GO dial", (await page.textContent("#view-play .dial-count")) === "GO");
+    check("stretch target label", (await page.textContent("#view-play .dial-target-val")) === "20s");
+    await page.click("#tab-adventure");
+    check("sunset stretch adventure listed", !!(await page.$('.adventure-preset[data-adventure="sunset-stretch"]')));
+    await page.click("#tab-play");
+
     console.log("# Energy taper");
     await freshPage(page);
     const xpGains = [];
@@ -226,11 +234,15 @@ async function main() {
     check("spicy filter shows 6 moves", (await page.$$("#exercise-board .exercise-tile")).length === 6,
       String((await page.$$("#exercise-board .exercise-tile")).length));
     await page.click('.filter-chip[data-filter-intensity="1"]');
-    check("easy filter shows 8 moves", (await page.$$("#exercise-board .exercise-tile")).length === 8,
+    check("easy filter shows 18 moves", (await page.$$("#exercise-board .exercise-tile")).length === 18,
       String((await page.$$("#exercise-board .exercise-tile")).length));
     await page.click('.filter-chip[data-filter-intensity="All"]');
-    check("all levels shows 33 moves", (await page.$$("#exercise-board .exercise-tile")).length === 33,
+    check("all levels shows 43 moves", (await page.$$("#exercise-board .exercise-tile")).length === 43,
       String((await page.$$("#exercise-board .exercise-tile")).length));
+    await page.click('.filter-chip[data-filter-group="Stretch"]');
+    check("stretch group shows 10 moves", (await page.$$("#exercise-board .exercise-tile")).length === 10,
+      String((await page.$$("#exercise-board .exercise-tile")).length));
+    await page.click('.filter-chip[data-filter-group="All"]');
 
     console.log("# Mystery Spinner");
     await freshPage(page);

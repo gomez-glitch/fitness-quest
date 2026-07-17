@@ -27,7 +27,7 @@ const PERSONAS = [
 
 const AVATARS = ["👟", "🦄", "🐯", "🦊", "🐼", "🛼", "🌟", "🚀"];
 
-const GROUPS = ["All", "Core", "Arms", "Legs", "Whole body"];
+const GROUPS = ["All", "Core", "Arms", "Legs", "Whole body", "Stretch"];
 
 const EXERCISES = [
   {
@@ -195,6 +195,56 @@ const EXERCISES = [
     muscles: "Everything!", cue: "Squat down, hop back to a plank, hop in, and jump up tall!",
     steps: ["Four beats: down-back-in-up", "Step back instead of hop is fine", "Reach high on the jump"],
   },
+  {
+    id: "downward-dog", title: "Downward Dog", mode: "timed", target: 30, xp: 45, icon: "🐕", group: "Stretch", intensity: 1,
+    muscles: "Whole-body stretch", cue: "Hands and feet down, lift your hips high like a mountain — and breathe.",
+    steps: ["Make an upside-down V", "Press heels gently down", "Relax your neck"],
+  },
+  {
+    id: "cobra", title: "Cobra", mode: "timed", target: 20, xp: 40, icon: "🐍", group: "Stretch", intensity: 1,
+    muscles: "Tummy + back stretch", cue: "Lie on your tummy and gently press your chest up, looking ahead.",
+    steps: ["Hands under shoulders", "Lift soft and slow", "Shoulders away from ears"],
+  },
+  {
+    id: "childs-pose", title: "Child's Pose", mode: "timed", target: 30, xp: 40, icon: "🧸", group: "Stretch", intensity: 1,
+    muscles: "Back + rest", cue: "Kneel, fold forward, and stretch your arms long — the cosy rest pose.",
+    steps: ["Knees wide, toes together", "Forehead toward the floor", "Melt and breathe"],
+  },
+  {
+    id: "tree-pose", title: "Tree Pose", mode: "timed", target: 20, xp: 40, icon: "🌳", group: "Stretch", intensity: 1,
+    muscles: "Balance + calm", cue: "One foot to your other leg, arms grow up like branches. Switch legs next time!",
+    steps: ["Stare at one still spot", "Foot above or below the knee", "Grow tall and breathe"],
+  },
+  {
+    id: "butterfly", title: "Butterfly Stretch", mode: "timed", target: 25, xp: 40, icon: "🦋", group: "Stretch", intensity: 1,
+    muscles: "Hips", cue: "Sit with the soles of your feet together and let your knees flutter like wings.",
+    steps: ["Sit up proud", "Feet sole-to-sole", "Gentle little flutters"],
+  },
+  {
+    id: "star-pose", title: "Star Pose", mode: "timed", target: 20, xp: 35, icon: "🌟", group: "Stretch", intensity: 1,
+    muscles: "Whole-body stretch", cue: "Stand wide in a big X and shine like a star.",
+    steps: ["Arms and legs wide", "Reach out through fingertips", "Big proud chest"],
+  },
+  {
+    id: "warrior", title: "Brave Warrior", mode: "timed", target: 20, xp: 45, icon: "🗡️", group: "Stretch", intensity: 1,
+    muscles: "Legs + focus", cue: "Strong lunge, arms reaching front and back, eyes forward. Switch sides next time!",
+    steps: ["Front knee bent", "Back leg long and strong", "Arms like arrows"],
+  },
+  {
+    id: "sloth-fold", title: "Sleepy Sloth Fold", mode: "timed", target: 25, xp: 40, icon: "🦥", group: "Stretch", intensity: 1,
+    muscles: "Hamstrings", cue: "Stand and dangle forward like a sleepy sloth — arms heavy, knees soft.",
+    steps: ["Bend from the hips", "Let arms hang loose", "Sway gently if it feels nice"],
+  },
+  {
+    id: "frog-pose", title: "Frog Pose", mode: "timed", target: 20, xp: 40, icon: "🪷", group: "Stretch", intensity: 1,
+    muscles: "Hips", cue: "Sink into a low squat with elbows inside your knees — hips say hello!",
+    steps: ["Heels down if you can", "Elbows press knees gently", "Chest stays lifted"],
+  },
+  {
+    id: "cat-cow", title: "Cat-Cow", target: 8, xp: 40, icon: "🐱", group: "Stretch", intensity: 1,
+    muscles: "Spine (mobility)", cue: "On all fours: arch up like a scared cat, then dip down like a happy cow.",
+    steps: ["Hands under shoulders", "Cat up on the breath out", "Cow down on the breath in"],
+  },
 ];
 
 const INTENSITY_META = {
@@ -292,6 +342,15 @@ const ADVENTURES = [
       { id: "mountain-climbers", line: "Climb the rocket ladder — quick!" },
       { id: "skater-hops", line: "Dodge the floating asteroids!" },
       { id: "wall-sit", line: "Brace for landing — hold steady!" },
+    ],
+  },
+  {
+    id: "sunset-stretch", name: "Sunset Stretch", emoji: "🌇", calm: true,
+    moves: [
+      { id: "sky-reach", line: "Reach up for the setting sun…" },
+      { id: "butterfly", line: "Flutter your wings slowly as the sky turns pink…" },
+      { id: "tree-pose", line: "Grow tall and still, like an evening tree…" },
+      { id: "childs-pose", line: "Curl up cosy — the stars are coming out." },
     ],
   },
   { id: "surprise", name: "Surprise Quest", emoji: "🎲", moves: null },
@@ -607,6 +666,10 @@ function targetFor(exercise, level = levelForXp(activeProfile().xp)) {
   return base;
 }
 
+function isCalmExercise(exercise) {
+  return exercise.group === "Stretch" && exercise.mode === "timed";
+}
+
 // "20s hold" vs "8 reps" — used everywhere a target is displayed.
 function targetLabel(exercise) {
   const t = targetFor(exercise);
@@ -900,7 +963,10 @@ function switchTab(name) {
     if (name === "play") mascot.start();
     else mascot.stop();
   }
-  if (name !== "play" && playClicker) playClicker.pauseTimer();
+  if (name !== "play" && playClicker) {
+    playClicker.pauseTimer();
+    if (!adventure.active) sound.stopCalm();
+  }
   if (name === "adventure") renderJourney(); // re-render so auto-scroll works once visible
   if (name === "home") updateHomeDots();
 }
@@ -1034,19 +1100,27 @@ function syncPlayClicker() {
   playClicker.configure({
     target: targetFor(exercise),
     timed: exercise.mode === "timed",
+    calm: isCalmExercise(exercise),
     count: st.counters[exercise.id] || 0,
   });
+  sound.stopCalm();
   renderPlayMeta();
 }
 
 function initPlayClicker() {
   playClicker = createClicker(el.clickerMount, {
-    onChange: ({ count, done, timed }) => {
+    onChange: ({ count, done, timed, phase }) => {
       const exercise = findExercise(activeExerciseId);
       if (!exercise) return;
       const st = activeProfile();
       // Timed holds only bank progress once finished; reps persist as they go.
       st.counters[exercise.id] = timed ? (done ? targetFor(exercise) : 0) : count;
+      markPlayActivity();
+      // Calm music accompanies stretch holds while they run.
+      if (isCalmExercise(exercise)) {
+        if (phase === "counting" || phase === "ready") sound.startCalm();
+        else sound.stopCalm();
+      }
       saveData();
       renderPlayMeta();
     },
@@ -1355,6 +1429,7 @@ el.filterChips.addEventListener("click", (event) => {
 el.exerciseBoard.addEventListener("click", (event) => {
   const btn = event.target.closest(".exercise-tile");
   if (!btn) return;
+  markPlayActivity();
   activeExerciseId = btn.dataset.exercise;
   renderExerciseBoard();
   renderActivePanel();
@@ -1446,6 +1521,8 @@ function stopAdventureExtras() {
 
 function startAdventure(preset) {
   adventure.active = true;
+  adventure.calm = Boolean(preset.calm);
+  if (adventure.calm) sound.startCalm();
   adventure.name = `${preset.emoji} ${preset.name}`;
   adventure.moves = preset.moves ? preset.moves.slice() : randomMoves(3);
   adventure.index = 0;
@@ -1458,6 +1535,7 @@ function startAdventure(preset) {
 
 function closeAdventure() {
   stopAdventureExtras();
+  sound.stopCalm();
   adventure.active = false;
   el.adventureOverlay.hidden = true;
   el.adventureOverlay.innerHTML = "";
@@ -1518,7 +1596,7 @@ function showAdventureMove() {
       setTimeout(() => adventureMoveDone(ex, target), 650);
     },
   });
-  adventure.clicker.configure({ target, timed, count: 0 });
+  adventure.clicker.configure({ target, timed, calm: isCalmExercise(ex), count: 0 });
 }
 
 function adventureMoveDone(ex, target) {
@@ -2085,6 +2163,14 @@ function awardCompletion(exercise, reps) {
   return earnedXp;
 }
 
+function sparkReact(className) {
+  if (REDUCED_MOTION) return;
+  el.activeIllustration.classList.remove("mascot-party", "mascot-wave");
+  void el.activeIllustration.offsetWidth;
+  el.activeIllustration.classList.add(className);
+  setTimeout(() => el.activeIllustration.classList.remove(className), 1500);
+}
+
 el.claimBtn.addEventListener("click", () => {
   const exercise = findExercise(activeExerciseId);
   if (!exercise) return;
@@ -2098,8 +2184,26 @@ el.claimBtn.addEventListener("click", () => {
 
   sound.fanfare();
   spawnConfetti();
+  sparkReact("mascot-party"); // Spark celebrates with you
+  markPlayActivity();
   syncPlayClicker();
 });
+
+// Idle wave: if the Play tab sits untouched for a while, Spark wiggles hello.
+let lastPlayActivity = Date.now();
+
+function markPlayActivity() {
+  lastPlayActivity = Date.now();
+}
+
+setInterval(() => {
+  const playVisible = !document.getElementById("view-play").hidden &&
+    !adventure.active && !dance.active && el.detailOverlay.hidden;
+  if (playVisible && Date.now() - lastPlayActivity > 30000) {
+    sparkReact("mascot-wave");
+    lastPlayActivity = Date.now() - 18000; // wave again in ~12s if still idle
+  }
+}, 5000);
 
 el.resetBtn.addEventListener("click", () => {
   const name = activeProfile().profile.nickname;
