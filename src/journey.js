@@ -5,6 +5,11 @@
 
 const NS = "http://www.w3.org/2000/svg";
 
+const REDUCED_MOTION =
+  typeof window !== "undefined" &&
+  typeof window.matchMedia === "function" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 export const JOURNEY_ZONES = [
   { name: "Sunny Meadows", emoji: "🌻" },
   { name: "Lava Volcano", emoji: "🌋" },
@@ -137,18 +142,66 @@ const PAINTERS = [paintMeadow, paintVolcano, paintSea, paintMountains, paintSpac
 
 // --- Public renderer ---------------------------------------------------------
 
-export function renderJourneyMap(container, totalJourney) {
+// A single zone's scenery as a standalone card (used by the Discovery screen).
+export function renderZoneCard(container, zoneIdx) {
+  const svg = el("svg", { viewBox: `0 0 ${W} ${ZONE_H}`, width: "100%", "aria-hidden": "true" });
+  const defs = el("defs", {});
+  // Unique gradient ids: the map's own defs may sit inside a display:none
+  // tab, and paint servers in non-rendered subtrees don't paint.
+  addGradients(defs, "card-");
+  svg.appendChild(defs);
+  PAINTERS[Math.max(0, Math.min(PAINTERS.length - 1, zoneIdx))](svg, 0);
+  svg.querySelectorAll("[fill^='url(#g-']").forEach((node) => {
+    node.setAttribute("fill", node.getAttribute("fill").replace("url(#g-", "url(#card-g-"));
+  });
+  container.textContent = "";
+  container.appendChild(svg);
+}
+
+function addGradients(defs, prefix = "") {
+  grad(defs, `${prefix}g-meadow`, [["0", "#bae6fd"], ["0.45", "#d9f99d"], ["1", "#86efac"]]);
+  grad(defs, `${prefix}g-volcano`, [["0", "#fed7aa"], ["1", "#fb923c"]]);
+  grad(defs, `${prefix}g-sea`, [["0", "#bae6fd"], ["1", "#3b82f6"]]);
+  grad(defs, `${prefix}g-mountains`, [["0", "#ede9fe"], ["1", "#a78bfa"]]);
+  grad(defs, `${prefix}g-space`, [["0", "#1e1b4b"], ["1", "#4c1d95"]]);
+  grad(defs, `${prefix}g-castle`, [["0", "#fdf2f8"], ["1", "#fbcfe8"]]);
+}
+
+function buildToken(x, y) {
+  const outer = el("g", { transform: `translate(${x.toFixed(1)} ${y.toFixed(1)})` });
+  outer.appendChild(el("circle", { cx: 0, cy: 0, r: 17, fill: "rgba(236,72,153,0.35)", class: "journey-pulse" }));
+  const inner = el("g", { class: "journey-token" });
+  inner.appendChild(el("circle", { cx: 0, cy: 0, r: 12, fill: "#8b5cf6", stroke: "#fff", "stroke-width": 3 }));
+  inner.appendChild(el("path", { d: "M -3.5 -14 L 0 -8 L 3.5 -14 Z", fill: "#fde68a" }));
+  inner.appendChild(el("circle", { cx: -3.5, cy: -2, r: 1.7, fill: "#3b0764" }));
+  inner.appendChild(el("circle", { cx: 3.5, cy: -2, r: 1.7, fill: "#3b0764" }));
+  inner.appendChild(el("path", { d: "M -3.5 3 Q 0 6.5 3.5 3", stroke: "#3b0764", "stroke-width": 1.6, fill: "none", "stroke-linecap": "round" }));
+  outer.appendChild(inner);
+  return { outer, inner };
+}
+
+// opts.animateFrom: earlier total-journey value — Spark hops node-to-node from
+// there to the current position (max ~8 hops, same lap). opts.onHop fires per
+// landing, opts.onDone at the end.
+export function renderJourneyMap(container, totalJourney, opts = {}) {
   const step = totalJourney % TOTAL_STEPS;
   const lap = Math.floor(totalJourney / TOTAL_STEPS) + 1;
 
+  let fromStep = step;
+  if (
+    !REDUCED_MOTION &&
+    typeof opts.animateFrom === "number" &&
+    opts.animateFrom < totalJourney
+  ) {
+    const lapStart = Math.floor(totalJourney / TOTAL_STEPS) * TOTAL_STEPS;
+    const from = Math.max(opts.animateFrom, lapStart, totalJourney - 8);
+    fromStep = from % TOTAL_STEPS;
+  }
+  const animating = fromStep < step;
+
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", "aria-hidden": "true" });
   const defs = el("defs", {});
-  grad(defs, "g-meadow", [["0", "#bae6fd"], ["0.45", "#d9f99d"], ["1", "#86efac"]]);
-  grad(defs, "g-volcano", [["0", "#fed7aa"], ["1", "#fb923c"]]);
-  grad(defs, "g-sea", [["0", "#bae6fd"], ["1", "#3b82f6"]]);
-  grad(defs, "g-mountains", [["0", "#ede9fe"], ["1", "#a78bfa"]]);
-  grad(defs, "g-space", [["0", "#1e1b4b"], ["1", "#4c1d95"]]);
-  grad(defs, "g-castle", [["0", "#fdf2f8"], ["1", "#fbcfe8"]]);
+  addGradients(defs);
   svg.appendChild(defs);
 
   // Zones stack bottom-up: meadow at the bottom of the map, castle on top.
@@ -186,39 +239,79 @@ export function renderJourneyMap(container, totalJourney) {
     svg.appendChild(plate);
   });
 
-  // Step nodes
+  // Step nodes (all plain circles; the token rides on top)
+  const nodeEls = [];
   points.forEach(([x, y], i) => {
-    const done = i < step;
-    const current = i === step;
-    if (current) {
-      svg.appendChild(el("circle", { cx: x, cy: y, r: 17, fill: "rgba(236,72,153,0.35)", class: "journey-pulse" }));
-      const token = el("g", { class: "journey-node journey-current" });
-      token.appendChild(el("circle", { cx: x, cy: y, r: 12, fill: "#8b5cf6", stroke: "#fff", "stroke-width": 3 }));
-      token.appendChild(el("path", { d: `M ${x - 3.5} ${y - 14} L ${x} ${y - 8} L ${x + 3.5} ${y - 14} Z`, fill: "#fde68a" }));
-      token.appendChild(el("circle", { cx: x - 3.5, cy: y - 2, r: 1.7, fill: "#3b0764" }));
-      token.appendChild(el("circle", { cx: x + 3.5, cy: y - 2, r: 1.7, fill: "#3b0764" }));
-      token.appendChild(el("path", { d: `M ${x - 3.5} ${y + 3} Q ${x} ${y + 6.5} ${x + 3.5} ${y + 3}`, stroke: "#3b0764", "stroke-width": 1.6, fill: "none", "stroke-linecap": "round" }));
-      svg.appendChild(token);
-    } else {
-      svg.appendChild(el("circle", {
-        cx: x, cy: y, r: 7.5, class: "journey-node",
-        fill: done ? "#ec4899" : "#ffffff",
-        stroke: done ? "#be185d" : "#c4b5fd", "stroke-width": 2.5,
-      }));
-    }
+    const done = i < fromStep;
+    const node = el("circle", {
+      cx: x, cy: y, r: 7.5, class: "journey-node",
+      fill: done ? "#ec4899" : "#ffffff",
+      stroke: done ? "#be185d" : "#c4b5fd", "stroke-width": 2.5,
+    });
+    nodeEls.push(node);
+    svg.appendChild(node);
   });
 
   // Lap flag at the castle gate
   emoji(svg, points[TOTAL_STEPS - 1][0] + 26, points[TOTAL_STEPS - 1][1] + 6, 20, "🚩");
 
+  // Spark token
+  const [sx, sy] = points[fromStep];
+  const token = buildToken(sx, sy);
+  svg.appendChild(token.outer);
+
   container.textContent = "";
   container.appendChild(svg);
 
-  // Scroll so Spark's token sits mid-view.
-  requestAnimationFrame(() => {
+  function scrollToY(y, smooth) {
     const scale = container.scrollHeight / H;
-    container.scrollTop = points[step][1] * scale - container.clientHeight / 2;
-  });
+    const target = y * scale - container.clientHeight / 2;
+    if (smooth && !REDUCED_MOTION) container.scrollTo({ top: target, behavior: "smooth" });
+    else container.scrollTop = target;
+  }
+
+  requestAnimationFrame(() => scrollToY(points[fromStep][1], false));
+
+  if (animating) {
+    const HOP_MS = 420;
+    let hop = 0;
+    let start = null;
+    const totalHops = step - fromStep;
+
+    function frame(ts) {
+      if (start === null) start = ts;
+      const t = Math.min(1, (ts - start) / HOP_MS);
+      const a = points[fromStep + hop];
+      const b = points[fromStep + hop + 1];
+      const x = a[0] + (b[0] - a[0]) * t;
+      const y = a[1] + (b[1] - a[1]) * t - Math.sin(Math.PI * t) * 16;
+      token.outer.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+
+      if (t >= 1) {
+        // landed: mark the node we arrived on, puff some dust
+        const landed = nodeEls[fromStep + hop + 1];
+        if (landed) {
+          landed.setAttribute("fill", "#ec4899");
+          landed.setAttribute("stroke", "#be185d");
+        }
+        const dust = el("circle", { cx: b[0], cy: b[1] + 8, r: 6, fill: "rgba(255,255,255,0.85)", class: "hop-dust" });
+        svg.appendChild(dust);
+        setTimeout(() => dust.remove(), 550);
+        scrollToY(b[1], true);
+        if (opts.onHop) opts.onHop(fromStep + hop + 1);
+
+        hop += 1;
+        start = null;
+        if (hop >= totalHops) {
+          token.inner.classList.add("token-wiggle");
+          if (opts.onDone) opts.onDone();
+          return;
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+    setTimeout(() => requestAnimationFrame(frame), 350);
+  }
 
   return { step, lap, zone: zoneForStep(step) };
 }

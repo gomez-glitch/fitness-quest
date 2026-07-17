@@ -1282,6 +1282,58 @@ body.no-scroll {
   50% { transform: scale(1.35); opacity: 0.2; }
 }
 
+/* ---------- Discovery + journey token animation ---------- */
+
+.discovery-card {
+  border: 4px solid var(--pink);
+  text-align: center;
+}
+
+.discovery-scene {
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.discovery-scene svg {
+  display: block;
+}
+
+.discovery-kicker {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--purple-dark);
+}
+
+.journey-token {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.token-wiggle {
+  animation: token-wiggle 0.6s ease;
+}
+
+@keyframes token-wiggle {
+  0%, 100% { transform: scale(1) rotate(0); }
+  30% { transform: scale(1.25) rotate(-8deg); }
+  60% { transform: scale(1.15) rotate(8deg); }
+}
+
+.hop-dust {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hop-dust 0.5s ease-out forwards;
+}
+
+@keyframes hop-dust {
+  0% { opacity: 0.9; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(2.2); }
+}
+
 /* ---------- Dance Party ---------- */
 
 .dance-card {

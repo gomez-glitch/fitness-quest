@@ -77,6 +77,9 @@ async function claimReps(page, exerciseId) {
   for (let i = 0; i < target; i++) await page.keyboard.press("ArrowUp");
   await page.click("#claim-xp-btn");
   await page.waitForTimeout(80);
+  const discovery = await page.$(".discovery-card");
+  if (discovery) await page.click('[data-action="close-discovery"]');
+  await page.waitForTimeout(60);
   const levelUp = await page.$(".levelup-card");
   if (levelUp) await page.click('[data-action="close-levelup"]');
 }
@@ -280,6 +283,38 @@ async function main() {
       return d.profiles[d.activeProfileId].stats.journey;
     });
     check("completion advances the journey", journeyStep === 1, String(journeyStep));
+
+    // Zone crossing: seed to step 5, one more claim crosses into Lava Volcano
+    await page.evaluate(() => {
+      const d = JSON.parse(localStorage.getItem("move-quest-progress-v3"));
+      const p = d.profiles[d.activeProfileId];
+      p.stats.journey = 5;
+      p.stats.seenJourney = 5;
+      localStorage.setItem("move-quest-progress-v3", JSON.stringify(d));
+    });
+    await page.reload();
+    await page.waitForSelector(".tab-bar");
+    await page.click("#tab-play");
+    await page.click('.exercise-tile[data-exercise="sit-ups"]');
+    const zt = Number(await page.textContent("#view-play .dial-target-val"));
+    await page.focus("#view-play .clicker");
+    for (let i = 0; i < zt; i++) await page.keyboard.press("ArrowUp");
+    await page.click("#claim-xp-btn");
+    await page.waitForSelector(".discovery-card");
+    check("zone crossing shows discovery screen",
+      (await page.textContent(".discovery-card .levelup-heading")).includes("Lava Volcano"));
+    check("discovery shows zone scenery", !!(await page.$("#discovery-scene svg")));
+    await page.click('[data-action="close-discovery"]');
+    check("discovery closes", await page.$eval("#discovery-overlay", (e) => e.hidden));
+
+    // Hop animation: visiting the map animates and updates seenJourney
+    await page.click("#tab-adventure");
+    await page.waitForTimeout(1500);
+    const seenAfter = await page.evaluate(() => {
+      const d = JSON.parse(localStorage.getItem("move-quest-progress-v3"));
+      return d.profiles[d.activeProfileId].stats.seenJourney;
+    });
+    check("map visit records hop progress", seenAfter === 6, String(seenAfter));
 
     console.log("# Badges");
     await seedProfile(page, {

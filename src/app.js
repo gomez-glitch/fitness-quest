@@ -4,7 +4,7 @@ import { createMascot, renderStaticMascot } from "./mascot.js";
 import { sound } from "./sound.js";
 import { createClicker } from "./clicker.js";
 import { voice } from "./voice.js";
-import { renderJourneyMap, zoneForStep, TOTAL_STEPS } from "./journey.js";
+import { renderJourneyMap, renderZoneCard, zoneForStep, TOTAL_STEPS } from "./journey.js";
 
 const STORAGE_KEY = "move-quest-progress-v3";
 const LEGACY_KEY = "move-quest-progress-v2";
@@ -379,7 +379,7 @@ function defaultProfileState(nickname = "Spark") {
     lastCompletedDate: null,
     counters,
     profile: { nickname, persona: "spark-sprinter", avatar: "👟" },
-    stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0, timedDone: 0, adventuresDone: 0, journey: 0 },
+    stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0, timedDone: 0, adventuresDone: 0, journey: 0, seenJourney: 0 },
     daily: { date: null, done: [], bonusClaimed: false, spin: null },
     days: {},
     curve: CURVE_VERSION,
@@ -452,6 +452,10 @@ function normalizeProfile(parsed) {
       // Backfill for profiles created before the journey existed.
       state.stats.journey = Object.values(state.stats.groups).reduce((a, b) => a + b, 0);
     }
+    state.stats.seenJourney =
+      typeof st.seenJourney === "number" && st.seenJourney >= 0
+        ? Math.min(st.seenJourney, state.stats.journey)
+        : state.stats.journey;
   }
 
   const dl = parsed.daily;
@@ -753,6 +757,7 @@ const el = {
   spinnerResult: document.getElementById("spinner-result"),
   danceBtn: document.getElementById("dance-btn"),
   journeyMap: document.getElementById("journey-map"),
+  discoveryOverlay: document.getElementById("discovery-overlay"),
   journeyStatus: document.getElementById("journey-status"),
   weekChart: document.getElementById("week-chart"),
   weekBests: document.getElementById("week-bests"),
@@ -1188,7 +1193,24 @@ function renderWeekChart() {
 
 function renderJourney() {
   const st = activeProfile();
-  const { step, lap, zone } = renderJourneyMap(el.journeyMap, st.stats.journey || 0);
+  const journey = st.stats.journey || 0;
+  const seen = Math.min(typeof st.stats.seenJourney === "number" ? st.stats.seenJourney : journey, journey);
+  // Hop animation only plays when the map is actually on screen.
+  const mapVisible =
+    !document.getElementById("view-adventure").hidden &&
+    !adventure.active && !dance.active;
+  const animate = mapVisible && seen < journey;
+
+  const { step, lap, zone } = renderJourneyMap(el.journeyMap, journey, animate ? {
+    animateFrom: seen,
+    onHop: () => sound.tick(),
+  } : {});
+
+  if (mapVisible && seen !== journey) {
+    st.stats.seenJourney = journey;
+    saveData();
+  }
+
   const left = TOTAL_STEPS - step;
   el.journeyStatus.textContent =
     `${zone.emoji} ${activeProfile().profile.nickname} is exploring ${zone.name}` +
@@ -1440,7 +1462,8 @@ function closeAdventure() {
   el.adventureOverlay.hidden = true;
   el.adventureOverlay.innerHTML = "";
   document.body.classList.remove("no-scroll");
-  maybeShowLevelUp(); // a level crossed mid-adventure celebrates now
+  maybeShowDiscovery(); // discoveries and level-ups held during the adventure fire now
+  maybeShowLevelUp();
 }
 
 function adventureHeader() {
@@ -1594,6 +1617,47 @@ el.adventureOverlay.addEventListener("click", (event) => {
 });
 
 // ---------------------------------------------------------------------------
+// New Land Discovered celebration
+// ---------------------------------------------------------------------------
+
+let pendingDiscovery = null;
+
+function maybeShowDiscovery() {
+  if (!pendingDiscovery) return;
+  if (!el.adventureOverlay.hidden || !el.detailOverlay.hidden || !el.levelupOverlay.hidden) return;
+  const { zone, index } = pendingDiscovery;
+  pendingDiscovery = null;
+
+  el.discoveryOverlay.innerHTML = `
+    <div class="adventure-card discovery-card" role="dialog" aria-modal="true" aria-label="New land discovered">
+      <div class="adventure-stage">
+        <div class="discovery-scene" id="discovery-scene" role="img" aria-label="${zone.name} scenery"></div>
+        <p class="discovery-kicker">🗺️ NEW LAND DISCOVERED!</p>
+        <h3 class="levelup-heading">${zone.emoji} ${zone.name}</h3>
+        <button type="button" class="btn btn-primary detail-try" data-action="close-discovery">Explore on! 🥾</button>
+      </div>
+    </div>
+  `;
+  el.discoveryOverlay.hidden = false;
+  document.body.classList.add("no-scroll");
+  renderZoneCard(document.getElementById("discovery-scene"), index);
+  sound.fanfare();
+  setTimeout(() => voice.say(`New land discovered! Welcome to the ${zone.name}!`), 600);
+  spawnConfetti(el.discoveryOverlay.querySelector(".adventure-stage"), 20);
+}
+
+function closeDiscovery() {
+  el.discoveryOverlay.hidden = true;
+  el.discoveryOverlay.innerHTML = "";
+  document.body.classList.remove("no-scroll");
+  maybeShowLevelUp(); // a level-up earned in the same claim celebrates next
+}
+
+el.discoveryOverlay.addEventListener("click", (event) => {
+  if (event.target.closest('[data-action="close-discovery"]')) closeDiscovery();
+});
+
+// ---------------------------------------------------------------------------
 // Level-up celebration
 // ---------------------------------------------------------------------------
 
@@ -1603,7 +1667,7 @@ let pendingLevelUp = null;
 // until no other overlay is in the way, then celebrate.
 function maybeShowLevelUp() {
   if (!pendingLevelUp) return;
-  if (!el.adventureOverlay.hidden || !el.detailOverlay.hidden) return;
+  if (!el.adventureOverlay.hidden || !el.detailOverlay.hidden || !el.discoveryOverlay.hidden) return;
   const { to } = pendingLevelUp;
   pendingLevelUp = null;
 
@@ -1736,6 +1800,7 @@ function closeDance() {
   el.adventureOverlay.hidden = true;
   el.adventureOverlay.innerHTML = "";
   document.body.classList.remove("no-scroll");
+  maybeShowDiscovery();
   maybeShowLevelUp();
 }
 
@@ -1900,6 +1965,7 @@ document.addEventListener("keydown", (event) => {
   if (adventure.active) closeAdventure();
   if (dance.active) closeDance();
   if (!el.detailOverlay.hidden) closeMoveDetail();
+  if (!el.discoveryOverlay.hidden) closeDiscovery();
   if (!el.levelupOverlay.hidden) closeLevelUp();
 });
 
@@ -1968,7 +2034,10 @@ function awardCompletion(exercise, reps) {
   st.stats.journey = (st.stats.journey || 0) + 1;
   const zoneAfter = zoneForStep(st.stats.journey);
   if (zoneAfter !== zoneBefore) {
-    setTimeout(() => voice.say(`New land discovered! Welcome to the ${zoneAfter.name}!`), 1300);
+    pendingDiscovery = {
+      zone: zoneAfter,
+      index: Math.floor((st.stats.journey % TOTAL_STEPS) / 6),
+    };
   }
 
   // Per-day history for the weekly chart
@@ -2011,6 +2080,7 @@ function awardCompletion(exercise, reps) {
   renderDaily();
   renderWeekChart();
   renderJourney();
+  maybeShowDiscovery();
   maybeShowLevelUp();
   return earnedXp;
 }
