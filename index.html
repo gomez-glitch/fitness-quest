@@ -22,125 +22,160 @@
   <main id="main">
     <!-- ================= HOME ================= -->
     <div class="tab-view" id="view-home" role="tabpanel" aria-labelledby="tab-home">
-      <header class="hero">
-        <div class="hero-inner">
-          <div class="hero-avatar" id="hero-avatar" aria-hidden="true">👟</div>
-          <p class="hero-rank" id="hero-rank"></p>
-          <div class="hero-copy">
-            <h1>Move Quest</h1>
-            <div class="hero-fact">
-              <span class="hero-fact-label">✨ Fun fact of the day</span>
-              <p class="hero-fact-text" id="hero-fact-text"></p>
+      <div class="home-pager" id="home-pager" tabindex="0" aria-label="Home panels — swipe left and right">
+
+        <!-- Panel 1: Welcome -->
+        <section class="home-panel" aria-label="Welcome">
+          <header class="hero home-hero">
+            <div class="hero-inner">
+              <div class="hero-avatar" id="hero-avatar" aria-hidden="true">👟</div>
+              <p class="hero-rank" id="hero-rank"></p>
+              <div class="hero-copy">
+                <h1>Move Quest</h1>
+                <div class="hero-fact">
+                  <span class="hero-fact-label">✨ Fun fact of the day</span>
+                  <p class="hero-fact-text" id="hero-fact-text"></p>
+                </div>
+                <div class="hero-actions">
+                  <button type="button" class="btn btn-primary" id="start-moving-btn">Start moving</button>
+                  <button type="button" class="btn btn-secondary" id="customize-hero-btn">Customize hero</button>
+                </div>
+              </div>
             </div>
-            <div class="hero-actions">
-              <button type="button" class="btn btn-primary" id="start-moving-btn">Start moving</button>
-              <button type="button" class="btn btn-secondary" id="customize-hero-btn">Customize hero</button>
+          </header>
+
+          <!-- Install prompt (shown only when installable / not yet installed) -->
+          <section class="card install-card" id="install-card" hidden aria-labelledby="install-heading">
+            <h2 id="install-heading">📲 Put Move Quest on your home screen</h2>
+            <p class="daily-intro" id="install-text">Install the app for one-tap access — it works offline too!</p>
+            <button type="button" class="btn btn-primary" id="install-btn">Install app</button>
+          </section>
+        </section>
+
+        <!-- Panel 2: My Hero -->
+        <section class="home-panel" aria-label="My hero">
+          <section class="card hero-feature" aria-labelledby="hero-feature-heading">
+            <h2 id="hero-feature-heading" class="visually-hidden">My hero</h2>
+            <div class="hero-feature-top">
+              <div class="hero-feature-avatar" id="hero2-avatar" aria-hidden="true">👟</div>
+              <div class="hero-feature-id">
+                <p class="hero-feature-name" id="hero2-name">Spark</p>
+                <p class="hero-feature-rank" id="hero2-rank"></p>
+              </div>
             </div>
-          </div>
-        </div>
-      </header>
-
-      <!-- Profile switcher (collapsible drawer) -->
-      <section class="card switcher-card" aria-labelledby="switcher-heading">
-        <button type="button" class="switcher-toggle" id="switcher-toggle"
-                aria-expanded="false" aria-controls="switcher-panel">
-          <h2 id="switcher-heading">🧒 Hero: <span id="switcher-summary"></span></h2>
-          <span class="switcher-chevron" aria-hidden="true">▾</span>
-        </button>
-        <div class="switcher-panel" id="switcher-panel" hidden>
-          <p class="field-hint">Tap a hero to switch, or add a new one — everyone keeps their own progress.</p>
-          <div class="profile-switcher" id="profile-switcher"></div>
-
-          <!-- Customize hero (sub-drawer) -->
-          <button type="button" class="switcher-toggle sub-toggle" id="customize-toggle"
-                  aria-expanded="false" aria-controls="customize-panel">
-            <h3>🎨 Customize hero</h3>
-            <span class="switcher-chevron" aria-hidden="true">▾</span>
-          </button>
-          <div class="customize-panel" id="customize-panel" hidden>
-            <form id="profile-form" class="profile-form">
-              <div class="field">
-                <label for="nickname-input">Nickname</label>
-                <input type="text" id="nickname-input" name="nickname" maxlength="16" placeholder="Spark" autocomplete="off" />
+            <div class="energy-block">
+              <p class="energy-mood" id="energy-mood" aria-live="polite"></p>
+              <div class="energy-track" role="img" aria-label="Spark's energy level">
+                <div class="energy-fill" id="energy-fill"></div>
               </div>
-
-              <div class="field">
-                <label for="persona-select">Persona</label>
-                <select id="persona-select" name="persona"></select>
-                <p class="field-hint" id="persona-boost"></p>
+            </div>
+            <div class="stat-grid">
+              <div class="stat-card stat-level">
+                <span class="stat-label">Level</span>
+                <span class="stat-value" id="stat-level">1</span>
               </div>
-
-              <fieldset class="field avatar-field">
-                <legend>Avatar</legend>
-                <div class="avatar-grid" id="avatar-grid" role="radiogroup" aria-label="Choose an avatar"></div>
-              </fieldset>
-
-              <div class="profile-actions">
-                <button type="submit" class="btn btn-primary">Save hero</button>
-                <button type="button" class="btn btn-danger" id="remove-profile-btn">Remove hero</button>
+              <div class="stat-card stat-xp">
+                <span class="stat-label">XP</span>
+                <span class="stat-value" id="stat-xp">0</span>
               </div>
-            </form>
-          </div>
-        </div>
-      </section>
+              <div class="stat-card stat-streak">
+                <span class="stat-label">Streak</span>
+                <span class="stat-value" id="stat-streak">0 🔥</span>
+              </div>
+              <div class="stat-card stat-reps">
+                <span class="stat-label">Total reps</span>
+                <span class="stat-value" id="stat-reps">0</span>
+              </div>
+            </div>
+            <div class="level-progress">
+              <div class="level-progress-track">
+                <div class="level-progress-fill" id="level-progress-fill"></div>
+              </div>
+              <p class="level-progress-label" id="level-progress-label">0 / 150 XP to next level</p>
+            </div>
+          </section>
 
-      <!-- Install prompt (shown only when installable / not yet installed) -->
-      <section class="card install-card" id="install-card" hidden aria-labelledby="install-heading">
-        <h2 id="install-heading">📲 Put Move Quest on your home screen</h2>
-        <p class="daily-intro" id="install-text">Install the app for one-tap access — it works offline too!</p>
-        <button type="button" class="btn btn-primary" id="install-btn">Install app</button>
-      </section>
+          <!-- Profile switcher (collapsible drawer) -->
+          <section class="card switcher-card" aria-labelledby="switcher-heading">
+            <button type="button" class="switcher-toggle" id="switcher-toggle"
+                    aria-expanded="false" aria-controls="switcher-panel">
+              <h2 id="switcher-heading">🧒 Hero: <span id="switcher-summary"></span></h2>
+              <span class="switcher-chevron" aria-hidden="true">▾</span>
+            </button>
+            <div class="switcher-panel" id="switcher-panel" hidden>
+              <p class="field-hint">Tap a hero to switch, or add a new one — everyone keeps their own progress.</p>
+              <div class="profile-switcher" id="profile-switcher"></div>
 
-      <!-- Progress dashboard -->
-      <section class="card dashboard" aria-labelledby="dashboard-heading">
-        <h2 id="dashboard-heading">📊 Quest progress</h2>
-        <div class="stat-grid">
-          <div class="stat-card stat-level">
-            <span class="stat-label">Level</span>
-            <span class="stat-value" id="stat-level">1</span>
-          </div>
-          <div class="stat-card stat-xp">
-            <span class="stat-label">XP</span>
-            <span class="stat-value" id="stat-xp">0</span>
-          </div>
-          <div class="stat-card stat-streak">
-            <span class="stat-label">Streak</span>
-            <span class="stat-value" id="stat-streak">0 🔥</span>
-          </div>
-          <div class="stat-card stat-reps">
-            <span class="stat-label">Total reps</span>
-            <span class="stat-value" id="stat-reps">0</span>
-          </div>
-        </div>
-        <div class="level-progress">
-          <div class="level-progress-track">
-            <div class="level-progress-fill" id="level-progress-fill"></div>
-          </div>
-          <p class="level-progress-label" id="level-progress-label">0 / 150 XP to next level</p>
-        </div>
-        <h3 class="week-heading">Last 7 days</h3>
-        <div class="week-chart" id="week-chart"></div>
-        <p class="week-bests" id="week-bests"></p>
-      </section>
+              <!-- Customize hero (sub-drawer) -->
+              <button type="button" class="switcher-toggle sub-toggle" id="customize-toggle"
+                      aria-expanded="false" aria-controls="customize-panel">
+                <h3>🎨 Customize hero</h3>
+                <span class="switcher-chevron" aria-hidden="true">▾</span>
+              </button>
+              <div class="customize-panel" id="customize-panel" hidden>
+                <form id="profile-form" class="profile-form">
+                  <div class="field">
+                    <label for="nickname-input">Nickname</label>
+                    <input type="text" id="nickname-input" name="nickname" maxlength="16" placeholder="Spark" autocomplete="off" />
+                  </div>
 
-      <!-- Daily quests -->
-      <section class="card daily-card" aria-labelledby="daily-heading">
-        <h2 id="daily-heading">⚡ Today's quests</h2>
-        <p class="daily-intro">Three special moves picked fresh every day. Finish all three to open the bonus chest!</p>
-        <div class="daily-board" id="daily-board"></div>
-      </section>
+                  <div class="field">
+                    <label for="persona-select">Persona</label>
+                    <select id="persona-select" name="persona"></select>
+                    <p class="field-hint" id="persona-boost"></p>
+                  </div>
 
-      <!-- Mystery Spinner -->
-      <section class="card spinner-card" aria-labelledby="spinner-heading">
-        <h2 id="spinner-heading">🎰 Mystery Spinner</h2>
-        <p class="daily-intro">One spin a day: a surprise move with a silly twist — or a lucky prize!</p>
-        <div class="spinner-area">
-          <div class="spinner-pointer" aria-hidden="true"></div>
-          <div class="spinner-wheel" id="spinner-wheel" aria-hidden="true"></div>
-        </div>
-        <button type="button" class="btn btn-primary spin-btn" id="spin-btn">Spin!</button>
-        <div class="spinner-result" id="spinner-result" aria-live="polite"></div>
-      </section>
+                  <fieldset class="field avatar-field">
+                    <legend>Avatar</legend>
+                    <div class="avatar-grid" id="avatar-grid" role="radiogroup" aria-label="Choose an avatar"></div>
+                  </fieldset>
+
+                  <div class="profile-actions">
+                    <button type="submit" class="btn btn-primary">Save hero</button>
+                    <button type="button" class="btn btn-danger" id="remove-profile-btn">Remove hero</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- Panel 3: Today -->
+        <section class="home-panel" aria-label="Today">
+          <section class="card daily-card" aria-labelledby="daily-heading">
+            <h2 id="daily-heading">⚡ Today's quests</h2>
+            <p class="daily-intro">Three special moves picked fresh every day. Finish all three to open the bonus chest!</p>
+            <div class="daily-board" id="daily-board"></div>
+          </section>
+
+          <section class="card" aria-labelledby="week-heading-title">
+            <h2 id="week-heading-title">📊 Last 7 days</h2>
+            <div class="week-chart" id="week-chart"></div>
+            <p class="week-bests" id="week-bests"></p>
+          </section>
+        </section>
+
+        <!-- Panel 4: Mystery Spinner -->
+        <section class="home-panel" aria-label="Mystery spinner">
+          <section class="card spinner-card" aria-labelledby="spinner-heading">
+            <h2 id="spinner-heading">🎰 Mystery Spinner</h2>
+            <p class="daily-intro">One spin a day: a surprise move with a silly twist — or a lucky prize!</p>
+            <div class="spinner-area">
+              <div class="spinner-pointer" aria-hidden="true"></div>
+              <div class="spinner-wheel" id="spinner-wheel" aria-hidden="true"></div>
+            </div>
+            <button type="button" class="btn btn-primary spin-btn" id="spin-btn">Spin!</button>
+            <div class="spinner-result" id="spinner-result" aria-live="polite"></div>
+          </section>
+        </section>
+      </div>
+
+      <div class="home-dots" id="home-dots" aria-label="Home panel position">
+        <button type="button" class="home-dot active" data-panel="0" aria-label="Welcome panel"></button>
+        <button type="button" class="home-dot" data-panel="1" aria-label="My hero panel"></button>
+        <button type="button" class="home-dot" data-panel="2" aria-label="Today panel"></button>
+        <button type="button" class="home-dot" data-panel="3" aria-label="Mystery spinner panel"></button>
+      </div>
     </div>
 
     <!-- ================= PLAY ================= -->

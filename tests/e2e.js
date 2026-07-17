@@ -112,6 +112,18 @@ async function main() {
     await page.goto(BASE);
     await page.waitForSelector(".tab-bar");
 
+    console.log("# Home pager");
+    check("home has 4 swipe panels", (await page.$$(".home-panel")).length === 4);
+    check("pager dots present", (await page.$$(".home-dot")).length === 4);
+    check("energy meter renders", (await page.textContent("#energy-mood")).length > 5);
+    await page.click('.home-dot[data-panel="3"]');
+    await page.waitForTimeout(700);
+    const panelIdx = await page.evaluate(() =>
+      Math.round(document.getElementById("home-pager").scrollLeft / document.getElementById("home-pager").clientWidth));
+    check("dot navigation reaches spinner panel", panelIdx === 3, String(panelIdx));
+    await page.click('.home-dot[data-panel="0"]');
+    await page.waitForTimeout(700);
+
     console.log("# Level curve & migration");
     await seedProfile(page, { xp: 400, curve: 2 });
     check("400 XP = level 3", (await page.textContent("#stat-level")) === "3");

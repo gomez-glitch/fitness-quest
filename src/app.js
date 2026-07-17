@@ -738,6 +738,13 @@ const el = {
   installBtn: document.getElementById("install-btn"),
   heroFactText: document.getElementById("hero-fact-text"),
   heroRank: document.getElementById("hero-rank"),
+  homePager: document.getElementById("home-pager"),
+  homeDots: document.getElementById("home-dots"),
+  hero2Avatar: document.getElementById("hero2-avatar"),
+  hero2Name: document.getElementById("hero2-name"),
+  hero2Rank: document.getElementById("hero2-rank"),
+  energyMood: document.getElementById("energy-mood"),
+  energyFill: document.getElementById("energy-fill"),
   detailOverlay: document.getElementById("detail-overlay"),
   levelupOverlay: document.getElementById("levelup-overlay"),
   dailyBoard: document.getElementById("daily-board"),
@@ -769,6 +776,35 @@ function renderHero() {
   el.heroAvatar.textContent = st.profile.avatar;
   el.heroAvatar.className = `hero-avatar ring-${rank.tier}`;
   el.heroRank.textContent = `Lv ${level} · ${rank.title}`;
+  el.hero2Avatar.textContent = st.profile.avatar;
+  el.hero2Avatar.className = `hero-feature-avatar ring-${rank.tier}`;
+  el.hero2Name.textContent = st.profile.nickname;
+  el.hero2Rank.textContent = `Lv ${level} · ${rank.title}`;
+  renderEnergyMeter();
+}
+
+// Spark's energy: fills with today's activity, drains on quiet days.
+function renderEnergyMeter() {
+  const st = activeProfile();
+  const today = todayStr();
+  let energy;
+  if (st.lastCompletedDate === today) {
+    energy = Math.min(100, 40 + todayClaimCount(st) * 12);
+  } else if (wasYesterday(st.lastCompletedDate, today)) {
+    energy = 35;
+  } else if (st.lastCompletedDate) {
+    energy = 15;
+  } else {
+    energy = 25; // brand-new hero, full of potential
+  }
+
+  el.energyFill.style.width = `${energy}%`;
+  el.energyFill.classList.toggle("energy-high", energy >= 80);
+  el.energyFill.classList.toggle("energy-low-fill", energy < 40);
+  el.energyMood.textContent =
+    energy >= 80 ? "🤩 Spark is SUPERCHARGED!"
+    : energy >= 40 ? "😊 Spark is feeling good!"
+    : "😴 Spark is sleepy — let's move!";
 }
 
 function renderDailyFact() {
@@ -823,6 +859,28 @@ function setCustomizeOpen(open) {
 
 const TABS = ["home", "play", "adventure", "library", "awards"];
 
+// ---------------------------------------------------------------------------
+// Home pager (swipe left/right between full-screen panels)
+// ---------------------------------------------------------------------------
+
+function currentHomePanel() {
+  return Math.round(el.homePager.scrollLeft / el.homePager.clientWidth);
+}
+
+function goHomePanel(index, smooth = true) {
+  el.homePager.scrollTo({
+    left: index * el.homePager.clientWidth,
+    behavior: smooth && !REDUCED_MOTION ? "smooth" : "auto",
+  });
+}
+
+function updateHomeDots() {
+  const idx = currentHomePanel();
+  el.homeDots.querySelectorAll(".home-dot").forEach((dot, i) => {
+    dot.classList.toggle("active", i === idx);
+  });
+}
+
 function switchTab(name) {
   if (!TABS.includes(name)) return;
   TABS.forEach((t) => {
@@ -839,6 +897,7 @@ function switchTab(name) {
   }
   if (name !== "play" && playClicker) playClicker.pauseTimer();
   if (name === "adventure") renderJourney(); // re-render so auto-scroll works once visible
+  if (name === "home") updateHomeDots();
 }
 
 function renderProfileForm() {
@@ -1165,10 +1224,31 @@ el.startMovingBtn.addEventListener("click", () => {
   switchTab("play");
 });
 
+let homeScrollRaf = null;
+el.homePager.addEventListener("scroll", () => {
+  if (homeScrollRaf) return;
+  homeScrollRaf = requestAnimationFrame(() => {
+    homeScrollRaf = null;
+    updateHomeDots();
+  });
+});
+
+el.homeDots.addEventListener("click", (event) => {
+  const dot = event.target.closest(".home-dot");
+  if (dot) goHomePanel(Number(dot.dataset.panel));
+});
+
+el.homePager.addEventListener("keydown", (event) => {
+  if (event.target !== el.homePager) return; // don't hijack form fields
+  if (event.key === "ArrowRight") goHomePanel(Math.min(3, currentHomePanel() + 1));
+  if (event.key === "ArrowLeft") goHomePanel(Math.max(0, currentHomePanel() - 1));
+});
+
 el.customizeHeroBtn.addEventListener("click", () => {
+  goHomePanel(1); // hero panel
   setSwitcherOpen(true);
   setCustomizeOpen(true);
-  el.nicknameInput.focus();
+  el.nicknameInput.focus({ preventScroll: true });
 });
 
 el.switcherToggle.addEventListener("click", () => {
@@ -1575,7 +1655,7 @@ function buildSpinnerWheel() {
   el.spinnerWheel.style.background = `conic-gradient(${stops})`;
   el.spinnerWheel.innerHTML = SPIN_MODS.map((m, i) => {
     const a = i * 45 + 22.5;
-    return `<span class="spinner-emoji" style="transform: rotate(${a}deg) translateY(-62px) rotate(${-a}deg)">${m.emoji}</span>`;
+    return `<span class="spinner-emoji" style="transform: rotate(${a}deg) translateY(-96px) rotate(${-a}deg)">${m.emoji}</span>`;
   }).join("");
 }
 

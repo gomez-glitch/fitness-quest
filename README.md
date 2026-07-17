@@ -20,6 +20,12 @@ colors, big buttons, and encouraging, positive language throughout.
 - App-style shell: a fixed bottom tab bar (Home / Play / Adventure / Library /
   Awards) keeps every screen short, and long card sets (exercise picker, move
   library, badge case) are swipeable horizontal snap rows
+- Swipeable Home: four full-screen panels (Welcome + daily fact → My Hero
+  with stats and Spark's energy meter → Today's quests + weekly chart →
+  a super-sized Mystery Spinner) with snap paging and dot navigation
+- Spark's energy meter: a colorful bar that fills with today's activity and
+  drains on quiet days, with mood messages ("Spark is SUPERCHARGED!" /
+  "Spark is sleepy — let's move!")
 - Multiple hero profiles (up to 4) so siblings can play side by side, each with
   their own XP, streaks, badges, and quest history — tucked into a collapsible
   drawer once a hero is picked, with hero customization nested inside it as a
