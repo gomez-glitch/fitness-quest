@@ -27,7 +27,9 @@ colors, big buttons, and encouraging, positive language throughout.
   scene that shifts with the real time of day (sunny day → sunset → starry
   night with a nightcap), his mood follows the energy meter, and he chats in
   a speech bubble about streaks, quests, and snacks. Boop him for giggles and
-  hearts. A 12-snack tray feeds his tummy meter (which slowly empties over
+  hearts. A spinning 3D snack wheel holds 12 foods — it idles with a slow
+  show-off spin, drag it to whirl with momentum, and tapping a food swings it
+  round to the front and feeds his tummy meter (which slowly empties over
   real hours): he munches with a chomp animation and sound, occasionally
   burps ("…excuse me! 🤭"), politely refuses food when full, and hides a
   secret favourite food each day per hero — find it for a jackpot celebration.

@@ -95,6 +95,8 @@ async function main() {
     await waitForServer(BASE);
     browser = await chromium.launch(launchOptions());
     const page = await browser.newPage({ viewport: { width: 420, height: 850 } });
+    // Freeze the 3D snack wheel on every load so food positions are deterministic.
+    await page.addInitScript(() => { window.__MQ_TEST_FREEZE_TRAY = true; });
     const pageErrors = [];
     page.on("pageerror", (e) => pageErrors.push(String(e.message)));
 
@@ -141,10 +143,11 @@ async function main() {
     check("boop stat shown", (await page.textContent("#pet-stats")).includes("Booped 1"));
 
     console.log("# Tamagotchi: snacks & naps");
-    check("snack tray offers 12 foods", (await page.$$("#pet-tray .pet-food")).length === 12);
+    check("snack wheel offers 12 foods", (await page.$$("#pet-tray .pet-food")).length === 12);
+    check("snack wheel names the front food", (await page.textContent("#pet-tray-label")).includes("tap to feed"));
     await page.waitForTimeout(1300); // let the boop reaction finish (busy flag)
-    await page.click('#pet-tray .pet-food[data-food="apple"]');
-    await page.waitForTimeout(400);
+    await page.click('#pet-tray .pet-food[data-food="apple"]'); // front of the frozen wheel
+    await page.waitForTimeout(700); // wheel settles on it, then the feed kicks off
     const petState = await page.evaluate(() => {
       const d = JSON.parse(localStorage.getItem("move-quest-progress-v3"));
       return d.profiles[d.activeProfileId].pet;

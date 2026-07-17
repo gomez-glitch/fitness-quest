@@ -93,7 +93,7 @@ Living list, roughly priority-ordered. Move items up/down freely.
   boss badge + bonus chest.
 - **Spark is alive** ✅ SHIPPED (and upgraded to a full tamagotchi) —
   Spark's Corner home panel: time-of-day scene, mood-driven idle animations,
-  boops, speech bubbles, a snack tray + tummy meter with real-time hunger,
+  boops, speech bubbles, a spinning 3D snack wheel + tummy meter with real-time hunger,
   a daily secret favourite food mini-game, comedy burps, and naps with a
   gentle boop-to-wake. Energy stays exercise-driven; food is pure fun
   (never sad/sick, treats always welcome).

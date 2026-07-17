@@ -1299,37 +1299,61 @@ body.no-scroll {
   color: var(--purple-dark);
 }
 
-/* snack tray */
+/* snack wheel: a 3D carousel of foods, spun by dragging */
 
 .pet-tray {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.4rem;
-  margin: 0 0 0.9rem;
+  position: relative;
+  height: 5.4rem;
+  margin: 0 0 0.15rem;
+  perspective: 620px;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pet-tray:active {
+  cursor: grabbing;
+}
+
+.pet-tray-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3rem;
+  height: 3rem;
+  margin: -1.5rem 0 0 -1.5rem;
+  transform-style: preserve-3d;
 }
 
 .pet-food {
-  width: 2.7rem;
-  height: 2.7rem;
-  font-size: 1.35rem;
+  position: absolute;
+  inset: 0;
+  font-size: 1.55rem;
   line-height: 1;
   border: 2px solid var(--lavender);
   border-radius: 12px;
   background: #fff;
   cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease;
   padding: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: rotateY(calc(var(--i) * 30deg)) translateZ(98px) scale(var(--s, 1));
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.25s ease;
 }
 
-.pet-food:hover,
-.pet-food:focus-visible {
+.pet-food.front {
+  --s: 1.14;
   border-color: var(--purple);
-  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
 }
 
-.pet-food:active {
-  transform: scale(0.85);
+.pet-tray-label {
+  margin: 0 0 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--purple-dark);
+  min-height: 1.2em;
 }
 
 .food-fly {

@@ -829,6 +829,7 @@ const el = {
   petBubble: document.getElementById("pet-bubble"),
   petStats: document.getElementById("pet-stats"),
   petTray: document.getElementById("pet-tray"),
+  trayLabel: document.getElementById("pet-tray-label"),
   tummyMood: document.getElementById("tummy-mood"),
   tummyFill: document.getElementById("tummy-fill"),
   detailOverlay: document.getElementById("detail-overlay"),
@@ -2109,11 +2110,112 @@ function feedSpark(foodId) {
   }, 2800);
 }
 
+// --- snack carousel: a spinning 3D lazy susan of foods ---
+
+const TRAY_STEP = 360 / PET_FOODS.length;
+const tray = {
+  ring: null,
+  items: [],
+  angle: 0,
+  vel: 0,
+  frontIdx: -1,
+  dragging: false,
+  justDragged: false,
+  raf: null,
+  resumeAt: 0,
+  feedTarget: null,
+  feedId: null,
+};
+
+function modWrap(n, m) {
+  return ((n % m) + m) % m;
+}
+
 function renderPetTray() {
   if (!el.petTray) return;
-  el.petTray.innerHTML = PET_FOODS.map(
-    (f) => `<button type="button" class="pet-food" data-food="${f.id}" aria-label="Feed Spark a ${f.name}">${f.emoji}</button>`
-  ).join("");
+  el.petTray.innerHTML =
+    `<div class="pet-tray-ring">` +
+    PET_FOODS.map(
+      (f, i) =>
+        `<button type="button" class="pet-food" style="--i:${i}" data-food="${f.id}" data-idx="${i}" aria-label="Feed Spark a ${f.name}">${f.emoji}</button>`
+    ).join("") +
+    `</div>`;
+  tray.ring = el.petTray.querySelector(".pet-tray-ring");
+  tray.items = Array.from(tray.ring.querySelectorAll(".pet-food"));
+  tray.frontIdx = -1;
+  updateTrayFront();
+}
+
+// Depth cue: foods fade as they swing away from the front of the wheel.
+function shadeTrayItems() {
+  tray.items.forEach((btn, i) => {
+    const dev = modWrap(tray.angle + i * TRAY_STEP + 180, 360) - 180;
+    const t = Math.min(1, Math.abs(dev) / 90);
+    btn.style.opacity = String(1 - t * 0.5);
+  });
+}
+
+function updateTrayFront() {
+  const idx = modWrap(Math.round(-tray.angle / TRAY_STEP), PET_FOODS.length);
+  if (idx === tray.frontIdx) return;
+  tray.frontIdx = idx;
+  tray.ring.querySelectorAll(".pet-food").forEach((b, i) => b.classList.toggle("front", i === idx));
+  const f = PET_FOODS[idx];
+  el.trayLabel.textContent = `${f.emoji} ${f.name} — tap to feed!`;
+}
+
+function trayFrame() {
+  tray.raf = requestAnimationFrame(trayFrame);
+  if (!tray.dragging) {
+    if (tray.feedTarget !== null) {
+      // easing home so the picked food arrives at the front, then gets eaten
+      const diff = tray.feedTarget - tray.angle;
+      if (Math.abs(diff) < 0.6 || REDUCED_MOTION) {
+        tray.angle = tray.feedTarget;
+        tray.feedTarget = null;
+        const id = tray.feedId;
+        tray.feedId = null;
+        feedSpark(id);
+      } else {
+        tray.angle += diff * 0.16;
+      }
+    } else if (Math.abs(tray.vel) > 0.05) {
+      // momentum from a flick, decaying
+      tray.angle += tray.vel;
+      tray.vel *= 0.94;
+      if (Math.abs(tray.vel) <= 0.05) tray.vel = 0;
+    } else if (!REDUCED_MOTION && !window.__MQ_TEST_FREEZE_TRAY && Date.now() > tray.resumeAt) {
+      tray.angle -= 0.12; // idle show-off spin
+    } else {
+      // settle onto the nearest food
+      const snap = Math.round(tray.angle / TRAY_STEP) * TRAY_STEP;
+      const diff = snap - tray.angle;
+      if (Math.abs(diff) > 0.05) tray.angle += REDUCED_MOTION ? diff : diff * 0.18;
+    }
+  }
+  tray.ring.style.transform = `rotateY(${tray.angle}deg)`;
+  shadeTrayItems();
+  updateTrayFront();
+}
+
+function startTraySpin() {
+  if (tray.raf || !tray.ring) return;
+  tray.resumeAt = Date.now() + 2500; // sit still a beat before showing off
+  tray.raf = requestAnimationFrame(trayFrame);
+}
+
+function stopTraySpin() {
+  if (tray.raf) cancelAnimationFrame(tray.raf);
+  tray.raf = null;
+}
+
+function spinTrayToFood(idx) {
+  const desired = -idx * TRAY_STEP;
+  const laps = Math.round((tray.angle - desired) / 360);
+  tray.feedTarget = desired + laps * 360;
+  tray.feedId = PET_FOODS[idx].id;
+  tray.vel = 0;
+  tray.resumeAt = Date.now() + 8000;
 }
 
 // --- naps ---
@@ -2151,6 +2253,7 @@ function startPetLife() {
   renderPet();
   petSay(petBubbleLine());
   if (pet.mascot) pet.mascot.start();
+  startTraySpin();
   pet.behaviorTimer = setInterval(() => {
     if (pet.busy || !pet.mascot) return;
     // Test hook: true forces a nap on the next tick, false suppresses naps.
@@ -2179,6 +2282,7 @@ function stopPetLife() {
   pet.napTimer = null;
   pet.napping = false;
   pet.busy = false;
+  stopTraySpin();
   if (pet.mascot) pet.mascot.stop();
 }
 
@@ -2189,9 +2293,58 @@ el.petScene.addEventListener("keydown", (event) => {
     boopSpark();
   }
 });
+const trayPointer = { active: false, id: null, startX: 0, lastX: 0 };
+
+el.petTray.addEventListener("pointerdown", (event) => {
+  trayPointer.active = true;
+  trayPointer.id = event.pointerId;
+  trayPointer.startX = trayPointer.lastX = event.clientX;
+  tray.vel = 0;
+  tray.resumeAt = Date.now() + 8000;
+});
+
+el.petTray.addEventListener("pointermove", (event) => {
+  if (!trayPointer.active) return;
+  if (!tray.dragging && Math.abs(event.clientX - trayPointer.startX) > 8) {
+    tray.dragging = true;
+    tray.feedTarget = null; // grabbing the wheel cancels a pending spin-to-feed
+    tray.feedId = null;
+    trayPointer.lastX = event.clientX;
+    try {
+      el.petTray.setPointerCapture(trayPointer.id);
+    } catch (err) {
+      // capture is a nicety; dragging works without it
+    }
+  }
+  if (tray.dragging) {
+    const dx = event.clientX - trayPointer.lastX;
+    tray.angle += dx * 0.45;
+    tray.vel = dx * 0.45;
+    trayPointer.lastX = event.clientX;
+  }
+});
+
+function endTrayDrag() {
+  if (!trayPointer.active) return;
+  trayPointer.active = false;
+  if (tray.dragging) {
+    tray.dragging = false;
+    tray.vel = Math.max(-10, Math.min(10, tray.vel));
+    tray.justDragged = true;
+    setTimeout(() => {
+      tray.justDragged = false;
+    }, 60);
+    tray.resumeAt = Date.now() + 8000;
+  }
+}
+
+el.petTray.addEventListener("pointerup", endTrayDrag);
+el.petTray.addEventListener("pointercancel", endTrayDrag);
+
 el.petTray.addEventListener("click", (event) => {
+  if (tray.justDragged) return; // a flick isn't a food pick
   const btn = event.target.closest(".pet-food");
-  if (btn) feedSpark(btn.dataset.food);
+  if (btn) spinTrayToFood(Number(btn.dataset.idx));
 });
 renderPetTray();
 
