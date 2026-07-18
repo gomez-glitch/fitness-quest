@@ -1,17 +1,59 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#7c3aed" />
       <stop offset="1" stop-color="#ec4899" />
     </linearGradient>
+    <radialGradient id="burst" cx="0.5" cy="0.46" r="0.62">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.4" />
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="head" cx="0.35" cy="0.3" r="0.9">
+      <stop offset="0" stop-color="#c4b5fd" />
+      <stop offset="0.6" stop-color="#8b5cf6" />
+      <stop offset="1" stop-color="#6d28d9" />
+    </radialGradient>
   </defs>
-  <rect width="512" height="512" rx="104" fill="url(#bg)" />
-  <!-- Spark's head -->
-  <path d="M 232 96 L 256 152 L 280 96 Z" fill="#fde68a" />
-  <circle cx="256" cy="264" r="128" fill="#8b5cf6" stroke="#5b21b6" stroke-width="10" />
-  <circle cx="212" cy="240" r="18" fill="#3b0764" />
-  <circle cx="300" cy="240" r="18" fill="#3b0764" />
-  <path d="M 200 310 Q 256 366 312 310" fill="none" stroke="#3b0764" stroke-width="18" stroke-linecap="round" />
-  <!-- emblem -->
-  <rect x="236" y="416" width="40" height="40" rx="8" fill="#fde68a" transform="rotate(45 256 436)" />
+  <rect width="512" height="512" rx="116" fill="url(#bg)" />
+
+  <!-- sun rays -->
+  <g opacity="0.14" fill="#ffffff">
+    <polygon points="256,236 176,20 336,20" />
+    <polygon points="256,236 492,140 492,300" />
+    <polygon points="256,236 20,140 20,300" />
+    <polygon points="256,236 150,492 362,492" />
+  </g>
+  <rect width="512" height="512" rx="116" fill="url(#burst)" />
+
+  <!-- confetti -->
+  <circle cx="92" cy="112" r="10" fill="#fde68a" />
+  <circle cx="428" cy="96" r="8" fill="#f9a8d4" />
+  <path d="M 416 348 l 6 15 15 6 -15 6 -6 15 -6 -15 -15 -6 15 -6 Z" fill="#fde68a" opacity="0.95" />
+  <path d="M 84 330 l 6 15 15 6 -15 6 -6 15 -6 -15 -15 -6 15 -6 Z" fill="#ffffff" opacity="0.8" />
+
+  <!-- shadow -->
+  <ellipse cx="256" cy="452" rx="96" ry="18" fill="#3b0764" opacity="0.35" />
+
+  <!-- star-jump Spark -->
+  <!-- arms -->
+  <path d="M 196 226 L 126 142" stroke="#5b21b6" stroke-width="34" stroke-linecap="round" />
+  <path d="M 316 226 L 386 142" stroke="#5b21b6" stroke-width="34" stroke-linecap="round" />
+  <path d="M 196 224 L 128 142" stroke="#8b5cf6" stroke-width="26" stroke-linecap="round" />
+  <path d="M 316 224 L 384 142" stroke="#8b5cf6" stroke-width="26" stroke-linecap="round" />
+  <!-- legs -->
+  <path d="M 226 358 L 184 428" stroke="#8b5cf6" stroke-width="30" stroke-linecap="round" />
+  <path d="M 286 358 L 328 428" stroke="#8b5cf6" stroke-width="30" stroke-linecap="round" />
+  <ellipse cx="176" cy="436" rx="26" ry="15" fill="#ffffff" />
+  <ellipse cx="336" cy="436" rx="26" ry="15" fill="#ffffff" />
+  <!-- torso -->
+  <rect x="196" y="208" width="120" height="164" rx="56" fill="#ec4899" stroke="#fff" stroke-width="10" />
+  <rect x="238" y="270" width="36" height="36" rx="7" fill="#fde68a" transform="rotate(45 256 288)" />
+  <!-- head -->
+  <path d="M 256 22 C 268 44 282 54 282 74 C 282 92 270 102 256 102 C 242 102 230 92 230 74 C 230 54 244 44 256 22 Z"
+        fill="#fbbf24" stroke="#fff7ed" stroke-width="7" />
+  <circle cx="256" cy="158" r="76" fill="url(#head)" stroke="#ffffff" stroke-width="10" />
+  <!-- star eyes -->
+  <path d="M 226 142 l 5 12 12 5 -12 5 -5 12 -5 -12 -12 -5 12 -5 Z" fill="#fde68a" />
+  <path d="M 286 142 l 5 12 12 5 -12 5 -5 12 -5 -12 -12 -5 12 -5 Z" fill="#fde68a" />
+  <path d="M 226 182 Q 256 210 286 182" fill="none" stroke="#2e1065" stroke-width="11" stroke-linecap="round" />
 </svg>
