@@ -132,7 +132,7 @@ const EXERCISES = [
   },
   {
     id: "wall-sit", title: "Wall Sit", mode: "timed", target: 20, xp: 55, icon: "🧱", group: "Legs", intensity: 2,
-    muscles: "Legs", cue: "Slide down a wall until your legs make a chair shape — and hold!",
+    muscles: "Legs", cue: "Slide down a wall until your legs make a chair shape — and hold.",
     steps: ["Back flat on the wall", "Knees over ankles", "Breathe and hold"],
   },
   {
@@ -142,8 +142,8 @@ const EXERCISES = [
   },
   {
     id: "flamingo-balance", title: "Flamingo Balance", mode: "timed", target: 10, xp: 40, icon: "🦩", group: "Legs", intensity: 1,
-    muscles: "Balance", cue: "Stand on one leg like a flamingo — switch legs next time!",
-    steps: ["Stare at one spot", "Arms out wide", "Wobbling means it's working!"],
+    muscles: "Balance", cue: "Stand on one leg like a flamingo — switch legs next time.",
+    steps: ["Stare at one spot", "Arms out wide", "Wobbling means it's working."],
   },
   {
     id: "knee-ups", title: "Knee Ups", target: 14, xp: 40, icon: "🚶", group: "Legs", intensity: 1,
@@ -192,7 +192,7 @@ const EXERCISES = [
   },
   {
     id: "burpees", title: "Burpees", target: 6, xp: 70, icon: "💥", group: "Whole body", intensity: 3,
-    muscles: "Everything!", cue: "Squat down, hop back to a plank, hop in, and jump up tall!",
+    muscles: "Everything.", cue: "Squat down, hop back to a plank, hop in, and jump up tall.",
     steps: ["Four beats: down-back-in-up", "Step back instead of hop is fine", "Reach high on the jump"],
   },
   {
@@ -212,7 +212,7 @@ const EXERCISES = [
   },
   {
     id: "tree-pose", title: "Tree Pose", mode: "timed", target: 20, xp: 40, icon: "🌳", group: "Stretch", intensity: 1,
-    muscles: "Balance + calm", cue: "One foot to your other leg, arms grow up like branches. Switch legs next time!",
+    muscles: "Balance + calm", cue: "One foot to your other leg, arms grow up like branches. Switch legs next time.",
     steps: ["Stare at one still spot", "Foot above or below the knee", "Grow tall and breathe"],
   },
   {
@@ -227,7 +227,7 @@ const EXERCISES = [
   },
   {
     id: "warrior", title: "Brave Warrior", mode: "timed", target: 20, xp: 45, icon: "🗡️", group: "Stretch", intensity: 1,
-    muscles: "Legs + focus", cue: "Strong lunge, arms reaching front and back, eyes forward. Switch sides next time!",
+    muscles: "Legs + focus", cue: "Strong lunge, arms reaching front and back, eyes forward. Switch sides next time.",
     steps: ["Front knee bent", "Back leg long and strong", "Arms like arrows"],
   },
   {
@@ -237,7 +237,7 @@ const EXERCISES = [
   },
   {
     id: "frog-pose", title: "Frog Pose", mode: "timed", target: 20, xp: 40, icon: "🪷", group: "Stretch", intensity: 1,
-    muscles: "Hips", cue: "Sink into a low squat with elbows inside your knees — hips say hello!",
+    muscles: "Hips", cue: "Sink into a low squat with elbows inside your knees — hips say hello.",
     steps: ["Heels down if you can", "Elbows press knees gently", "Chest stays lifted"],
   },
   {
@@ -262,22 +262,22 @@ const EXERCISES = [
   },
   {
     id: "back-roll", title: "Back Massage Roll", mode: "timed", target: 30, xp: 45, icon: "💆", group: "Stretch", intensity: 1, roller: true,
-    muscles: "Upper back", cue: "Lie back with the roller under your upper back — your own massage machine!",
+    muscles: "Upper back", cue: "Lie back with the roller under your upper back — your own massage machine.",
     steps: ["Knees bent, feet flat", "Gentle rolls up and down", "Never roll your neck or lower back"],
   },
   {
     id: "superhero-side-roll", title: "Superhero Side Roll", mode: "timed", target: 20, xp: 40, icon: "🦸", group: "Stretch", intensity: 1, roller: true,
-    muscles: "Sides", cue: "Roller under your side, arm stretched long like you're flying. Swap sides next time!",
+    muscles: "Sides", cue: "Roller under your side, arm stretched long like you're flying. Swap sides next time.",
     steps: ["Stretch your arm out long", "Tiny slow rolls", "Fly like a resting superhero"],
   },
   {
     id: "foot-wake-up", title: "Foot Wake-Up", mode: "timed", target: 20, xp: 35, icon: "🦶", group: "Stretch", intensity: 1, roller: true,
-    muscles: "Feet", cue: "Standing, roll the sole of one foot over the roller. Hold a wall and swap feet next time!",
+    muscles: "Feet", cue: "Standing, roll the sole of one foot over the roller. Hold a wall and swap feet next time.",
     steps: ["Hold a wall or chair", "Roll heel to toes slowly", "Wake up those sleepy feet"],
   },
   {
     id: "rolling-bridge", title: "Rolling Bridge", mode: "timed", target: 20, xp: 55, icon: "🌉", group: "Stretch", intensity: 2, roller: true,
-    muscles: "Bottom + balance", cue: "Hold a bridge with your feet resting on the roller — wobbly balance spice!",
+    muscles: "Bottom + balance", cue: "Hold a bridge with your feet resting on the roller — wobbly balance spice.",
     steps: ["Feet steady on the roller", "Lift hips and hold strong", "Ask a grown-up to spot you"],
   },
   {
@@ -287,7 +287,7 @@ const EXERCISES = [
   },
   {
     id: "bunny-hops", title: "Bunny Hops", target: 12, xp: 40, icon: "🐰", group: "Animal", intensity: 1,
-    muscles: "Legs + bounce", cue: "Little bouncy hops with your paws up — soft landings like a sneaky bunny!",
+    muscles: "Legs + bounce", cue: "Little bouncy hops with your paws up — soft landings like a sneaky bunny.",
     steps: ["Paws up by your chest", "Small quick hops", "Land quiet as a whisper"],
   },
   {
@@ -297,7 +297,7 @@ const EXERCISES = [
   },
   {
     id: "crab-walk", title: "Crab Walk", mode: "timed", target: 20, xp: 55, icon: "🦀", group: "Animal", intensity: 2,
-    muscles: "Arms + core", cue: "Belly to the sky, hands behind you, hips up — scuttle sideways like a crab!",
+    muscles: "Arms + core", cue: "Belly to the sky, hands behind you, hips up — scuttle sideways like a crab.",
     steps: ["Fingers point at your feet", "Lift those hips high", "Scuttle scuttle scuttle"],
   },
   {
@@ -317,12 +317,12 @@ const EXERCISES = [
   },
   {
     id: "cheetah-sprint", title: "Cheetah Sprint", mode: "timed", target: 15, xp: 60, icon: "🐆", group: "Animal", intensity: 3,
-    muscles: "Legs + heart", cue: "Run on the spot as FAST as a cheetah — fastest animal on Earth!",
+    muscles: "Legs + heart", cue: "Run on the spot as FAST as a cheetah — fastest animal on Earth.",
     steps: ["Pump those arms", "Fast fast feet", "Fifteen seconds of full zoom"],
   },
   {
     id: "kangaroo-jumps", title: "Kangaroo Jumps", target: 10, xp: 60, icon: "🦘", group: "Animal", intensity: 3,
-    muscles: "Legs + power", cue: "Big two-foot bounces with your paws tucked — boing across the outback!",
+    muscles: "Legs + power", cue: "Big two-foot bounces with your paws tucked — boing across the outback.",
     steps: ["Bend low like a spring", "Jump BIG", "Soft knees when you land"],
   },
 ];
@@ -340,15 +340,15 @@ const DAILY_BONUS_XP = 40;
 const FUN_FACTS = [
   "Your heart is a muscle about the size of your fist — and it gets a little stronger every time you play! ❤️",
   "Jumping and skipping make your bones grow stronger. Bones love a bounce! 🦴",
-  "Kids' hearts beat faster than grown-ups' — around 70 to 100 beats every minute!",
+  "Kids' hearts beat faster than grown-ups' — around 70 to 100 beats every minute.",
   "Your muscles work in pairs: when one pulls, its partner rests. Teamwork! 🤝",
   "Moving your body releases happy brain chemicals called endorphins. 😊",
   "Stretching after moving keeps your muscles bendy, like a cat. 🐱",
-  "Balancing on one leg is a secret workout — your body makes hundreds of tiny fixes to keep you steady!",
+  "Balancing on one leg is a secret workout — your body makes hundreds of tiny fixes to keep you steady.",
   "Playing tag is real athlete training — bursts of running, then rest. Champions train like that on purpose! 🏃",
   "You have more than 600 muscles, and every single one likes to be used.",
   "Your bones are alive! They quietly rebuild themselves all the time.",
-  "Kids have about 300 bones, but grown-ups have 206 — some of yours will join together as you grow!",
+  "Kids have about 300 bones, but grown-ups have 206 — some of yours will join together as you grow.",
   "Your blood zooms all the way around your body in about one minute. 🚀",
   "You breathe about 20,000 times every day. Your lungs are champions! 🌬️",
   "For its weight, your thigh bone is stronger than concrete. 🏗️",
@@ -366,27 +366,27 @@ const FUN_FACTS = [
   "Everyone's body is different — and yours is exactly right for being you. 💜",
   "Saying 'I can't do it YET' turns a wall into a staircase. 🪜",
   "Cheering for a friend gives YOUR brain a happiness boost too. 📣",
-  "Trying new things grows your brain — mistakes are proof you're learning!",
+  "Trying new things grows your brain — mistakes are proof you're learning.",
   "A high-five in the mirror is scientifically silly AND fun. Try one! 🖐️",
   "Being kind releases the same feel-good chemicals as exercise. Double points for kind movers! ✨",
   "Dancing counts as exercise — even the silly kind. Especially the silly kind! 🕺",
   "Your heart pumps enough blood every day to fill 35 bathtubs. What a champion! 🛁",
   "Kangaroos can't walk backwards — but YOU can. Try five careful backward steps! 🦘",
-  "Fleas can jump 100 times their own height. Strong legs are amazing at any size!",
-  "Your funny bone isn't a bone at all — it's a nerve near your elbow!",
+  "Fleas can jump 100 times their own height. Strong legs are amazing at any size.",
+  "Your funny bone isn't a bone at all — it's a nerve near your elbow.",
   "Cheetahs sprint super fast but get tired in seconds. Steady movers last much longer! 🐆",
   "Blueberries are brain berries — brilliant fuel before thinking hard. 🫐",
   "Milk, yogurt, and cheese carry calcium — the building blocks of strong bones. 🥛",
   "Plain popcorn is a whole grain — a real snack superpower! 🍿",
-  "Your tongue has about 10,000 taste buds. New foods often taste better on the third try!",
+  "Your tongue has about 10,000 taste buds. New foods often taste better on the third try.",
   "Eating slowly gives your tummy time to say 'I'm full, thank you!'",
   "Laughing is a mini tummy workout. Giggle away! 😂",
   "Hugging someone you love releases calm, cozy chemicals. 🤗",
   "While you sleep, your brain tidies up memories like sorting a toy box. 🧸",
-  "A big stretch and a yawn help wake your brain right up!",
+  "A big stretch and a yawn help wake your brain right up.",
   "Standing tall like a superhero for ten seconds can help you feel braver. 🦸",
   "Octopuses have three hearts — you only need your one mighty champion. 🐙",
-  "Walking to school or the park totally counts as exercise. Every step wins!",
+  "Walking to school or the park totally counts as exercise. Every step wins.",
   "Your ears help you balance! Spinning swirls the liquid inside — that's why you feel dizzy.",
   "Drinking water helps your joints move smoothly, like oil on a bike chain. 🚲",
   "Astronauts exercise two hours a day in space to keep their muscles strong. 🧑‍🚀",
@@ -459,14 +459,14 @@ const DANCE_MOVES = [
 ];
 
 const SPIN_MODS = [
-  { id: "double-xp", emoji: "✨", label: "Double XP!", desc: "This move pays 2× XP today!" },
-  { id: "half-reps", emoji: "🪄", label: "Half the reps!", desc: "Target cut in half — quick win!" },
-  { id: "dino", emoji: "🦖", label: "Dino style!", desc: "Do it roaring like a dinosaur!" },
-  { id: "slow-mo", emoji: "🐢", label: "Slow motion!", desc: "Slooow and suuuper controlled." },
-  { id: "speedy", emoji: "⚡️", label: "Super speed!", desc: "Fast as lightning — but safe!" },
-  { id: "animal", emoji: "🐵", label: "Animal noises!", desc: "A different animal sound every rep!" },
-  { id: "hero-pose", emoji: "🦸", label: "Hero pose!", desc: "Strike a superhero pose after each rep!" },
-  { id: "giggle", emoji: "😂", label: "Giggle mode!", desc: "Biggest smile the whole time!" },
+  { id: "double-xp", emoji: "✨", label: "Double XP", desc: "This move pays 2× XP today." },
+  { id: "half-reps", emoji: "🪄", label: "Half the reps", desc: "Target cut in half — quick win." },
+  { id: "dino", emoji: "🦖", label: "Dino style", desc: "Do it roaring like a dinosaur." },
+  { id: "slow-mo", emoji: "🐢", label: "Slow motion", desc: "Slooow and suuuper controlled." },
+  { id: "speedy", emoji: "⚡️", label: "Super speed", desc: "Fast as lightning — but safe." },
+  { id: "animal", emoji: "🐵", label: "Animal noises", desc: "A different animal sound every rep." },
+  { id: "hero-pose", emoji: "🦸", label: "Hero pose", desc: "Strike a superhero pose after each rep." },
+  { id: "giggle", emoji: "😂", label: "Giggle mode", desc: "Biggest smile the whole time." },
 ];
 
 const SURPRISE_LINES = [
@@ -997,10 +997,10 @@ function renderHomeBriefing(st) {
   el.briefCount.textContent = `${done}/${DAILY_QUEST_COUNT}`;
   el.briefSub.textContent =
     done >= DAILY_QUEST_COUNT
-      ? (st.daily.bonusClaimed ? "All done — hero work! 🏆" : "Done! Claim your bonus chest! 🎁")
+      ? (st.daily.bonusClaimed ? "All done — hero work 🏆" : "Done — claim your bonus chest 🎁")
       : done === 0
         ? `${DAILY_QUEST_COUNT} fresh quests waiting`
-        : `${DAILY_QUEST_COUNT - done} to go — nearly there!`;
+        : `${DAILY_QUEST_COUNT - done} to go — nearly there`;
 }
 
 function renderHero() {
@@ -1036,8 +1036,8 @@ function renderEnergyMeter() {
   el.energyFill.classList.toggle("energy-low-fill", energy < 40);
   el.energyMood.textContent =
     energy >= 80 ? "🤩 Spark is SUPERCHARGED!"
-    : energy >= 40 ? "😊 Spark is feeling good!"
-    : "😴 Spark is sleepy — let's move!";
+    : energy >= 40 ? "😊 Spark is feeling good"
+    : "😴 Spark is sleepy — time to move";
 }
 
 function renderDailyFact() {
@@ -1197,7 +1197,7 @@ function renderExerciseBoard() {
     (activeIntensity === "All" || ex.intensity === Number(activeIntensity))
   );
   el.exerciseBoard.innerHTML = list.length === 0
-    ? `<p class="quest-log-empty">No moves match those filters — try widening them!</p>`
+    ? `<p class="quest-log-empty">No moves match those filters — try widening them.</p>`
     : list.map((ex) => {
       const pressed = ex.id === activeExerciseId;
       const meta = INTENSITY_META[ex.intensity];
@@ -1365,7 +1365,7 @@ function renderQuestLog() {
     el.questLog.innerHTML = `
       <li class="quest-log-empty-state">
         <div class="empty-stage" id="empty-quests-stage" aria-hidden="true"></div>
-        <p>No quests yet — Spark is warmed up and waiting for you!</p>
+        <p>No quests yet — Spark is warmed up and waiting for you.</p>
         <button type="button" class="btn btn-claim btn-compact" id="empty-quests-btn">Start your first quest</button>
       </li>`;
     createMascot(document.getElementById("empty-quests-stage"), "pet-wave"); // static waving poster
@@ -2049,9 +2049,9 @@ function renderTummyMeter() {
   const tummy = tummyNow(st);
   el.tummyFill.style.width = `${tummy}%`;
   el.tummyMood.textContent =
-    tummy >= 75 ? "😋 Yummy — Spark is full!"
+    tummy >= 75 ? "😋 Spark is happily full"
     : tummy >= 35 ? "🙂 Spark's tummy is happy"
-    : "🍽️ Spark is getting hungry!";
+    : "🍽️ Spark is getting hungry";
 }
 
 function petMood() {
@@ -2223,13 +2223,13 @@ const BOOP_REACTIONS = [
 
 const BOOP_PARTY = {
   motion: "pet-dance", dur: 3400, sfx: "groove", hearts: ["🎉", "🎊", "💜", "⭐"],
-  lines: ["A BOOP PARTY?! Best day ever! 🎉", "Triple boop!! PARTY TIME! 🎉"],
+  lines: ["A BOOP PARTY?! Best day ever! 🎉", "Triple boop! PARTY TIME! 🎉"],
 };
 
 // Rare rolls (~1 in 17) — surprises worth telling a sibling about.
 const RARE_BOOPS = [
   { motion: "pet-sneeze", dur: 1800, sfx: "achoo", hearts: ["🤧", "💨", "✨"],
-    lines: ["Ah… ah… AH-CHOO!! 🤧 …boop dust!", "ACHOO! Oops — sparkly sneeze!"] },
+    lines: ["Ah… ah… AH-CHOO! 🤧 …boop dust!", "ACHOO! Oops — sparkly sneeze!"] },
   { motion: "pet-hiccup", dur: 1800, sfx: "hic", hearts: ["🫧", "✨"],
     lines: ["*hic!* …*hic!* Oh dear! 🫧", "*hic!* Boop me again — it might cure them!"] },
 ];
@@ -2431,7 +2431,7 @@ function updateTrayFront() {
   tray.frontIdx = idx;
   tray.ring.querySelectorAll(".pet-food").forEach((b, i) => b.classList.toggle("front", i === idx));
   const f = PET_FOODS[idx];
-  el.trayLabel.textContent = `${f.emoji} ${f.name} — tap to feed!`;
+  el.trayLabel.textContent = `${f.emoji} ${f.name} — tap to feed`;
 }
 
 function trayFrame() {
@@ -2639,7 +2639,7 @@ function renderSpinner() {
   ensureDailyFresh(st);
   const spin = st.daily.spin;
   el.spinBtn.disabled = Boolean(spin) || spinning;
-  el.spinBtn.textContent = spin ? "Come back tomorrow!" : "Spin!";
+  el.spinBtn.textContent = spin ? "Come back tomorrow" : "Spin";
 
   if (spin && !spinning) {
     const ex = findExercise(spin.exerciseId);
@@ -2647,10 +2647,10 @@ function renderSpinner() {
     el.spinnerResult.innerHTML = `
       <div class="spin-prize-card">
         <p class="spinner-prize">${mod.emoji} <strong>${ex.title}</strong> — ${mod.label}</p>
-        <p class="spinner-desc">${mod.desc}${spin.claimed ? " ✅ Done!" : ""}</p>
+        <p class="spinner-desc">${mod.desc}${spin.claimed ? " ✅ Done" : ""}</p>
         ${spin.claimed
-          ? `<p class="spinner-desc">⏰️ A new spin lands tomorrow!</p>`
-          : `<button type="button" class="btn btn-primary" data-spin-go="${ex.id}">Go do it! 🎯</button>`}
+          ? `<p class="spinner-desc">⏰️ A new spin lands tomorrow</p>`
+          : `<button type="button" class="btn btn-primary" data-spin-go="${ex.id}">Go do it 🎯</button>`}
       </div>
     `;
   } else if (!spin) {
@@ -2841,7 +2841,7 @@ function openMoveDetail(id) {
           ${ex.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}
         </ul>
         <button type="button" class="btn btn-primary detail-try" data-action="try" data-exercise="${ex.id}">
-          Try it now! 🎯
+          Try it now 🎯
         </button>
       </div>
     </div>
