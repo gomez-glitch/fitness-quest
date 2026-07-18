@@ -881,16 +881,31 @@ fieldset.avatar-field {
   min-height: 0.9rem;
 }
 
-.week-bar {
+.week-track {
+  flex: 1;
   width: 70%;
   max-width: 34px;
-  border-radius: 6px 6px 3px 3px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.week-col.today .week-track {
+  border-color: var(--purple);
+}
+
+.week-bar {
+  width: 100%;
+  border-radius: 999px;
   background: linear-gradient(180deg, var(--pink), var(--purple));
   transition: height 0.4s ease;
 }
 
 .week-col:not(.today) .week-bar {
-  opacity: 0.65;
+  opacity: 0.6;
 }
 
 .week-day {

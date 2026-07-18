@@ -190,6 +190,13 @@ async function main() {
     await page.click('.home-dot[data-panel="0"]');
     await page.waitForTimeout(700);
 
+    console.log("# Daily quest balance");
+    const dailyMetas = await page.$$eval("#daily-board .daily-quest .daily-quest-meta",
+      (els) => els.map((e) => e.textContent));
+    check("three daily quests picked", dailyMetas.length === 3, JSON.stringify(dailyMetas));
+    check("exactly one is a timed hold", dailyMetas.filter((m) => m.includes("hold")).length === 1,
+      JSON.stringify(dailyMetas));
+
     console.log("# Level curve & migration");
     await seedProfile(page, { xp: 400, curve: 2 });
     check("400 XP = level 3", (await page.textContent("#stat-level")) === "3");

@@ -209,6 +209,20 @@ export function renderJourneyMap(container, totalJourney, opts = {}) {
     paint(svg, H - (zoneIdx + 1) * ZONE_H);
   });
 
+  // Soft cloud bands feather the hard seams between zone backgrounds.
+  for (let z = 1; z < PAINTERS.length; z++) {
+    const y = H - z * ZONE_H;
+    svg.appendChild(el("path", {
+      d: `M 0 ${y + 12} Q ${W * 0.12} ${y - 10} ${W * 0.28} ${y + 4} ` +
+         `Q ${W * 0.42} ${y + 16} ${W * 0.55} ${y + 2} ` +
+         `Q ${W * 0.7} ${y - 12} ${W * 0.84} ${y + 6} ` +
+         `Q ${W * 0.93} ${y + 16} ${W} ${y + 4} ` +
+         `L ${W} ${y + 22} Q ${W * 0.7} ${y + 32} ${W * 0.45} ${y + 22} ` +
+         `Q ${W * 0.2} ${y + 14} 0 ${y + 26} Z`,
+      fill: "rgba(255, 255, 255, 0.5)",
+    }));
+  }
+
   // The winding path
   const points = [];
   for (let i = 0; i < TOTAL_STEPS; i++) points.push(nodePos(i));

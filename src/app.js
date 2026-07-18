@@ -823,14 +823,28 @@ function mulberry32(seed) {
   };
 }
 
+// Balanced daily picks: one easy rep move to warm up, one timed hold for the
+// challenge, one rep wildcard — never two from the same muscle group, and
+// never more than one hold. Deterministic per date, same on every device.
 function dailyQuestIds(dateStr = todayStr()) {
   const rand = mulberry32(Number(dateStr.replace(/-/g, "")));
-  const pool = EXERCISES.map((ex) => ex.id);
-  const picked = [];
-  while (picked.length < DAILY_QUEST_COUNT && pool.length) {
-    picked.push(pool.splice(Math.floor(rand() * pool.length), 1)[0]);
+  const chosen = [];
+  const pickFrom = (list) => {
+    const pool = list.filter(
+      (ex) => !chosen.some((c) => c.id === ex.id || c.group === ex.group)
+    );
+    if (!pool.length) return;
+    chosen.push(pool[Math.floor(rand() * pool.length)]);
+  };
+
+  pickFrom(EXERCISES.filter((ex) => ex.intensity === 1 && ex.mode !== "timed"));
+  pickFrom(EXERCISES.filter((ex) => ex.mode === "timed"));
+  while (chosen.length < DAILY_QUEST_COUNT) {
+    const before = chosen.length;
+    pickFrom(EXERCISES.filter((ex) => ex.mode !== "timed"));
+    if (chosen.length === before) break; // no candidates left
   }
-  return picked;
+  return chosen.map((ex) => ex.id);
 }
 
 function ensureDailyFresh(st) {
@@ -1432,14 +1446,17 @@ function renderWeekChart() {
   el.weekChart.innerHTML = days.map((d) => `
     <div class="week-col ${d.isToday ? "today" : ""}">
       <span class="week-xp">${d.xp || ""}</span>
-      <div class="week-bar" style="height:${Math.max(4, Math.round((d.xp / max) * 100))}%"></div>
+      <div class="week-track">
+        <div class="week-bar" style="height:${d.xp ? Math.max(14, Math.round((d.xp / max) * 100)) : 0}%"></div>
+      </div>
       <span class="week-day">${d.label}</span>
     </div>
   `).join("");
 
   const bestDayXp = Math.max(...Object.values(st.days).map((d) => d.xp), 0);
-  el.weekBests.textContent =
-    `Best day: ${bestDayXp} XP · Longest streak: ${st.stats.bestStreak} day${st.stats.bestStreak === 1 ? "" : "s"}`;
+  el.weekBests.textContent = bestDayXp === 0
+    ? "Your week starts today — every quest lights up a bar."
+    : `Best day: ${bestDayXp} XP · Longest streak: ${st.stats.bestStreak} day${st.stats.bestStreak === 1 ? "" : "s"}`;
 }
 
 function renderJourney() {
