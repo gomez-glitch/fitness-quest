@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0b0e14" />
+  <title>Soundstage</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <button id="home-btn" class="brand" aria-label="Home">
+        <span class="brand-mark">◉</span> Soundstage
+      </button>
+      <form id="search-form" class="search" role="search">
+        <input id="search-input" type="search" placeholder="Search songs & artists"
+               autocomplete="off" enterkeyhint="search" />
+      </form>
+      <div class="top-status">
+        <span id="demo-pill" class="pill pill-demo hidden">Demo</span>
+        <span id="spotify-pill" class="pill">Spotify</span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="content" id="content">
+        <!-- Home: playlist shelves -->
+        <div id="view-home" class="view">
+          <h2 class="shelf-title">Your playlists</h2>
+          <div id="shelf-mine" class="shelf" data-shelf="mine"></div>
+          <h2 class="shelf-title">Best of Spotify</h2>
+          <div id="shelf-curated" class="shelf" data-shelf="curated"></div>
+        </div>
+
+        <!-- Playlist detail -->
+        <div id="view-playlist" class="view hidden">
+          <div class="playlist-head">
+            <button class="back-btn" id="playlist-back" aria-label="Back">‹</button>
+            <img id="playlist-art" class="playlist-art" alt="" />
+            <div class="playlist-meta">
+              <h2 id="playlist-name"></h2>
+              <p id="playlist-desc"></p>
+            </div>
+          </div>
+          <ol id="track-list" class="track-list"></ol>
+        </div>
+
+        <!-- Search results -->
+        <div id="view-search" class="view hidden">
+          <div class="playlist-head">
+            <button class="back-btn" id="search-back" aria-label="Back">‹</button>
+            <div class="playlist-meta">
+              <h2 id="search-title">Search</h2>
+            </div>
+          </div>
+          <ol id="search-results" class="track-list"></ol>
+        </div>
+
+        <!-- Setup (live mode, Spotify not connected) -->
+        <div id="view-setup" class="view hidden">
+          <div class="setup-card">
+            <h2>Connect Spotify</h2>
+            <p>Create an app at <strong>developer.spotify.com</strong>, set its
+              redirect URI to <code id="setup-redirect"></code>, then start the
+              server with <code>SPOTIFY_CLIENT_ID=…</code>.</p>
+            <button id="spotify-login-btn" class="primary-btn">Connect Spotify</button>
+            <p class="setup-tip">No credentials handy? Run with <code>DEMO=1</code>
+              for a fully working demo.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Zones rail -->
+      <aside class="zones" id="zones-rail">
+        <div class="zones-head">
+          <h2>Zones</h2>
+          <button id="edit-groups-btn" class="ghost-btn">Edit groups</button>
+        </div>
+        <div id="zone-list" class="zone-list"></div>
+      </aside>
+    </main>
+
+    <!-- Now playing -->
+    <footer class="nowbar hidden" id="nowbar">
+      <div class="now-track">
+        <div class="now-art" id="now-art">♪</div>
+        <div class="now-meta">
+          <div class="now-title" id="now-title">—</div>
+          <div class="now-sub" id="now-sub">—</div>
+        </div>
+      </div>
+      <div class="now-center">
+        <div class="transport">
+          <button id="prev-btn" class="t-btn" aria-label="Previous">⏮</button>
+          <button id="playpause-btn" class="t-btn t-main" aria-label="Play or pause">▶</button>
+          <button id="next-btn" class="t-btn" aria-label="Next">⏭</button>
+        </div>
+        <div class="progress">
+          <span id="pos-label" class="time">0:00</span>
+          <div class="bar"><div id="progress-fill" class="bar-fill"></div></div>
+          <span id="dur-label" class="time">0:00</span>
+        </div>
+      </div>
+      <div class="now-zone">
+        <span class="now-zone-label">Playing in</span>
+        <span id="now-zone-name">—</span>
+      </div>
+    </footer>
+
+    <!-- Video overlay -->
+    <div id="video-overlay" class="video-overlay hidden">
+      <div class="video-chrome">
+        <div class="video-title" id="video-title"></div>
+        <div class="video-actions">
+          <button id="video-to-sonos" class="ghost-btn">Mute video · audio to Sonos</button>
+          <button id="video-close" class="ghost-btn" aria-label="Close video">✕ Close</button>
+        </div>
+      </div>
+      <div class="video-frame-wrap">
+        <iframe id="video-frame" title="Music video"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>

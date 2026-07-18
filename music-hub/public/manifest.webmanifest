@@ -1,0 +1,18 @@
+{
+  "name": "Soundstage",
+  "short_name": "Soundstage",
+  "description": "iPad music hub: Spotify playlists, music videos on screen, multi-zone Sonos.",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b0e14'/%3E%3Ccircle cx='50' cy='50' r='26' fill='none' stroke='%234ade80' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='9' fill='%2322d3ee'/%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

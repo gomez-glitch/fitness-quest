@@ -1,0 +1,16 @@
+{
+  "name": "soundstage",
+  "version": "1.0.0",
+  "description": "Soundstage — an iPad-centric music hub: Spotify playlists, music videos on screen, multi-zone Sonos playback.",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "node server/index.js",
+    "demo": "DEMO=1 node server/index.js",
+    "test": "node tests/unit.js && node tests/e2e.js",
+    "lint": "node --check server/index.js && node --check server/spotify.js && node --check server/sonos.js && node --check server/demo.js && node --check public/app.js && node --check tests/unit.js && node --check tests/e2e.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
+}
