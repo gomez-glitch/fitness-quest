@@ -515,6 +515,22 @@ const BADGES = [
   { id: "animal-5", emoji: "🐾", label: "Animal Antics", need: "5 animal moves", test: (s) => (s.stats.groups["Animal"] || 0) >= 5 },
 ];
 
+// Fancy dress: finishing an animal move earns Spark that costume for the
+// rest of the day. Latest move wins, so switching costumes is a game itself.
+const ANIMAL_COSTUMES = {
+  "bear-crawl": { id: "bear", lines: ["ROAR! I'm the fuzziest bear in the forest! 🐻", "This bear suit is SO warm and cosy!"] },
+  "frog-hops": { id: "frog", lines: ["Ribbit ribbit! Check out my froggy hood! 🐸", "I'm one hop away from catching a fly!"] },
+  "bunny-hops": { id: "bunny", lines: ["Look at my ears! Boing boing! 🐰", "Bunny Spark, at your service!"] },
+  "crab-walk": { id: "crab", lines: ["Pinch pinch! I'm Captain Crab today! 🦀", "Sideways is the BEST direction!"] },
+  "duck-waddle": { id: "duck", lines: ["Quack quack! Duck Spark reporting! 🦆", "This beak makes everything funnier!"] },
+  "cheetah-sprint": { id: "cheetah", lines: ["Cheetah ears! I feel FAST just wearing them! 🐆", "Zoom zoom — fastest Spark alive!"] },
+  "kangaroo-jumps": { id: "kangaroo", lines: ["G'day! Kangaroo Spark, ready to bounce! 🦘", "These ears hear snacks from miles away!"] },
+  "inchworm": { id: "worm", lines: ["Wiggle wiggle — I've got antennae! 🐛", "Inchworm Spark, measuring the fun!"] },
+};
+
+const COSTUME_LINES = {};
+Object.values(ANIMAL_COSTUMES).forEach((c) => { COSTUME_LINES[c.id] = c.lines; });
+
 // ---------------------------------------------------------------------------
 // State: storage, migration, normalization
 // ---------------------------------------------------------------------------
@@ -531,7 +547,7 @@ function defaultProfileState(nickname = "Spark") {
     counters,
     profile: { nickname, persona: "spark-sprinter", avatar: "👟" },
     stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0, timedDone: 0, adventuresDone: 0, journey: 0, seenJourney: 0, boops: 0 },
-    pet: { tummy: 60, tummyAt: Date.now(), meals: 0, favDate: null },
+    pet: { tummy: 60, tummyAt: Date.now(), meals: 0, favDate: null, costume: null },
     daily: { date: null, done: [], bonusClaimed: false, spin: null },
     days: {},
     curve: CURVE_VERSION,
@@ -617,6 +633,13 @@ function normalizeProfile(parsed) {
     if (typeof pt.tummyAt === "number" && pt.tummyAt > 0 && pt.tummyAt <= Date.now()) state.pet.tummyAt = pt.tummyAt;
     if (typeof pt.meals === "number" && pt.meals >= 0) state.pet.meals = pt.meals;
     if (typeof pt.favDate === "string") state.pet.favDate = pt.favDate;
+    const c = pt.costume;
+    if (
+      c && typeof c === "object" && typeof c.date === "string" &&
+      Object.values(ANIMAL_COSTUMES).some((v) => v.id === c.id)
+    ) {
+      state.pet.costume = { id: c.id, date: c.date };
+    }
   }
 
   const dl = parsed.daily;
@@ -1978,7 +2001,15 @@ function petTimeClass() {
   return "pet-day";
 }
 
+function activeCostume(st) {
+  const c = st.pet.costume;
+  return c && c.date === todayStr() ? c.id : null;
+}
+
 function petAccessoryFor() {
+  // Today's animal costume trumps everything — even the nightcap.
+  const costume = activeCostume(activeProfile());
+  if (costume) return costume;
   if (petTimeClass() === "pet-night") return "nightcap";
   const tier = heroRank(levelForXp(activeProfile().xp)).tier;
   if (tier === "rainbow") return "crown";
@@ -2042,6 +2073,9 @@ function petBubbleLine() {
     "I have a secret favourite food today… can you guess it? 😏",
     "Psst — one snack on the tray is my favourite today!",
   ]);
+  const costume = activeCostume(st);
+  if (costume) pools.push(COSTUME_LINES[costume]);
+  else pools.push(["Do an Animal move and I'll dress up as it — promise! 🐾"]);
   pools.push([
     "What should we play today?",
     "Boop me! Go on, I dare you. Hehe.",
@@ -2826,6 +2860,10 @@ function awardCompletion(exercise, reps) {
 
   // Lifetime stats for badges (guards let pseudo-moves like Dance Party pass through)
   if (findExercise(exercise.id) && !st.stats.tried.includes(exercise.id)) st.stats.tried.push(exercise.id);
+  // Animal moves dress Spark up for the rest of the day
+  if (ANIMAL_COSTUMES[exercise.id]) {
+    st.pet.costume = { id: ANIMAL_COSTUMES[exercise.id].id, date: today };
+  }
   if (exercise.group) st.stats.groups[exercise.group] = (st.stats.groups[exercise.group] || 0) + 1;
   if (exercise.mode === "timed") st.stats.timedDone = (st.stats.timedDone || 0) + 1;
   if (st.stats.todayDate === today) {

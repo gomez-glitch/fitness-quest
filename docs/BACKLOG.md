@@ -85,7 +85,9 @@ Living list, roughly priority-ordered. Move items up/down freely.
    filter group (Bunny Hops, Bear Crawl, Crab Walk, Frog Hops, Inchworm,
    Duck Waddle, Cheetah Sprint, Kangaroo Jumps), Animal Antics 🐾 badge,
    Jungle Jamboree 🦁 adventure, bunny/frog moves added to Dance Party and
-   Spark's idle show-off pool. (Idea sparked by reviewing the
+   Spark's idle show-off pool, and fancy-dress tie-in: each animal move
+   dresses Spark in that costume for the day (8 costume accessories on the
+   mascot, costume beats nightcap/crown, bragging bubble lines). (Idea sparked by reviewing the
    exercises-dataset repo — built natively, no external assets.)
 7. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
    added; add a CONTRIBUTING-style note if anyone else joins the project.

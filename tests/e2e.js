@@ -166,6 +166,19 @@ async function main() {
     check("boop wakes Spark gently", (await page.textContent("#pet-bubble")).includes("yaw"));
     await page.waitForTimeout(1600); // let the wake-up finish
 
+    console.log("# Animal costume dress-up");
+    await claimReps(page, "frog-hops");
+    const costume = await page.evaluate(() => {
+      const d = JSON.parse(localStorage.getItem("move-quest-progress-v3"));
+      return d.profiles[d.activeProfileId].pet.costume;
+    });
+    check("frog hops earns the frog costume", Boolean(costume) && costume.id === "frog",
+      JSON.stringify(costume));
+    await page.click("#tab-home");
+    await page.click('.home-dot[data-panel="1"]');
+    await page.waitForTimeout(800);
+    check("Spark wears the frog hood", !!(await page.$('#pet-stage svg[data-accessory="frog"]')));
+
     await page.click('.home-dot[data-panel="0"]');
     await page.waitForTimeout(500);
     await page.click('.home-dot[data-panel="0"]');

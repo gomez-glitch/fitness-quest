@@ -40,7 +40,11 @@ colors, big buttons, and encouraging, positive language throughout.
   burps ("…excuse me! 🤭"), politely refuses food when full, and hides a
   secret favourite food each day per hero — find it for a jackpot celebration.
   Sometimes he simply lies down for a nap (more likely when sleepy); booping
-  a napping Spark wakes him gently with a yawn
+  a napping Spark wakes him gently with a yawn. And finishing any Animal move
+  dresses Spark in that animal's fancy-dress costume for the rest of the day —
+  bear hood, frog eyes, bunny ears, crab claws, duck cap, cheetah ears,
+  kangaroo ears, or inchworm antennae — with matching bragging in his bubble
+  (latest move wins, so costume-swapping is its own game)
 - Spark's energy meter: a colorful bar that fills with today's activity and
   drains on quiet days, with mood messages ("Spark is SUPERCHARGED!" /
   "Spark is sleepy — let's move!")

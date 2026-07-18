@@ -1135,6 +1135,62 @@ function drawAccessory(headG, accessory) {
       d: "M -9.4 -3.4 Q 0 -8.4 9.4 -3.4", fill: "none", stroke: "#ec4899",
       "stroke-width": 3, "stroke-linecap": "round",
     }));
+  } else if (accessory === "bear") {
+    // fuzzy bear hood: round ears + brown hood crescent
+    headG.appendChild(svgEl("circle", { cx: -7.6, cy: -8.2, r: 3.8, fill: "#92400e" }));
+    headG.appendChild(svgEl("circle", { cx: 7.6, cy: -8.2, r: 3.8, fill: "#92400e" }));
+    headG.appendChild(svgEl("circle", { cx: -7.6, cy: -8.2, r: 1.9, fill: "#f59e0b" }));
+    headG.appendChild(svgEl("circle", { cx: 7.6, cy: -8.2, r: 1.9, fill: "#f59e0b" }));
+    headG.appendChild(svgEl("path", { d: "M -9.6 -1.5 Q 0 -14 9.6 -1.5 Q 0 -7.5 -9.6 -1.5 Z", fill: "#92400e" }));
+  } else if (accessory === "frog") {
+    // froggy hood with bulgy eyes on top
+    headG.appendChild(svgEl("path", { d: "M -9.6 -1.5 Q 0 -14 9.6 -1.5 Q 0 -7.5 -9.6 -1.5 Z", fill: "#16a34a" }));
+    headG.appendChild(svgEl("circle", { cx: -4.6, cy: -11, r: 3.1, fill: "#16a34a" }));
+    headG.appendChild(svgEl("circle", { cx: 4.6, cy: -11, r: 3.1, fill: "#16a34a" }));
+    headG.appendChild(svgEl("circle", { cx: -4.6, cy: -11.5, r: 1.8, fill: "#ffffff" }));
+    headG.appendChild(svgEl("circle", { cx: 4.6, cy: -11.5, r: 1.8, fill: "#ffffff" }));
+    headG.appendChild(svgEl("circle", { cx: -4.6, cy: -11.5, r: 0.9, fill: "#14532d" }));
+    headG.appendChild(svgEl("circle", { cx: 4.6, cy: -11.5, r: 0.9, fill: "#14532d" }));
+  } else if (accessory === "bunny") {
+    // tall floppy bunny ears with pink insides
+    headG.appendChild(svgEl("ellipse", { cx: -4.8, cy: -14, rx: 2.6, ry: 7, fill: "#f5f5f4", transform: "rotate(-14 -4.8 -14)" }));
+    headG.appendChild(svgEl("ellipse", { cx: 4.8, cy: -14, rx: 2.6, ry: 7, fill: "#f5f5f4", transform: "rotate(14 4.8 -14)" }));
+    headG.appendChild(svgEl("ellipse", { cx: -4.8, cy: -13.4, rx: 1.2, ry: 4.6, fill: "#f9a8d4", transform: "rotate(-14 -4.8 -13.4)" }));
+    headG.appendChild(svgEl("ellipse", { cx: 4.8, cy: -13.4, rx: 1.2, ry: 4.6, fill: "#f9a8d4", transform: "rotate(14 4.8 -13.4)" }));
+  } else if (accessory === "crab") {
+    // red band with little claws on springs
+    headG.appendChild(svgEl("path", { d: "M -9.4 -3.4 Q 0 -8.4 9.4 -3.4", fill: "none", stroke: "#ef4444", "stroke-width": 3, "stroke-linecap": "round" }));
+    headG.appendChild(svgEl("path", { d: "M -7.4 -6 L -8.6 -9.4", stroke: "#ef4444", "stroke-width": 1.4, "stroke-linecap": "round", fill: "none" }));
+    headG.appendChild(svgEl("path", { d: "M 7.4 -6 L 8.6 -9.4", stroke: "#ef4444", "stroke-width": 1.4, "stroke-linecap": "round", fill: "none" }));
+    headG.appendChild(svgEl("circle", { cx: -9, cy: -11.4, r: 2.7, fill: "#ef4444" }));
+    headG.appendChild(svgEl("circle", { cx: 9, cy: -11.4, r: 2.7, fill: "#ef4444" }));
+    headG.appendChild(svgEl("path", { d: "M -9.6 -13.6 L -8.4 -11.4 L -9.6 -9.6", stroke: "#fecaca", "stroke-width": 1, fill: "none", "stroke-linecap": "round" }));
+    headG.appendChild(svgEl("path", { d: "M 9.6 -13.6 L 8.4 -11.4 L 9.6 -9.6", stroke: "#fecaca", "stroke-width": 1, fill: "none", "stroke-linecap": "round" }));
+  } else if (accessory === "duck") {
+    // ducky cap with a cheeky beak and a feather tuft
+    headG.appendChild(svgEl("path", { d: "M -9.8 -1 Q 0 -15 9.8 -1 Q 0 -5.5 -9.8 -1 Z", fill: "#fbbf24" }));
+    headG.appendChild(svgEl("path", { d: "M -4 -9.6 L 0 -15 L 4 -9.6 L 0 -7.4 Z", fill: "#f97316" }));
+    headG.appendChild(svgEl("path", { d: "M 5.5 -9.5 Q 7.5 -13.5 6 -15.5", stroke: "#fbbf24", "stroke-width": 1.6, fill: "none", "stroke-linecap": "round" }));
+  } else if (accessory === "cheetah") {
+    // spotted cheetah band with pointy ears
+    headG.appendChild(svgEl("path", { d: "M -9.5 -5.5 L -6.5 -11.5 L -3.8 -6.2 Z", fill: "#f59e0b" }));
+    headG.appendChild(svgEl("path", { d: "M 9.5 -5.5 L 6.5 -11.5 L 3.8 -6.2 Z", fill: "#f59e0b" }));
+    headG.appendChild(svgEl("path", { d: "M -9.4 -3.4 Q 0 -8.4 9.4 -3.4", fill: "none", stroke: "#f59e0b", "stroke-width": 3.2, "stroke-linecap": "round" }));
+    headG.appendChild(svgEl("circle", { cx: -4.5, cy: -5.4, r: 0.85, fill: "#78350f" }));
+    headG.appendChild(svgEl("circle", { cx: 0, cy: -6.2, r: 0.85, fill: "#78350f" }));
+    headG.appendChild(svgEl("circle", { cx: 4.5, cy: -5.4, r: 0.85, fill: "#78350f" }));
+  } else if (accessory === "kangaroo") {
+    // tall outback ears
+    headG.appendChild(svgEl("ellipse", { cx: -5.4, cy: -12.4, rx: 2.4, ry: 5.6, fill: "#d97706", transform: "rotate(-22 -5.4 -12.4)" }));
+    headG.appendChild(svgEl("ellipse", { cx: 5.4, cy: -12.4, rx: 2.4, ry: 5.6, fill: "#d97706", transform: "rotate(22 5.4 -12.4)" }));
+    headG.appendChild(svgEl("ellipse", { cx: -5.4, cy: -12, rx: 1.1, ry: 3.6, fill: "#fde68a", transform: "rotate(-22 -5.4 -12)" }));
+    headG.appendChild(svgEl("ellipse", { cx: 5.4, cy: -12, rx: 1.1, ry: 3.6, fill: "#fde68a", transform: "rotate(22 5.4 -12)" }));
+  } else if (accessory === "worm") {
+    // springy inchworm antennae
+    headG.appendChild(svgEl("path", { d: "M -2.6 -9 Q -4.4 -13 -5.4 -15.6", stroke: "#16a34a", "stroke-width": 1.4, fill: "none", "stroke-linecap": "round" }));
+    headG.appendChild(svgEl("path", { d: "M 2.6 -9 Q 4.4 -13 5.4 -15.6", stroke: "#16a34a", "stroke-width": 1.4, fill: "none", "stroke-linecap": "round" }));
+    headG.appendChild(svgEl("circle", { cx: -5.6, cy: -16.4, r: 1.9, fill: "#4ade80" }));
+    headG.appendChild(svgEl("circle", { cx: 5.6, cy: -16.4, r: 1.9, fill: "#4ade80" }));
   }
 }
 
@@ -1147,6 +1203,7 @@ function limbPath(color, width) {
 
 function buildFigure(svg, view, motion, accessory = null) {
   svg.textContent = "";
+  svg.setAttribute("data-accessory", accessory || "");
 
   const parts = { view };
 
