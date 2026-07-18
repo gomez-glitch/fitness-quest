@@ -560,6 +560,118 @@ export const MOTIONS = {
     ],
   },
 
+  // --- foam roller set: gentle rolling moves over the blue wheel ---
+
+  "calf-rollers": {
+    view: "side", duration: 3200, poster: 0.5, prop: "roller", propAt: [80, 102],
+    base: {
+      ...SIDE_BASE, y: 96, neck: 30,
+      a1: [-35, 4], a2: [-30, 3],
+      l1: [102, 18, 0], l2: [98, 15, 0],
+    },
+    frames: [
+      { t: 0, x: 50, torso: -42 },
+      { t: 0.5, x: 57, torso: -38 },
+      { t: 1, x: 50, torso: -42 },
+    ],
+  },
+
+  "hamstring-rollers": {
+    view: "side", duration: 3200, poster: 0.5, prop: "roller", propAt: [72, 102],
+    base: {
+      ...SIDE_BASE, y: 95, neck: 28,
+      a1: [-35, 4], a2: [-30, 3],
+      l1: [95, 12, 0], l2: [91, 10, 0],
+    },
+    frames: [
+      { t: 0, x: 52, torso: -40 },
+      { t: 0.5, x: 58, torso: -36 },
+      { t: 1, x: 52, torso: -40 },
+    ],
+  },
+
+  "thigh-rollers": {
+    view: "side", duration: 3200, poster: 0.5, prop: "roller", propAt: [46, 102],
+    base: {
+      ...SIDE_BASE, y: 96, neck: 14,
+      a1: [45, 55], a2: [49, 58],
+      l1: [-92, 3, -80], l2: [-95, 4, -80],
+    },
+    frames: [
+      { t: 0, x: 56, torso: 60 },
+      { t: 0.5, x: 62, torso: 62 },
+      { t: 1, x: 56, torso: 60 },
+    ],
+  },
+
+  "back-roll": {
+    view: "side", duration: 3200, poster: 0.5, prop: "roller", propAt: [48, 100],
+    base: {
+      ...SIDE_BASE, y: 94, neck: 34,
+      a1: [-48, 108], a2: [-42, 104],
+      l1: [106, 96, 0], l2: [102, 92, 0],
+    },
+    frames: [
+      { t: 0, x: 56, torso: -82 },
+      { t: 0.5, x: 61, torso: -86 },
+      { t: 1, x: 56, torso: -82 },
+    ],
+  },
+
+  "superhero-side-roll": {
+    view: "side", duration: 3200, poster: 0.5, prop: "roller", propAt: [56, 102],
+    base: {
+      ...SIDE_BASE, y: 93, neck: 0,
+      a1: [98, 4], a2: [102, 6],
+      l1: [-92, 3, -80], l2: [-95, 4, -80],
+    },
+    frames: [
+      { t: 0, x: 54, torso: 84 },
+      { t: 0.5, x: 60, torso: 82 },
+      { t: 1, x: 54, torso: 84 },
+    ],
+  },
+
+  "foot-wake-up": {
+    view: "side", duration: 2400, poster: 0.5, prop: "roller", propAt: [76, 104],
+    base: {
+      ...SIDE_BASE, torso: 4, neck: 0, y: 76,
+      a1: [70, 6], a2: [12, 8],
+      l1: [2, 3, 0],
+    },
+    frames: [
+      { t: 0, l2: [32, 18, -35] },
+      { t: 0.5, l2: [40, 26, -20] },
+      { t: 1, l2: [32, 18, -35] },
+    ],
+  },
+
+  "rolling-bridge": {
+    view: "side", duration: 3000, poster: 0.5, prop: "roller", propAt: [78, 102],
+    base: {
+      ...SIDE_BASE, x: 58, neck: 34,
+      a1: [96, 4], a2: [92, 4],
+    },
+    frames: [
+      { t: 0, y: 95, torso: -92, l1: [104, 90, 0], l2: [100, 86, 0] },
+      { t: 0.5, y: 87, torso: -110, l1: [92, 82, 0], l2: [89, 79, 0] },
+      { t: 1, y: 95, torso: -92, l1: [104, 90, 0], l2: [100, 86, 0] },
+    ],
+  },
+
+  "roller-reach-over": {
+    view: "side", duration: 3400, poster: 0.55, prop: "roller", propAt: [84, 102],
+    base: {
+      ...SIDE_BASE, y: 88,
+      l1: [-14, 112, -60], l2: [-17, 114, -60],
+    },
+    frames: [
+      { t: 0, x: 62, torso: 55, neck: 8, a1: [62, 8], a2: [66, 10] },
+      { t: 0.5, x: 66, torso: 96, neck: -4, a1: [88, 4], a2: [92, 5] },
+      { t: 1, x: 62, torso: 55, neck: 8, a1: [62, 8], a2: [66, 10] },
+    ],
+  },
+
   "pet-happy": {
     view: "front", duration: 1900, poster: 0, face: "happy",
     base: { ...FRONT_BASE, y: 76 },
@@ -698,6 +810,42 @@ export const MOTIONS = {
       { t: 0.55, a1: [44, 128], a2: [44, 128], y: 74.5 },
       { t: 0.75, a1: [38, 118], a2: [38, 118], y: 75 },
       { t: 1, a1: [20, 12], a2: [20, 12], y: 76 },
+    ],
+  },
+
+  "pet-sneeze": {
+    view: "front", duration: 1500, poster: 0.6, face: "closed",
+    base: { ...FRONT_BASE },
+    frames: [
+      { t: 0, y: 76, torso: 0, neck: 0, a1: [15, 10], a2: [15, 10] },
+      { t: 0.3, y: 75, torso: -9, neck: -16, a1: [50, 95], a2: [50, 95] },
+      { t: 0.5, y: 74.5, torso: -12, neck: -20, a1: [55, 100], a2: [55, 100] },
+      { t: 0.62, y: 78, torso: 24, neck: 20, a1: [40, 10], a2: [40, 10] },
+      { t: 0.8, y: 76.5, torso: 10, neck: 8, a1: [20, 12], a2: [20, 12] },
+      { t: 1, y: 76, torso: 0, neck: 0, a1: [15, 10], a2: [15, 10] },
+    ],
+  },
+
+  "pet-hiccup": {
+    view: "front", duration: 600, poster: 0.35, face: "happy",
+    base: { ...FRONT_BASE },
+    frames: [
+      { t: 0, y: 76, torso: 0, neck: 0, a1: [35, 60], a2: [35, 60] },
+      { t: 0.3, y: 73.5, torso: -7, neck: -8, a1: [45, 75], a2: [45, 75] },
+      { t: 0.5, y: 76, torso: 2, neck: 3, a1: [35, 60], a2: [35, 60] },
+      { t: 1, y: 76, torso: 0, neck: 0, a1: [35, 60], a2: [35, 60] },
+    ],
+  },
+
+  "pet-dizzy": {
+    view: "front", duration: 1700, poster: 0.25, face: "dizzy",
+    base: { ...FRONT_BASE, y: 76.5 },
+    frames: [
+      { t: 0, torso: -11, neck: 9, a1: [55, 15], a2: [40, 20] },
+      { t: 0.25, torso: 0, neck: -6, a1: [48, 18], a2: [48, 18] },
+      { t: 0.5, torso: 11, neck: 9, a1: [40, 20], a2: [55, 15] },
+      { t: 0.75, torso: 0, neck: -6, a1: [48, 18], a2: [48, 18] },
+      { t: 1, torso: -11, neck: 9, a1: [55, 15], a2: [40, 20] },
     ],
   },
 
@@ -847,6 +995,11 @@ function drawFace(headG, view, face) {
         d: `M ${cx} -3.6 L ${cx + 0.9} -1.8 L ${cx + 2.6} -1.6 L ${cx + 1.3} -0.4 L ${cx + 1.7} 1.4 L ${cx} 0.4 L ${cx - 1.7} 1.4 L ${cx - 1.3} -0.4 L ${cx - 2.6} -1.6 L ${cx - 0.9} -1.8 Z`,
         fill: "#fbbf24",
       }));
+    } else if (face === "dizzy") {
+      headG.appendChild(svgEl("path", {
+        d: `M ${cx + 2} -1.5 a 2 2 0 1 0 -2 2 a 1.1 1.1 0 1 1 1.1 -1.1`,
+        fill: "none", stroke: COLORS.face, "stroke-width": 1.2, "stroke-linecap": "round",
+      }));
     } else {
       headG.appendChild(svgEl("circle", { cx, cy: -1.5, r: 1.7, fill: COLORS.face }));
     }
@@ -864,6 +1017,7 @@ function drawFace(headG, view, face) {
     headG.appendChild(svgEl("path", {
       d: face === "sleepy" || face === "closed" ? "M -2.5 4 Q 0 5 2.5 4"
         : face === "star" || face === "happy" ? "M -3.5 3 Q 0 7.5 3.5 3"
+        : face === "dizzy" ? "M -3 4.5 Q -1.5 3.2 0 4.5 Q 1.5 5.8 3 4.5"
         : "M -3 3.5 Q 0 6.5 3 3.5",
       fill: "none", stroke: COLORS.face, "stroke-width": 1.6, "stroke-linecap": "round",
     }));
@@ -921,6 +1075,13 @@ function buildFigure(svg, view, motion, accessory = null) {
 
   if (motion.prop === "wall") {
     svg.appendChild(svgEl("rect", { x: 38, y: 26, width: 7, height: 84, rx: 2, fill: COLORS.chair }));
+  }
+
+  // Foam roller, seen end-on from the side view: a friendly blue wheel.
+  if (motion.prop === "roller") {
+    const [cx, cy] = motion.propAt || [60, 101];
+    svg.appendChild(svgEl("circle", { cx, cy, r: 6, fill: "#7dd3fc", stroke: "#0284c7", "stroke-width": 1.5 }));
+    svg.appendChild(svgEl("circle", { cx, cy, r: 2, fill: "#0284c7" }));
   }
 
   const farColor = view === "side" ? COLORS.far : COLORS.near;

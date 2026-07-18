@@ -29,8 +29,11 @@ colors, big buttons, and encouraging, positive language throughout.
   a speech bubble about streaks, quests, and snacks. Booping him spins a
   reaction roulette — tickle giggles, high fives, a dance break with its own
   mini groove, a jump for joy with a rising "whee!", a muscle flex, or super
-  mode, each with matching sounds, lines, and emoji bursts — and three quick
-  boops in a row unlock a boop party. A spinning 3D snack wheel holds 12 foods — it idles with a slow
+  mode, each with matching sounds, lines, and emoji bursts. Rare rolls
+  (~1 in 17) land a sparkly sneeze or a case of the hiccups; night boops
+  lean cosy and stretchy while morning boops are extra bouncy; and three
+  quick boops in a row unlock a boop party that leaves Spark spiral-eyed
+  and dizzy. A spinning 3D snack wheel holds 12 foods — it idles with a slow
   show-off spin, drag it to whirl with momentum, and tapping a food swings it
   round to the front and feeds his tummy meter (which slowly empties over
   real hours): he munches with a chomp animation and sound, occasionally
@@ -55,11 +58,15 @@ colors, big buttons, and encouraging, positive language throughout.
 - A last-7-days activity chart on the dashboard with best-day and
   longest-streak callouts
 - Hero customization: nickname, persona, and avatar, saved to the browser
-- 43 short kid-friendly exercises with muscle-group AND intensity filters
+- 51 short kid-friendly exercises with muscle-group AND intensity filters
   (🌱 Easy / ⚡ Steady / 🔥 Spicy), including four timed "hold" challenges
   (wall sit, plank hold, flamingo balance, farmer hold) with a GO → 3-2-1
-  get-ready lead-in and automatic countdown, plus small-free-weight moves
-  (curls, presses, wing raises, rows, farmer hold) marked with 🏋️
+  get-ready lead-in and automatic countdown, small-free-weight moves
+  (curls, presses, wing raises, rows, farmer hold) marked with 🏋️, and an
+  eight-move foam roller set (calf/thigh/hamstring rolls, back massage roll,
+  superhero side roll, foot wake-up, rolling bridge, roller reach-over)
+  marked with 🛞 — gentle timed rolls with calm music, breathing cues, and
+  a blue roller drawn into each animation
 - Spark, an articulated mascot with real elbow and knee joints, demonstrates
   each exercise with anatomically-faithful looping animation in the active
   quest card (side or front view, whichever reads best per move)

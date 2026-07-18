@@ -116,6 +116,21 @@ export const sound = {
     osc.stop(start + 0.5);
   },
 
+  // Ah… ah… ACHOO! Two little inhales, one big sneeze.
+  achoo() {
+    if (muted) return;
+    note(700, 0, 0.08, "triangle", 0.12);
+    note(950, 0.16, 0.08, "triangle", 0.14);
+    note(320, 0.36, 0.24, "sawtooth", 0.16);
+  },
+
+  // A tiny squeaky hiccup blip.
+  hic() {
+    if (muted) return;
+    note(880, 0, 0.05, "square", 0.13);
+    note(1245, 0.05, 0.07, "square", 0.11);
+  },
+
   // A four-beat mini groove for dance breaks.
   groove() {
     if (muted) return;

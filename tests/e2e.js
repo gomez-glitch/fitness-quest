@@ -278,13 +278,13 @@ async function main() {
     check("spicy filter shows 6 moves", (await page.$$("#exercise-board .exercise-tile")).length === 6,
       String((await page.$$("#exercise-board .exercise-tile")).length));
     await page.click('.filter-chip[data-filter-intensity="1"]');
-    check("easy filter shows 18 moves", (await page.$$("#exercise-board .exercise-tile")).length === 18,
+    check("easy filter shows 25 moves", (await page.$$("#exercise-board .exercise-tile")).length === 25,
       String((await page.$$("#exercise-board .exercise-tile")).length));
     await page.click('.filter-chip[data-filter-intensity="All"]');
-    check("all levels shows 43 moves", (await page.$$("#exercise-board .exercise-tile")).length === 43,
+    check("all levels shows 51 moves", (await page.$$("#exercise-board .exercise-tile")).length === 51,
       String((await page.$$("#exercise-board .exercise-tile")).length));
     await page.click('.filter-chip[data-filter-group="Stretch"]');
-    check("stretch group shows 10 moves", (await page.$$("#exercise-board .exercise-tile")).length === 10,
+    check("stretch group shows 18 moves", (await page.$$("#exercise-board .exercise-tile")).length === 18,
       String((await page.$$("#exercise-board .exercise-tile")).length));
     await page.click('.filter-chip[data-filter-group="All"]');
 

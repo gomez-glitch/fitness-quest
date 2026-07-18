@@ -245,6 +245,46 @@ const EXERCISES = [
     muscles: "Spine (mobility)", cue: "On all fours: arch up like a scared cat, then dip down like a happy cow.",
     steps: ["Hands under shoulders", "Cat up on the breath out", "Cow down on the breath in"],
   },
+  {
+    id: "calf-rollers", title: "Calf Rollers", mode: "timed", target: 30, xp: 40, icon: "🛞", group: "Stretch", intensity: 1, roller: true,
+    muscles: "Calves", cue: "Sit with the roller under your calves and roll slowly from ankles to knees.",
+    steps: ["Hands on the floor behind you", "Roll slowly — no racing", "Skip any spot that hurts"],
+  },
+  {
+    id: "thigh-rollers", title: "Thigh Rollers", mode: "timed", target: 30, xp: 40, icon: "🦵", group: "Stretch", intensity: 1, roller: true,
+    muscles: "Thighs", cue: "Lie on your tummy with the roller under your thighs and roll gently up and down.",
+    steps: ["Rest on your forearms", "Slow little rolls", "Breathe like a calm dragon"],
+  },
+  {
+    id: "hamstring-rollers", title: "Hamstring Rollers", mode: "timed", target: 30, xp: 40, icon: "🍗", group: "Stretch", intensity: 1, roller: true,
+    muscles: "Backs of legs", cue: "Sit with the roller under the backs of your legs and roll slowly.",
+    steps: ["Lean back on your hands", "Roll knee to hip, nice and slow", "Skip anything that hurts"],
+  },
+  {
+    id: "back-roll", title: "Back Massage Roll", mode: "timed", target: 30, xp: 45, icon: "💆", group: "Stretch", intensity: 1, roller: true,
+    muscles: "Upper back", cue: "Lie back with the roller under your upper back — your own massage machine!",
+    steps: ["Knees bent, feet flat", "Gentle rolls up and down", "Never roll your neck or lower back"],
+  },
+  {
+    id: "superhero-side-roll", title: "Superhero Side Roll", mode: "timed", target: 20, xp: 40, icon: "🦸", group: "Stretch", intensity: 1, roller: true,
+    muscles: "Sides", cue: "Roller under your side, arm stretched long like you're flying. Swap sides next time!",
+    steps: ["Stretch your arm out long", "Tiny slow rolls", "Fly like a resting superhero"],
+  },
+  {
+    id: "foot-wake-up", title: "Foot Wake-Up", mode: "timed", target: 20, xp: 35, icon: "🦶", group: "Stretch", intensity: 1, roller: true,
+    muscles: "Feet", cue: "Standing, roll the sole of one foot over the roller. Hold a wall and swap feet next time!",
+    steps: ["Hold a wall or chair", "Roll heel to toes slowly", "Wake up those sleepy feet"],
+  },
+  {
+    id: "rolling-bridge", title: "Rolling Bridge", mode: "timed", target: 20, xp: 55, icon: "🌉", group: "Stretch", intensity: 2, roller: true,
+    muscles: "Bottom + balance", cue: "Hold a bridge with your feet resting on the roller — wobbly balance spice!",
+    steps: ["Feet steady on the roller", "Lift hips and hold strong", "Ask a grown-up to spot you"],
+  },
+  {
+    id: "roller-reach-over", title: "Roller Reach-Over", mode: "timed", target: 20, xp: 40, icon: "🙇", group: "Stretch", intensity: 1, roller: true,
+    muscles: "Shoulders + back", cue: "Kneel with the roller in front, roll it away and melt into a lo-o-ong stretch.",
+    steps: ["Kneel tall to start", "Roll the roller far away", "Reach and breathe out slowly"],
+  },
 ];
 
 const INTENSITY_META = {
@@ -1060,7 +1100,7 @@ function renderExerciseBoard() {
           <span class="exercise-tile-body">
             <span class="exercise-tile-title">${ex.title}</span>
             <span class="exercise-tile-meta">${targetLabel(ex)} · ${ex.xp} XP · ${ex.muscles}</span>
-            <span class="exercise-tile-meta">${meta.emoji} ${meta.label}${ex.weights ? " · 🏋️ weights" : ""}</span>
+            <span class="exercise-tile-meta">${meta.emoji} ${meta.label}${ex.weights ? " · 🏋️ weights" : ""}${ex.roller ? " · 🛞 roller" : ""}</span>
           </span>
         </button>
       `;
@@ -2031,6 +2071,24 @@ const BOOP_PARTY = {
   lines: ["A BOOP PARTY?! Best day ever! 🎉", "Triple boop!! PARTY TIME! 🎉"],
 };
 
+// Rare rolls (~1 in 17) — surprises worth telling a sibling about.
+const RARE_BOOPS = [
+  { motion: "pet-sneeze", dur: 1800, sfx: "achoo", hearts: ["🤧", "💨", "✨"],
+    lines: ["Ah… ah… AH-CHOO!! 🤧 …boop dust!", "ACHOO! Oops — sparkly sneeze!"] },
+  { motion: "pet-hiccup", dur: 1800, sfx: "hic", hearts: ["🫧", "✨"],
+    lines: ["*hic!* …*hic!* Oh dear! 🫧", "*hic!* Boop me again — it might cure them!"] },
+];
+
+// Time-aware flavours: cosy stretches at night, extra bounce in the morning.
+const NIGHT_BOOP = {
+  motion: "pet-yawn", dur: 1700, sfx: "giggle", hearts: ["🌙", "💤", "💜"],
+  lines: ["*stretchy yawn* Nearly bedtime, hero… 🌙", "Night boops feel extra cosy 🌙", "One more gentle stretch, then dreams ✨"],
+};
+const MORNING_BOOP = {
+  motion: "pet-jump", dur: 1700, sfx: "whee", hearts: ["☀️", "🌟", "✨"],
+  lines: ["MORNING ENERGY! Let's gooo! ☀️", "Rise and BOING! ☀️", "Good morning! I've been up for AGES!"],
+};
+
 function boopSpark() {
   if (!pet.mascot) return;
   if (pet.napping) {
@@ -2048,9 +2106,17 @@ function boopSpark() {
   pet.boopTimes = pet.boopTimes.filter((t) => now - t < 6000);
   pet.boopTimes.push(now);
   let reaction;
+  const roll = Math.random();
+  const time = petTimeClass();
   if (pet.boopTimes.length >= 3) {
     pet.boopTimes = [];
     reaction = BOOP_PARTY;
+  } else if (roll < 0.06) {
+    reaction = RARE_BOOPS[Math.floor(Math.random() * RARE_BOOPS.length)];
+  } else if (time === "pet-night" && roll < 0.34 && pet.lastBoop !== NIGHT_BOOP.motion) {
+    reaction = NIGHT_BOOP;
+  } else if (time === "pet-morning" && roll < 0.34 && pet.lastBoop !== MORNING_BOOP.motion) {
+    reaction = MORNING_BOOP;
   } else {
     const pool = BOOP_REACTIONS.filter((r) => r.motion !== pet.lastBoop);
     reaction = pool[Math.floor(Math.random() * pool.length)];
@@ -2065,6 +2131,17 @@ function boopSpark() {
   if (reaction === BOOP_PARTY) setTimeout(() => burstHearts(reaction.hearts), 1400);
 
   setTimeout(() => {
+    if (reaction === BOOP_PARTY && pet.mascot) {
+      // All that partying leaves a Spark a little spinny.
+      pet.mascot.setExercise("pet-dizzy");
+      petSay("Woooah… the room is spinny… 😵‍💫");
+      setTimeout(() => {
+        pet.busy = false;
+        if (pet.mascot) pet.mascot.setExercise(petIdleMotion());
+        renderPet();
+      }, 1900);
+      return;
+    }
     pet.busy = false;
     if (pet.mascot) pet.mascot.setExercise(petIdleMotion());
     renderPet();

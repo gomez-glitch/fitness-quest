@@ -63,9 +63,10 @@ Living list, roughly priority-ordered. Move items up/down freely.
      Sky Reach, ends in Child's Pose.
    - Warm-up tie-in: Marching + Arm Circles + two stretches could form an
      auto-suggested warm-up row at the top of Play.
-5. **Foam roller set** — gentle roller moves as 20–30s timed items in the
-   Stretch group, tagged with a 🪵 roller gear marker (like the 🏋️ weights
-   tag). Mascot motions add a roller ellipse prop under the body part:
+5. **Foam roller set** ✅ SHIPPED — all eight moves live as 20–30s timed
+   items in the Stretch group with a 🛞 roller gear marker, calm music +
+   breathing cues, and a blue end-on roller drawn into each FK animation.
+   Original spec kept below for reference:
    - **Calf Rollers** (30s) — sit, roller under calves, roll ankle-to-knee.
    - **Thigh Rollers** (30s) — face down, roller under thighs, slow rolls.
    - **Hamstring Rollers** (30s) — seated, roller under the backs of legs.
@@ -94,10 +95,18 @@ Living list, roughly priority-ordered. Move items up/down freely.
 - **Spark is alive** ✅ SHIPPED (and upgraded to a full tamagotchi) —
   Spark's Corner home panel: time-of-day scene, mood-driven idle animations,
   a boop reaction roulette (tickle / high five / dance break / jump for joy /
-  flex / super mode + triple-boop party), speech bubbles, a spinning 3D snack wheel + tummy meter with real-time hunger,
+  flex / super mode + triple-boop party, rare sneeze & hiccup rolls,
+  post-party dizzy spiral eyes, cosy night boops and bouncy morning boops),
+  speech bubbles, a spinning 3D snack wheel + tummy meter with real-time hunger,
   a daily secret favourite food mini-game, comedy burps, and naps with a
   gentle boop-to-wake. Energy stays exercise-driven; food is pure fun
   (never sad/sick, treats always welcome).
+- **Copy-me game** — Spark demonstrates a move in his corner ("Can YOU do
+  3 star jumps?") and a boop confirms you did it, earning a heart.
+- **Catch-me mode** — Spark scoots left/right across his scene and you have
+  to boop the moving target.
+- **Boop milestones** — the boop counter earns tiny titles at 50/100/500
+  ("Boop Buddy" → "Boop Master" → "Boop Legend") shown in the stats line.
 - **Trophy share cards** — canvas-generated celebration card (avatar, rank,
   stat) shared via the Web Share API on level-ups and boss kills.
 - **Secret moves** — hidden exercises unlocked by feats ("all three holds in
