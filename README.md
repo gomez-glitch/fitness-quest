@@ -20,9 +20,12 @@ colors, big buttons, and encouraging, positive language throughout.
 - App-style shell: a fixed bottom tab bar (Home / Play / Adventure / Library /
   Awards) keeps every screen short, and long card sets (exercise picker, move
   library, badge case) are swipeable horizontal snap rows
-- Swipeable Home: five full-screen panels (Welcome + daily fact → Spark's
+- Swipeable Home: five full-screen panels (Daily briefing → Spark's
   Corner → My Hero with stats → Today's quests + weekly chart → a super-sized
-  Mystery Spinner) with snap paging and dot navigation
+  Mystery Spinner) with snap paging and dot navigation. The briefing greets
+  the hero by name ("Good morning, Spark!"), shows a tappable quest-progress
+  ring (0/3 → sweeps as daily quests complete, links to the Today panel),
+  the daily fun fact, and one-tap Start moving
 - Spark's Corner, a full tamagotchi home for the mascot: Spark lives in a
   scene that shifts with the real time of day (sunny day → sunset → starry
   night with a nightcap), his mood follows the energy meter, and he chats in
@@ -99,6 +102,9 @@ colors, big buttons, and encouraging, positive language throughout.
 - Move library of illustrated cards for every exercise
 - Quest log of the most recent completed challenges
 - Per-hero "reset progress" (with confirmation) that keeps the hero's identity
+- Motion design: views fade in with gently staggered rising cards, tab icons
+  pop on selection, stat numbers count up when they change, and the quest
+  ring sweeps — all disabled under prefers-reduced-motion
 
 ## Testing
 

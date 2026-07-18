@@ -95,21 +95,143 @@ a:focus-visible {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0.9rem;
+}
+
+.hero-eyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.hero-id-row {
+  display: flex;
+  align-items: center;
   gap: 1rem;
+  text-align: left;
+}
+
+.hero-id-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.hero-greeting {
+  font-size: clamp(1.35rem, 5vw, 1.8rem);
+  color: var(--white);
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(59, 7, 100, 0.3);
+  line-height: 1.15;
 }
 
 .hero-avatar {
-  font-size: 4rem;
+  font-size: 2.6rem;
   line-height: 1;
   background: rgba(255, 255, 255, 0.25);
   border-radius: 50%;
-  width: 6rem;
-  height: 6rem;
+  width: 4.4rem;
+  height: 4.4rem;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-pop);
   animation: hero-float 3s ease-in-out infinite;
+}
+
+/* Daily briefing: quest progress ring, tappable */
+.hero-brief {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  max-width: 340px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.hero-brief:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.hero-brief:active {
+  transform: scale(0.98);
+}
+
+.brief-ring {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+}
+
+.brief-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.brief-track,
+.brief-fill {
+  fill: none;
+  stroke-width: 8;
+}
+
+.brief-track {
+  stroke: rgba(255, 255, 255, 0.28);
+}
+
+.brief-fill {
+  stroke: var(--yellow);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brief-count {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--white);
+}
+
+.brief-copy {
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+}
+
+.brief-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--white);
+}
+
+.brief-sub {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.brief-chevron {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1;
 }
 
 @keyframes hero-float {
@@ -142,9 +264,9 @@ a:focus-visible {
 
 .hero h1 {
   color: var(--white);
-  font-size: clamp(2rem, 6vw, 3rem);
-  margin-bottom: 0.5rem;
-  text-shadow: 0 3px 10px rgba(59, 7, 100, 0.35);
+  font-size: clamp(1.35rem, 5vw, 1.8rem);
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(59, 7, 100, 0.3);
 }
 
 .hero-fact {
@@ -287,6 +409,30 @@ main {
   display: none;
 }
 
+/* Motion: views fade in and their cards rise with a gentle stagger.
+   Restart happens automatically when a hidden view becomes visible. */
+.tab-view {
+  animation: view-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.tab-view > * {
+  animation: card-up 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.tab-view > *:nth-child(2) { animation-delay: 0.05s; }
+.tab-view > *:nth-child(3) { animation-delay: 0.1s; }
+.tab-view > *:nth-child(4) { animation-delay: 0.15s; }
+.tab-view > *:nth-child(5) { animation-delay: 0.2s; }
+.tab-view > *:nth-child(n + 6) { animation-delay: 0.24s; }
+
+@keyframes view-in {
+  from { opacity: 0; }
+}
+
+@keyframes card-up {
+  from { opacity: 0; transform: translateY(14px); }
+}
+
 /* ---------- Bottom tab bar ---------- */
 
 .tab-bar {
@@ -344,6 +490,13 @@ main {
 .tab-btn[aria-selected="true"] .tab-icon {
   transform: scale(1.12);
   opacity: 1;
+  animation: tab-pop 0.35s ease;
+}
+
+@keyframes tab-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.3); }
+  100% { transform: scale(1.12); }
 }
 
 .tab-btn[aria-selected="true"] .tab-label {

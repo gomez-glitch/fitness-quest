@@ -930,6 +930,11 @@ const el = {
   installBtn: document.getElementById("install-btn"),
   heroFactText: document.getElementById("hero-fact-text"),
   heroRank: document.getElementById("hero-rank"),
+  heroGreeting: document.getElementById("hero-greeting"),
+  heroBrief: document.getElementById("hero-brief"),
+  briefFill: document.getElementById("brief-fill"),
+  briefCount: document.getElementById("brief-count"),
+  briefSub: document.getElementById("brief-sub"),
   homePager: document.getElementById("home-pager"),
   homeDots: document.getElementById("home-dots"),
   hero2Avatar: document.getElementById("hero2-avatar"),
@@ -972,10 +977,37 @@ const el = {
 // Rendering
 // ---------------------------------------------------------------------------
 
+const BRIEF_RING_CIRC = 2 * Math.PI * 30;
+
+function renderHomeBriefing(st) {
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  el.heroGreeting.textContent = `${greeting}, ${st.profile.nickname}!`;
+
+  ensureDailyFresh(st);
+  const done = Math.min(DAILY_QUEST_COUNT, st.daily.done.length);
+  if (!renderHomeBriefing.ready) {
+    // First paint snaps into place — no backwards "unfill" sweep on load.
+    renderHomeBriefing.ready = true;
+    el.briefFill.style.transition = "none";
+    requestAnimationFrame(() => { el.briefFill.style.transition = ""; });
+  }
+  el.briefFill.style.strokeDasharray = String(BRIEF_RING_CIRC);
+  el.briefFill.style.strokeDashoffset = String(BRIEF_RING_CIRC * (1 - done / DAILY_QUEST_COUNT));
+  el.briefCount.textContent = `${done}/${DAILY_QUEST_COUNT}`;
+  el.briefSub.textContent =
+    done >= DAILY_QUEST_COUNT
+      ? (st.daily.bonusClaimed ? "All done — hero work! 🏆" : "Done! Claim your bonus chest! 🎁")
+      : done === 0
+        ? `${DAILY_QUEST_COUNT} fresh quests waiting`
+        : `${DAILY_QUEST_COUNT - done} to go — nearly there!`;
+}
+
 function renderHero() {
   const st = activeProfile();
   const level = levelForXp(st.xp);
   const rank = heroRank(level);
+  renderHomeBriefing(st);
   el.heroAvatar.textContent = st.profile.avatar;
   el.heroAvatar.className = `hero-avatar ring-${rank.tier}`;
   el.heroRank.textContent = `Lv ${level} · ${rank.title}`;
@@ -1137,9 +1169,9 @@ function renderDashboard() {
   const pct = Math.round((xpIntoLevel / span) * 100);
 
   el.statLevel.textContent = String(level);
-  el.statXp.textContent = String(st.xp);
+  animateNumber(el.statXp, st.xp);
   el.statStreak.innerHTML = `${st.streak} <span class="flame">🔥</span>`;
-  el.statReps.textContent = String(st.reps);
+  animateNumber(el.statReps, st.reps);
 
   el.levelProgressFill.style.width = `${pct}%`;
   el.levelProgressLabel.textContent = `${xpIntoLevel} / ${span} XP to level ${level + 1}`;
@@ -1429,6 +1461,27 @@ function renderJourney() {
     `${lap > 1 ? ` (lap ${lap}!)` : ""} — ${left} quest${left === 1 ? "" : "s"} to the castle!`;
 }
 
+// Count-up tween for stat numbers. First paint (and reduced motion) snaps
+// directly so freshly loaded values are never caught mid-animation.
+const countedUp = new WeakSet();
+
+function animateNumber(target, to) {
+  const from = parseInt(target.textContent, 10) || 0;
+  if (REDUCED_MOTION || window.__MQ_TEST_NO_TWEEN || !countedUp.has(target) || from === to) {
+    countedUp.add(target);
+    target.textContent = String(to);
+    return;
+  }
+  const start = performance.now();
+  const dur = 450;
+  (function tick(now) {
+    const t = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - t, 3);
+    target.textContent = String(Math.round(from + (to - from) * eased));
+    if (t < 1) requestAnimationFrame(tick);
+  })(start);
+}
+
 function renderAll() {
   renderHero();
   renderProfileSwitcher();
@@ -1457,6 +1510,15 @@ el.tabBar.addEventListener("click", (event) => {
 
 el.startMovingBtn.addEventListener("click", () => {
   switchTab("play");
+});
+
+// Tapping the daily briefing ring slides over to the Today panel.
+el.heroBrief.addEventListener("click", () => goHomePanel(3));
+el.heroBrief.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    goHomePanel(3);
+  }
 });
 
 let homeScrollRaf = null;

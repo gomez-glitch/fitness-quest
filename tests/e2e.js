@@ -95,8 +95,12 @@ async function main() {
     await waitForServer(BASE);
     browser = await chromium.launch(launchOptions());
     const page = await browser.newPage({ viewport: { width: 420, height: 850 } });
-    // Freeze the 3D snack wheel on every load so food positions are deterministic.
-    await page.addInitScript(() => { window.__MQ_TEST_FREEZE_TRAY = true; });
+    // Freeze the 3D snack wheel and skip number tweens on every load so
+    // positions and stat values are deterministic.
+    await page.addInitScript(() => {
+      window.__MQ_TEST_FREEZE_TRAY = true;
+      window.__MQ_TEST_NO_TWEEN = true;
+    });
     const pageErrors = [];
     page.on("pageerror", (e) => pageErrors.push(String(e.message)));
 
@@ -109,6 +113,8 @@ async function main() {
       document.getElementById("view-play").hidden));
     check("daily fact rendered", (await page.textContent("#hero-fact-text")).trim().length > 10);
     check("rank pill shows level 1", (await page.textContent("#hero-rank")).includes("Lv 1"));
+    check("greeting welcomes the hero by name", (await page.textContent("#hero-greeting")).includes("Spark"));
+    check("daily briefing ring starts 0/3", (await page.textContent("#brief-count")) === "0/3");
 
     await page.goto(`${BASE}?tab=adventure`);
     await page.waitForSelector(".tab-bar");

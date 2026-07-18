@@ -28,18 +28,36 @@
         <section class="home-panel" aria-label="Welcome">
           <header class="hero home-hero">
             <div class="hero-inner">
-              <div class="hero-avatar" id="hero-avatar" aria-hidden="true">👟</div>
-              <p class="hero-rank" id="hero-rank"></p>
-              <div class="hero-copy">
-                <h1>Move Quest</h1>
-                <div class="hero-fact">
-                  <span class="hero-fact-label">✨ Fun fact of the day</span>
-                  <p class="hero-fact-text" id="hero-fact-text"></p>
+              <p class="hero-eyebrow">Move Quest</p>
+              <div class="hero-id-row">
+                <div class="hero-avatar" id="hero-avatar" aria-hidden="true">👟</div>
+                <div class="hero-id-copy">
+                  <h1 class="hero-greeting" id="hero-greeting">Hello!</h1>
+                  <p class="hero-rank" id="hero-rank"></p>
                 </div>
-                <div class="hero-actions">
-                  <button type="button" class="btn btn-primary" id="start-moving-btn">Start moving</button>
-                  <button type="button" class="btn btn-secondary" id="customize-hero-btn">Customize hero</button>
+              </div>
+              <div class="hero-brief" id="hero-brief" role="button" tabindex="0"
+                   aria-label="Today's quests — tap to see them">
+                <div class="brief-ring" aria-hidden="true">
+                  <svg viewBox="0 0 72 72">
+                    <circle class="brief-track" cx="36" cy="36" r="30" />
+                    <circle class="brief-fill" id="brief-fill" cx="36" cy="36" r="30" />
+                  </svg>
+                  <span class="brief-count" id="brief-count">0/3</span>
                 </div>
+                <div class="brief-copy">
+                  <p class="brief-title">Today's quests</p>
+                  <p class="brief-sub" id="brief-sub"></p>
+                </div>
+                <span class="brief-chevron" aria-hidden="true">›</span>
+              </div>
+              <div class="hero-fact">
+                <span class="hero-fact-label">✨ Fun fact of the day</span>
+                <p class="hero-fact-text" id="hero-fact-text"></p>
+              </div>
+              <div class="hero-actions">
+                <button type="button" class="btn btn-primary" id="start-moving-btn">Start moving</button>
+                <button type="button" class="btn btn-secondary" id="customize-hero-btn">Customize hero</button>
               </div>
             </div>
           </header>
