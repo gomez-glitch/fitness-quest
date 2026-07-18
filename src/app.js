@@ -27,7 +27,7 @@ const PERSONAS = [
 
 const AVATARS = ["👟", "🦄", "🐯", "🦊", "🐼", "🛼", "🌟", "🚀"];
 
-const GROUPS = ["All", "Core", "Arms", "Legs", "Whole body", "Stretch"];
+const GROUPS = ["All", "Core", "Arms", "Legs", "Whole body", "Animal", "Stretch"];
 
 const EXERCISES = [
   {
@@ -285,6 +285,46 @@ const EXERCISES = [
     muscles: "Shoulders + back", cue: "Kneel with the roller in front, roll it away and melt into a lo-o-ong stretch.",
     steps: ["Kneel tall to start", "Roll the roller far away", "Reach and breathe out slowly"],
   },
+  {
+    id: "bunny-hops", title: "Bunny Hops", target: 12, xp: 40, icon: "🐰", group: "Animal", intensity: 1,
+    muscles: "Legs + bounce", cue: "Little bouncy hops with your paws up — soft landings like a sneaky bunny!",
+    steps: ["Paws up by your chest", "Small quick hops", "Land quiet as a whisper"],
+  },
+  {
+    id: "bear-crawl", title: "Bear Crawl", mode: "timed", target: 20, xp: 55, icon: "🐻", group: "Animal", intensity: 2,
+    muscles: "Whole body", cue: "Hands and feet on the floor, bottom up — prowl around like a big strong bear.",
+    steps: ["Hands under shoulders", "Move opposite hand and foot", "Growling is encouraged"],
+  },
+  {
+    id: "crab-walk", title: "Crab Walk", mode: "timed", target: 20, xp: 55, icon: "🦀", group: "Animal", intensity: 2,
+    muscles: "Arms + core", cue: "Belly to the sky, hands behind you, hips up — scuttle sideways like a crab!",
+    steps: ["Fingers point at your feet", "Lift those hips high", "Scuttle scuttle scuttle"],
+  },
+  {
+    id: "frog-hops", title: "Frog Hops", target: 8, xp: 50, icon: "🐸", group: "Animal", intensity: 2,
+    muscles: "Legs", cue: "Squat low, hands down between your knees, then LEAP like a frog after a fly.",
+    steps: ["Crouch down small", "Explode up and forward", "Land back in your lily-pad squat"],
+  },
+  {
+    id: "inchworm", title: "Inchworm", target: 6, xp: 50, icon: "🐛", group: "Animal", intensity: 2,
+    muscles: "Whole body", cue: "Fold down, walk your hands out to a plank, then walk them back and stand tall.",
+    steps: ["Hands walk out slowly", "Flat as a bridge in the middle", "Walk back and grow tall"],
+  },
+  {
+    id: "duck-waddle", title: "Duck Waddle", mode: "timed", target: 15, xp: 50, icon: "🦆", group: "Animal", intensity: 2,
+    muscles: "Legs", cue: "Sink into a low squat, tuck your wings, and waddle about. Quacking helps.",
+    steps: ["Stay low the whole time", "Little waddle steps", "Quack with confidence"],
+  },
+  {
+    id: "cheetah-sprint", title: "Cheetah Sprint", mode: "timed", target: 15, xp: 60, icon: "🐆", group: "Animal", intensity: 3,
+    muscles: "Legs + heart", cue: "Run on the spot as FAST as a cheetah — fastest animal on Earth!",
+    steps: ["Pump those arms", "Fast fast feet", "Fifteen seconds of full zoom"],
+  },
+  {
+    id: "kangaroo-jumps", title: "Kangaroo Jumps", target: 10, xp: 60, icon: "🦘", group: "Animal", intensity: 3,
+    muscles: "Legs + power", cue: "Big two-foot bounces with your paws tucked — boing across the outback!",
+    steps: ["Bend low like a spring", "Jump BIG", "Soft knees when you land"],
+  },
 ];
 
 const INTENSITY_META = {
@@ -385,6 +425,16 @@ const ADVENTURES = [
     ],
   },
   {
+    id: "jungle-jamboree", name: "Jungle Jamboree", emoji: "🦁",
+    moves: [
+      { id: "marching", line: "Tiptoe into the jungle — the animals are waiting…" },
+      { id: "bear-crawl", line: "Prowl through the ferns with the bear patrol!" },
+      { id: "frog-hops", line: "Leap the lily pads across Crocodile Creek!" },
+      { id: "duck-waddle", line: "Sneak under the low vines with the duck parade!" },
+      { id: "cheetah-sprint", line: "The cheetah challenges you — RACE to the waterfall!" },
+    ],
+  },
+  {
     id: "sunset-stretch", name: "Sunset Stretch", emoji: "🌇", calm: true,
     moves: [
       { id: "sky-reach", line: "Reach up for the setting sun…" },
@@ -405,6 +455,7 @@ const DANCE_COMMANDS = [
 const DANCE_MOVES = [
   "jumping-jacks", "squats", "high-knees", "skater-hops", "arm-circles",
   "hip-circles", "butt-kicks", "sky-reach", "russian-twists", "marching",
+  "bunny-hops", "frog-hops",
 ];
 
 const SPIN_MODS = [
@@ -461,6 +512,7 @@ const BADGES = [
   { id: "adv-3", emoji: "🥾", label: "Trail Blazer", need: "Finish 3 adventures", test: (s) => (s.stats.adventuresDone || 0) >= 3 },
   { id: "adv-10", emoji: "🗻", label: "Quest Conqueror", need: "Finish 10 adventures", test: (s) => (s.stats.adventuresDone || 0) >= 10 },
   { id: "whole-5", emoji: "🌟", label: "Whole-Body Wonder", need: "5 whole body quests", test: (s) => (s.stats.groups["Whole body"] || 0) >= 5 },
+  { id: "animal-5", emoji: "🐾", label: "Animal Antics", need: "5 animal moves", test: (s) => (s.stats.groups["Animal"] || 0) >= 5 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -1934,7 +1986,7 @@ function petAccessoryFor() {
   return null;
 }
 
-const PET_SHOWOFFS = ["jumping-jacks", "squats", "arm-circles", "high-knees", "star-pose", "pet-dance", "pet-flex"];
+const PET_SHOWOFFS = ["jumping-jacks", "squats", "arm-circles", "high-knees", "star-pose", "bunny-hops", "pet-dance", "pet-flex"];
 
 function petIdleMotion() {
   const mood = pet.mood;

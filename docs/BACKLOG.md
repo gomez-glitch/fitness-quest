@@ -4,8 +4,8 @@ Living list, roughly priority-ordered. Move items up/down freely.
 
 ## Next up
 
-1. **Protection pack** — the highest-value unbuilt item now that progress is
-   precious:
+1. **Protection pack** (⏸️ PAUSED — parked by request 2026-07-18; still the
+   highest-value unbuilt item now that progress is precious):
    - Export/import saves ("Save my heroes" downloads a small file or shows a
      copyable code; import restores). Guards against cleared browser data,
      iOS storage eviction, and device switches.
@@ -81,7 +81,13 @@ Living list, roughly priority-ordered. Move items up/down freely.
    - **Roller Reach-Over** (20s) — kneel, roller ahead, roll it away and
      reach into a long stretch.
    Safety copy: "roll slowly", "skip anything that hurts", "grown-up nearby".
-6. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
+6. **Animal Moves pack** ✅ SHIPPED — eight moves in their own "Animal"
+   filter group (Bunny Hops, Bear Crawl, Crab Walk, Frog Hops, Inchworm,
+   Duck Waddle, Cheetah Sprint, Kangaroo Jumps), Animal Antics 🐾 badge,
+   Jungle Jamboree 🦁 adventure, bunny/frog moves added to Dance Party and
+   Spark's idle show-off pool. (Idea sparked by reviewing the
+   exercises-dataset repo — built natively, no external assets.)
+7. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
    added; add a CONTRIBUTING-style note if anyone else joins the project.
 
 ## Ideas shelf

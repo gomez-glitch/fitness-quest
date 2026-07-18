@@ -51,14 +51,15 @@ colors, big buttons, and encouraging, positive language throughout.
 - Daily Quests: three featured moves picked fresh each day (same picks on every
   device), with a +40 XP bonus chest for finishing all three
 - Adventure mode: story-driven guided workouts (Lava Volcano Escape, Deep Sea
-  Dive, Space Station Rescue, or a surprise mix) — every move carries a
+  Dive, Space Station Rescue, Jungle Jamboree, the calm Sunset Stretch, or a
+  surprise mix) — every move carries a
   narrative line, chains open with a warm-up, halfway cheer bubbles pop up,
   and a combo-bonus celebration ends the quest
-- 21 badges and 52 rotating daily fun facts
+- 22 badges and 52 rotating daily fun facts
 - A last-7-days activity chart on the dashboard with best-day and
   longest-streak callouts
 - Hero customization: nickname, persona, and avatar, saved to the browser
-- 51 short kid-friendly exercises with muscle-group AND intensity filters
+- 59 short kid-friendly exercises with muscle-group AND intensity filters
   (🌱 Easy / ⚡ Steady / 🔥 Spicy), including four timed "hold" challenges
   (wall sit, plank hold, flamingo balance, farmer hold) with a GO → 3-2-1
   get-ready lead-in and automatic countdown, small-free-weight moves
@@ -66,7 +67,10 @@ colors, big buttons, and encouraging, positive language throughout.
   eight-move foam roller set (calf/thigh/hamstring rolls, back massage roll,
   superhero side roll, foot wake-up, rolling bridge, roller reach-over)
   marked with 🛞 — gentle timed rolls with calm music, breathing cues, and
-  a blue roller drawn into each animation
+  a blue roller drawn into each animation — plus an eight-move Animal pack
+  with its own 🐾 filter group (bunny hops, bear crawl, crab walk, frog hops,
+  inchworm, duck waddle, cheetah sprint, kangaroo jumps) and an Animal Antics
+  badge
 - Spark, an articulated mascot with real elbow and knee joints, demonstrates
   each exercise with anatomically-faithful looping animation in the active
   quest card (side or front view, whichever reads best per move)
@@ -86,8 +90,8 @@ colors, big buttons, and encouraging, positive language throughout.
   full XP for the first 6 claims each day, then half, then a quarter — a
   gentle nudge to rest and come back tomorrow
 - Daily streak tracking (based on local calendar dates)
-- 21 badges: XP milestones, streaks, daily goals, variety/explorer, levels,
-  holds, and adventures
+- 22 badges: XP milestones, streaks, daily goals, variety/explorer, levels,
+  holds, adventures, and animal moves
 - Move library of illustrated cards for every exercise
 - Quest log of the most recent completed challenges
 - Per-hero "reset progress" (with confirmation) that keeps the hero's identity

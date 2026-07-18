@@ -222,6 +222,7 @@ async function main() {
     check("stretch target label", (await page.textContent("#view-play .dial-target-val")) === "20s");
     await page.click("#tab-adventure");
     check("sunset stretch adventure listed", !!(await page.$('.adventure-preset[data-adventure="sunset-stretch"]')));
+    check("jungle jamboree adventure listed", !!(await page.$('.adventure-preset[data-adventure="jungle-jamboree"]')));
     await page.click("#tab-play");
 
     console.log("# Energy taper");
@@ -275,13 +276,13 @@ async function main() {
     console.log("# Intensity filter");
     await page.click("#tab-play");
     await page.click('.filter-chip[data-filter-intensity="3"]');
-    check("spicy filter shows 6 moves", (await page.$$("#exercise-board .exercise-tile")).length === 6,
+    check("spicy filter shows 8 moves", (await page.$$("#exercise-board .exercise-tile")).length === 8,
       String((await page.$$("#exercise-board .exercise-tile")).length));
     await page.click('.filter-chip[data-filter-intensity="1"]');
-    check("easy filter shows 25 moves", (await page.$$("#exercise-board .exercise-tile")).length === 25,
+    check("easy filter shows 26 moves", (await page.$$("#exercise-board .exercise-tile")).length === 26,
       String((await page.$$("#exercise-board .exercise-tile")).length));
     await page.click('.filter-chip[data-filter-intensity="All"]');
-    check("all levels shows 51 moves", (await page.$$("#exercise-board .exercise-tile")).length === 51,
+    check("all levels shows 59 moves", (await page.$$("#exercise-board .exercise-tile")).length === 59,
       String((await page.$$("#exercise-board .exercise-tile")).length));
     await page.click('.filter-chip[data-filter-group="Stretch"]');
     check("stretch group shows 18 moves", (await page.$$("#exercise-board .exercise-tile")).length === 18,
@@ -380,7 +381,7 @@ async function main() {
     await page.click("#tab-awards");
     const earned = (await page.$$(".badge:not(.locked)")).length;
     const total = (await page.$$(".badge")).length;
-    check("badge case has 21 badges", total === 21, String(total));
+    check("badge case has 22 badges", total === 22, String(total));
     check("seeded state earns 18 badges", earned === 18, String(earned));
 
     console.log("# Hygiene");
