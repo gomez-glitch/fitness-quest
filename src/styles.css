@@ -1601,7 +1601,8 @@ body.no-scroll {
 
 .spinner-hub {
   position: absolute;
-  bottom: 102px;
+  /* wheel is 264px tall and bottom-anchored, so its centre is 132px up */
+  bottom: 132px;
   left: 50%;
   transform: translate(-50%, 50%);
   width: 3.4rem;
@@ -1613,6 +1614,7 @@ body.no-scroll {
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
+  line-height: 1;
   pointer-events: none;
 }
 
@@ -1909,15 +1911,17 @@ body.no-scroll {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
+  /* top-aligned so icons sit at the same height on every tile,
+     even when a long title wraps to two lines */
+  justify-content: flex-start;
+  gap: 0.3rem;
   width: 138px;
   text-align: center;
   background: var(--white);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 0.8rem 0.55rem;
-  min-height: 106px;
+  padding: 0.75rem 0.55rem 0.7rem;
+  min-height: 112px;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
@@ -1935,6 +1939,12 @@ body.no-scroll {
 .exercise-tile-icon {
   font-size: 1.6rem;
   flex-shrink: 0;
+  height: 2.1rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .exercise-tile-body {
