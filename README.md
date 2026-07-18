@@ -26,8 +26,11 @@ colors, big buttons, and encouraging, positive language throughout.
 - Spark's Corner, a full tamagotchi home for the mascot: Spark lives in a
   scene that shifts with the real time of day (sunny day → sunset → starry
   night with a nightcap), his mood follows the energy meter, and he chats in
-  a speech bubble about streaks, quests, and snacks. Boop him for giggles and
-  hearts. A spinning 3D snack wheel holds 12 foods — it idles with a slow
+  a speech bubble about streaks, quests, and snacks. Booping him spins a
+  reaction roulette — tickle giggles, high fives, a dance break with its own
+  mini groove, a jump for joy with a rising "whee!", a muscle flex, or super
+  mode, each with matching sounds, lines, and emoji bursts — and three quick
+  boops in a row unlock a boop party. A spinning 3D snack wheel holds 12 foods — it idles with a slow
   show-off spin, drag it to whirl with momentum, and tapping a food swings it
   round to the front and feeds his tummy meter (which slowly empties over
   real hours): he munches with a chomp animation and sound, occasionally

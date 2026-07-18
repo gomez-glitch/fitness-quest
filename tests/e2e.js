@@ -145,7 +145,7 @@ async function main() {
     console.log("# Tamagotchi: snacks & naps");
     check("snack wheel offers 12 foods", (await page.$$("#pet-tray .pet-food")).length === 12);
     check("snack wheel names the front food", (await page.textContent("#pet-tray-label")).includes("tap to feed"));
-    await page.waitForTimeout(1300); // let the boop reaction finish (busy flag)
+    await page.waitForTimeout(2800); // let the longest boop reaction finish (busy flag)
     await page.click('#pet-tray .pet-food[data-food="apple"]'); // front of the frozen wheel
     await page.waitForTimeout(700); // wheel settles on it, then the feed kicks off
     const petState = await page.evaluate(() => {

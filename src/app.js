@@ -1822,6 +1822,8 @@ const pet = {
   busy: false,
   napping: false,
   mood: "",
+  lastBoop: "",
+  boopTimes: [],
 };
 
 // The snack tray. Everyday foods fill more, treats a little less — but a
@@ -1892,7 +1894,7 @@ function petAccessoryFor() {
   return null;
 }
 
-const PET_SHOWOFFS = ["jumping-jacks", "squats", "arm-circles", "high-knees", "star-pose"];
+const PET_SHOWOFFS = ["jumping-jacks", "squats", "arm-circles", "high-knees", "star-pose", "pet-dance", "pet-flex"];
 
 function petIdleMotion() {
   const mood = pet.mood;
@@ -2007,6 +2009,28 @@ function burstHearts(emojis = ["💜", "💖", "✨"]) {
   }
 }
 
+// Boop roulette: every boop rolls a different animated reaction. Three quick
+// boops in a row unlock a mini boop party.
+const BOOP_REACTIONS = [
+  { motion: "pet-tickle", dur: 1400, sfx: "giggle", hearts: ["💜", "💖", "✨"],
+    lines: ["Hehe! That tickles!", "Boop! 🥰", "Again, again!", "*giggle*"] },
+  { motion: "pet-highfive", dur: 1500, sfx: "clap", hearts: ["✋", "⭐", "💥"],
+    lines: ["High five! ✋", "Up top! You're awesome!", "Team Move Quest! ✋"] },
+  { motion: "pet-dance", dur: 2600, sfx: "groove", hearts: ["🎵", "🎶", "✨"],
+    lines: ["Dance break! 🎶", "Wiggle wiggle wiggle!", "Dancing counts as exercise… right?!"] },
+  { motion: "pet-jump", dur: 1700, sfx: "whee", hearts: ["🌟", "✨", "💫"],
+    lines: ["WHEEE! Jump for joy!", "Boing boing! 🤸", "I could jump over the moon!"] },
+  { motion: "pet-flex", dur: 2000, sfx: "fanfare", hearts: ["💪", "⭐", "✨"],
+    lines: ["Feel the POWER! 💪", "All our quests made me strong!", "Muscles by Move Quest! 💪"] },
+  { motion: "pet-super", dur: 1500, sfx: "badge", hearts: ["⚡", "🌟", "✨"],
+    lines: ["SUPER SPARK MODE!", "Zoom zoom! ⚡", "Faster than a rocket!"] },
+];
+
+const BOOP_PARTY = {
+  motion: "pet-dance", dur: 3400, sfx: "groove", hearts: ["🎉", "🎊", "💜", "⭐"],
+  lines: ["A BOOP PARTY?! Best day ever! 🎉", "Triple boop!! PARTY TIME! 🎉"],
+};
+
 function boopSpark() {
   if (!pet.mascot) return;
   if (pet.napping) {
@@ -2020,17 +2044,31 @@ function boopSpark() {
   saveData();
   el.petStats.textContent = petStatsText(st);
 
-  pet.mascot.setExercise("pet-tickle");
-  sound.giggle();
+  const now = Date.now();
+  pet.boopTimes = pet.boopTimes.filter((t) => now - t < 6000);
+  pet.boopTimes.push(now);
+  let reaction;
+  if (pet.boopTimes.length >= 3) {
+    pet.boopTimes = [];
+    reaction = BOOP_PARTY;
+  } else {
+    const pool = BOOP_REACTIONS.filter((r) => r.motion !== pet.lastBoop);
+    reaction = pool[Math.floor(Math.random() * pool.length)];
+  }
+  pet.lastBoop = reaction.motion;
+
+  pet.mascot.setExercise(reaction.motion);
+  (sound[reaction.sfx] || sound.giggle).call(sound);
   if (navigator.vibrate) navigator.vibrate(10);
-  petSay(["Hehe! That tickles!", "Boop! 🥰", "Again, again!", "*giggle*"][Math.floor(Math.random() * 4)]);
-  burstHearts();
+  petSay(reaction.lines[Math.floor(Math.random() * reaction.lines.length)]);
+  burstHearts(reaction.hearts);
+  if (reaction === BOOP_PARTY) setTimeout(() => burstHearts(reaction.hearts), 1400);
 
   setTimeout(() => {
     pet.busy = false;
     if (pet.mascot) pet.mascot.setExercise(petIdleMotion());
     renderPet();
-  }, 1400);
+  }, reaction.dur);
 }
 
 // --- feeding ---

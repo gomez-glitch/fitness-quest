@@ -654,6 +654,53 @@ export const MOTIONS = {
     ],
   },
 
+  "pet-highfive": {
+    view: "front", duration: 700, poster: 0.45, face: "star",
+    base: { ...FRONT_BASE, y: 76, a1: [12, 6] },
+    frames: [
+      { t: 0, a2: [30, 20], torso: -3, y: 76 },
+      { t: 0.45, a2: [168, -4], torso: 6, y: 73 },
+      { t: 0.75, a2: [158, 6], torso: 4, y: 74 },
+      { t: 1, a2: [30, 20], torso: -3, y: 76 },
+    ],
+  },
+
+  "pet-dance": {
+    view: "front", duration: 900, poster: 0, face: "happy",
+    base: { ...FRONT_BASE },
+    frames: [
+      { t: 0, y: 76, torso: -8, a1: [150, 15], a2: [15, 25], l1: [10, 6, 0], l2: [2, 2, 0] },
+      { t: 0.25, y: 73.5, torso: 0, a1: [90, 30], a2: [90, 30] },
+      { t: 0.5, y: 76, torso: 8, a1: [15, 25], a2: [150, 15], l1: [2, 2, 0], l2: [10, 6, 0] },
+      { t: 0.75, y: 73.5, torso: 0, a1: [90, 30], a2: [90, 30] },
+      { t: 1, y: 76, torso: -8, a1: [150, 15], a2: [15, 25], l1: [10, 6, 0], l2: [2, 2, 0] },
+    ],
+  },
+
+  "pet-jump": {
+    view: "front", duration: 850, poster: 0.55, face: "star",
+    base: { ...FRONT_BASE },
+    frames: [
+      { t: 0, y: 76, a1: [15, 10], a2: [15, 10], l1: [6, 4, 0], l2: [6, 4, 0], torso: 0 },
+      { t: 0.22, y: 80, a1: [-5, 20], a2: [-5, 20], l1: [24, 30, 0], l2: [24, 30, 0], torso: 6 },
+      { t: 0.55, y: 61, a1: [165, 5], a2: [165, 5], l1: [14, 2, 0], l2: [14, 2, 0], torso: -2 },
+      { t: 0.8, y: 77, a1: [50, 15], a2: [50, 15], l1: [18, 22, 0], l2: [18, 22, 0], torso: 0 },
+      { t: 1, y: 76, a1: [15, 10], a2: [15, 10], l1: [6, 4, 0], l2: [6, 4, 0], torso: 0 },
+    ],
+  },
+
+  "pet-flex": {
+    view: "front", duration: 1100, poster: 0.55, face: "star",
+    base: { ...FRONT_BASE, y: 76 },
+    frames: [
+      { t: 0, a1: [20, 12], a2: [20, 12], y: 76 },
+      { t: 0.35, a1: [38, 118], a2: [38, 118], y: 75 },
+      { t: 0.55, a1: [44, 128], a2: [44, 128], y: 74.5 },
+      { t: 0.75, a1: [38, 118], a2: [38, 118], y: 75 },
+      { t: 1, a1: [20, 12], a2: [20, 12], y: 76 },
+    ],
+  },
+
   "burpees": {
     view: "side", duration: 2600, poster: 0.45,
     base: { ...SIDE_BASE },

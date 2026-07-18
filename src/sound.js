@@ -91,6 +91,38 @@ export const sound = {
     note(784, 0.09, 0.12, "triangle", 0.16);
   },
 
+  // High five! Two bright snappy hits.
+  clap() {
+    if (muted) return;
+    note(1046, 0, 0.05, "triangle", 0.2);
+    note(1568, 0.06, 0.1, "triangle", 0.18);
+  },
+
+  // A rising "wheee!" slide for jumps.
+  whee() {
+    if (muted) return;
+    const ac = audioCtx();
+    if (!ac) return;
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    const start = ac.currentTime;
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(392, start);
+    osc.frequency.exponentialRampToValueAtTime(1046, start + 0.35);
+    gain.gain.setValueAtTime(0.16, start);
+    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.45);
+    osc.connect(gain).connect(ac.destination);
+    osc.start(start);
+    osc.stop(start + 0.5);
+  },
+
+  // A four-beat mini groove for dance breaks.
+  groove() {
+    if (muted) return;
+    [0, 0.3, 0.6, 0.9].forEach((t) => note(130, t, 0.1, "sine", 0.22));
+    [523, 659, 784, 659].forEach((f, i) => note(f, i * 0.3 + 0.15, 0.12, "triangle", 0.12));
+  },
+
   // Calm music: a generative lullaby — a soft drifting pad with occasional
   // pentatonic bell notes. Fully synthesized, loops until stopped.
   startCalm() {
