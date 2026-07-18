@@ -6,17 +6,19 @@
   --ink: #3b0764;
   --purple: #7c3aed;
   --purple-dark: #5b21b6;
+  --muted: #7c6ba8;
   --pink: #ec4899;
   --yellow: #fde68a;
   --lavender: #ede9fe;
-  --bg: #fff7ed;
+  --bg: #faf8ff;
   --white: #ffffff;
   --success: #16a34a;
-  --radius-lg: 1.75rem;
+  --border: rgba(124, 58, 237, 0.12);
+  --radius-lg: 1.5rem;
   --radius-md: 1.125rem;
   --radius-sm: 0.75rem;
-  --shadow-soft: 0 10px 30px rgba(124, 58, 237, 0.18);
-  --shadow-pop: 0 6px 16px rgba(236, 72, 153, 0.25);
+  --shadow-soft: 0 1px 2px rgba(59, 7, 100, 0.05), 0 8px 24px rgba(124, 58, 237, 0.09);
+  --shadow-pop: 0 4px 14px rgba(236, 72, 153, 0.22);
   font-size: 16px;
 }
 
@@ -30,8 +32,8 @@ html, body {
 }
 
 body {
-  font-family: "Segoe UI", "Trebuchet MS", Verdana, system-ui, sans-serif;
-  background: linear-gradient(180deg, var(--bg) 0%, var(--lavender) 100%);
+  font-family: ui-rounded, "SF Pro Rounded", "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+  background: linear-gradient(180deg, #fdfbff 0%, #f1ebfe 100%);
   color: var(--ink);
   line-height: 1.5;
   min-height: 100vh;
@@ -257,9 +259,9 @@ a:focus-visible {
 }
 
 .btn-danger {
-  background: var(--white);
+  background: #fef2f2;
   color: #b91c1c;
-  border: 2px solid #b91c1c;
+  border: none;
 }
 
 .btn-danger:hover {
@@ -296,9 +298,12 @@ main {
   display: flex;
   justify-content: center;
   gap: 0.25rem;
-  background: var(--white);
-  box-shadow: 0 -6px 24px rgba(59, 7, 100, 0.16);
-  padding: 0.4rem 0.5rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border-top: 1px solid rgba(124, 58, 237, 0.08);
+  box-shadow: 0 -4px 20px rgba(59, 7, 100, 0.07);
+  padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
 }
 
 .tab-btn {
@@ -306,35 +311,43 @@ main {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.1rem;
+  gap: 0.12rem;
   flex: 1;
   max-width: 120px;
-  min-height: 56px;
-  padding: 0.35rem 0.25rem;
+  min-height: 54px;
+  padding: 0.3rem 0.25rem;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 999px;
   background: none;
-  color: var(--purple-dark);
+  color: var(--muted);
+  transition: color 0.15s ease, background 0.15s ease;
 }
 
 .tab-icon {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   line-height: 1;
+  opacity: 0.65;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .tab-label {
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-size: 0.66rem;
+  font-weight: 700;
   letter-spacing: 0.02em;
 }
 
 .tab-btn[aria-selected="true"] {
   background: var(--lavender);
-  color: var(--ink);
+  color: var(--purple-dark);
 }
 
 .tab-btn[aria-selected="true"] .tab-icon {
-  transform: scale(1.15);
+  transform: scale(1.12);
+  opacity: 1;
+}
+
+.tab-btn[aria-selected="true"] .tab-label {
+  font-weight: 800;
 }
 
 /* ---------- Horizontal snap rows ---------- */
@@ -357,13 +370,16 @@ main {
 
 .card {
   background: var(--white);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 1.5rem;
+  padding: 1.25rem 1.25rem 1.35rem;
   box-shadow: var(--shadow-soft);
 }
 
 .card h2 {
-  font-size: 1.4rem;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.65rem;
 }
 
 /* ---------- Profile switcher (collapsible drawer) ---------- */
@@ -562,26 +578,28 @@ fieldset.avatar-field {
 }
 
 .stat-card {
-  background: var(--lavender);
+  background: linear-gradient(170deg, var(--white) 0%, var(--lavender) 130%);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 1rem;
+  padding: 0.85rem 1rem;
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
 }
 
 .stat-label {
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  color: var(--purple-dark);
+  color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.07em;
 }
 
 .stat-value {
-  font-size: 1.6rem;
+  font-size: 1.55rem;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
   color: var(--ink);
 }
 
@@ -899,7 +917,8 @@ body.no-scroll {
   width: 150px;
   height: 150px;
   border-radius: var(--radius-md);
-  background: var(--yellow);
+  background: radial-gradient(125% 95% at 50% 18%, #fef9c3 0%, #fde68a 62%, #fcd34d 115%);
+  box-shadow: inset 0 -14px 22px rgba(217, 119, 6, 0.13);
   overflow: hidden;
 }
 
@@ -1605,35 +1624,48 @@ body.no-scroll {
 .filter-chips {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.45rem;
+  margin-bottom: 0.9rem;
 }
 
+/* One tidy scrolling row per filter — no more chip walls. */
 .filter-chip-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding: 2px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-chip-row::-webkit-scrollbar {
+  display: none;
 }
 
 .filter-chip {
-  padding: 0.5rem 1rem;
+  flex: 0 0 auto;
+  padding: 0.42rem 0.9rem;
   border-radius: 999px;
-  border: 2px solid var(--lavender);
-  background: var(--bg);
+  border: 1.5px solid var(--border);
+  background: var(--white);
   font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--purple-dark);
-  min-height: 44px;
+  font-size: 0.84rem;
+  color: var(--muted);
+  min-height: 40px;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 
 .filter-chip:hover {
-  border-color: var(--pink);
+  border-color: var(--purple);
+  color: var(--purple-dark);
 }
 
 .filter-chip[aria-pressed="true"] {
   background: var(--purple);
   border-color: var(--purple);
   color: var(--white);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
 }
 
 .exercise-tile {
@@ -1641,45 +1673,51 @@ body.no-scroll {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  width: 148px;
+  gap: 0.35rem;
+  width: 138px;
   text-align: center;
-  background: var(--bg);
-  border: 3px solid var(--lavender);
+  background: var(--white);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 0.9rem 0.6rem;
-  min-height: 110px;
+  padding: 0.8rem 0.55rem;
+  min-height: 106px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .exercise-tile:hover {
-  border-color: var(--pink);
+  border-color: var(--purple);
+  transform: translateY(-1px);
 }
 
 .exercise-tile[aria-pressed="true"] {
   border-color: var(--purple);
   background: var(--lavender);
+  box-shadow: 0 3px 12px rgba(124, 58, 237, 0.18);
 }
 
 .exercise-tile-icon {
-  font-size: 1.75rem;
+  font-size: 1.6rem;
   flex-shrink: 0;
 }
 
 .exercise-tile-body {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.12rem;
   align-items: center;
 }
 
 .exercise-tile-title {
   font-weight: 800;
+  font-size: 0.92rem;
+  line-height: 1.25;
   color: var(--ink);
 }
 
 .exercise-tile-meta {
-  font-size: 0.82rem;
-  color: var(--purple-dark);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--muted);
 }
 
 /* ---------- Active quest card ---------- */
@@ -1885,7 +1923,8 @@ body.no-scroll {
   aspect-ratio: 1 / 1;
   margin: 0 auto;
   border-radius: var(--radius-md);
-  background: var(--yellow);
+  background: radial-gradient(125% 95% at 50% 18%, #fef9c3 0%, #fde68a 62%, #fcd34d 115%);
+  box-shadow: inset 0 -14px 22px rgba(217, 119, 6, 0.13);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1982,9 +2021,14 @@ body.no-scroll {
 }
 
 .badge.locked {
-  background: #e5e7eb;
-  color: #6b7280;
+  background: var(--bg);
+  border: 1.5px dashed #ddd6fe;
+  color: var(--muted);
+}
+
+.badge.locked .badge-emoji {
   filter: grayscale(1);
+  opacity: 0.4;
 }
 
 .badge-req {
@@ -2040,7 +2084,18 @@ body.no-scroll {
 /* ---------- Reset ---------- */
 
 .reset-card {
-  border: 2px dashed #fca5a5;
+  border: 1px solid rgba(185, 28, 28, 0.14);
+  background: #fffbfb;
+  box-shadow: none;
+}
+
+.reset-card h2 {
+  font-size: 1rem;
+}
+
+.reset-card p {
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
 /* ---------- Footer ---------- */

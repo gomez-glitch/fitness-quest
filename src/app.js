@@ -1174,8 +1174,8 @@ function renderExerciseBoard() {
           <span class="exercise-tile-icon" aria-hidden="true">${ex.icon}</span>
           <span class="exercise-tile-body">
             <span class="exercise-tile-title">${ex.title}</span>
-            <span class="exercise-tile-meta">${targetLabel(ex)} · ${ex.xp} XP · ${ex.muscles}</span>
-            <span class="exercise-tile-meta">${meta.emoji} ${meta.label}${ex.weights ? " · 🏋️ weights" : ""}${ex.roller ? " · 🛞 roller" : ""}</span>
+            <span class="exercise-tile-meta">${targetLabel(ex)} · ${ex.xp} XP</span>
+            <span class="exercise-tile-meta">${meta.emoji} ${meta.label}${ex.weights ? " · 🏋️" : ""}${ex.roller ? " · 🛞" : ""}</span>
           </span>
         </button>
       `;
