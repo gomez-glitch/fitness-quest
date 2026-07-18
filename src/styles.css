@@ -368,6 +368,11 @@ a:focus-visible {
 .btn-round {
   width: 3.25rem;
   height: 3.25rem;
+  padding: 0; /* the inherited pill padding pushed the glyph off-centre */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
   border-radius: 50%;
   background: var(--purple);
   color: var(--white);
