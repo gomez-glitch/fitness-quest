@@ -2645,12 +2645,22 @@ function renderSpinner() {
     const ex = findExercise(spin.exerciseId);
     const mod = SPIN_MODS.find((m) => m.id === spin.modifier);
     el.spinnerResult.innerHTML = `
-      <p class="spinner-prize">${mod.emoji} <strong>${ex.title}</strong> — ${mod.label}</p>
-      <p class="spinner-desc">${mod.desc}${spin.claimed ? " ✅ Done!" : ""}</p>
-      ${spin.claimed ? "" : `<button type="button" class="btn btn-primary" data-spin-go="${ex.id}">Go do it! 🎯</button>`}
+      <div class="spin-prize-card">
+        <p class="spinner-prize">${mod.emoji} <strong>${ex.title}</strong> — ${mod.label}</p>
+        <p class="spinner-desc">${mod.desc}${spin.claimed ? " ✅ Done!" : ""}</p>
+        ${spin.claimed
+          ? `<p class="spinner-desc">⏰ A new spin lands tomorrow!</p>`
+          : `<button type="button" class="btn btn-primary" data-spin-go="${ex.id}">Go do it! 🎯</button>`}
+      </div>
     `;
   } else if (!spin) {
-    el.spinnerResult.innerHTML = "";
+    // Pre-spin teaser: show what fortune might bring.
+    el.spinnerResult.innerHTML = `
+      <p class="spinner-teaser-label">Today's possible twists</p>
+      <div class="spinner-teaser">
+        ${SPIN_MODS.map((m) => `<span class="teaser-chip">${m.emoji} ${m.label}</span>`).join("")}
+      </div>
+    `;
   }
 }
 
@@ -2667,7 +2677,7 @@ el.spinBtn.addEventListener("click", () => {
   el.spinnerWheel.style.transform = `rotate(${turns - (modIdx * 45 + 22.5)}deg)`;
 
   // ticking that slows down as the wheel settles
-  [100, 300, 600, 1000, 1500, 2100, 2700].forEach((ms) => setTimeout(() => sound.tick(), ms));
+  [100, 250, 420, 620, 850, 1120, 1430, 1780, 2170, 2600, 3050].forEach((ms) => setTimeout(() => sound.tick(), ms));
 
   setTimeout(() => {
     spinning = false;

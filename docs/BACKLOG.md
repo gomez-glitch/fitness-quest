@@ -115,6 +115,16 @@ Living list, roughly priority-ordered. Move items up/down freely.
   to boop the moving target.
 - **Boop milestones** — the boop counter earns tiny titles at 50/100/500
   ("Boop Buddy" → "Boop Master" → "Boop Legend") shown in the stats line.
+- **Tablet / landscape layout** — two-column grids on wide screens (Play:
+  board left + quest card right; Home panels side by side); currently
+  everything is portrait-phone stretched.
+- **Sound mixer** — split the single mute into three toggles: effects /
+  calm music / voice coach (parents want voice off at 7am; kids want
+  effects without narration).
+- **Per-hero voice** — vary speechSynthesis pitch/rate per profile so each
+  sibling's Spark sounds subtly different.
+- **Split app.js into modules** — ~3,300 lines now; carve out pet.js,
+  spinner.js, adventure.js, state.js for faster, safer future work.
 - **Trophy share cards** — canvas-generated celebration card (avatar, rank,
   stat) shared via the Web Share API on level-ups and boss kills.
 - **Secret moves** — hidden exercises unlocked by feats ("all three holds in
