@@ -476,6 +476,12 @@ main {
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
+.tab-icon svg {
+  width: 23px;
+  height: 23px;
+  display: block;
+}
+
 .tab-label {
   font-size: 0.66rem;
   font-weight: 700;
@@ -995,11 +1001,26 @@ fieldset.avatar-field {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: linear-gradient(160deg, rgba(59, 7, 100, 0.92), rgba(124, 58, 237, 0.92));
+  background: linear-gradient(160deg, rgba(46, 8, 84, 0.62), rgba(91, 33, 182, 0.55));
+  backdrop-filter: blur(12px) saturate(1.25);
+  -webkit-backdrop-filter: blur(12px) saturate(1.25);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  animation: overlay-in 0.22s ease both;
+}
+
+.adventure-overlay > * {
+  animation: overlay-card-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+}
+
+@keyframes overlay-card-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
 }
 
 body.no-scroll {
@@ -2232,6 +2253,42 @@ body.no-scroll {
 .quest-log-empty {
   color: var(--purple-dark);
   font-style: italic;
+}
+
+/* Illustrated empty state: a waving Spark instead of lonely italic text */
+.quest-log-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0 0.6rem;
+  text-align: center;
+}
+
+.empty-stage {
+  width: 104px;
+  height: 104px;
+}
+
+.empty-stage svg {
+  width: 100%;
+  height: 100%;
+}
+
+.quest-log-empty-state p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+  max-width: 32ch;
+}
+
+.btn-compact {
+  width: auto;
+  font-size: 0.92rem;
+  padding: 0.6rem 1.3rem;
+  min-height: 44px;
+  margin-top: 0.25rem;
 }
 
 /* ---------- Reset ---------- */

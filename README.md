@@ -103,8 +103,12 @@ colors, big buttons, and encouraging, positive language throughout.
 - Quest log of the most recent completed challenges
 - Per-hero "reset progress" (with confirmation) that keeps the hero's identity
 - Motion design: views fade in with gently staggered rising cards, tab icons
-  pop on selection, stat numbers count up when they change, and the quest
-  ring sweeps — all disabled under prefers-reduced-motion
+  pop on selection, stat numbers count up when they change, overlays rise
+  over a frosted blurred scrim, and the quest ring sweeps — all disabled
+  under prefers-reduced-motion
+- Consistent chrome: the tab bar uses tinted line-art SVG icons (emoji stay
+  where they're content — foods, badges, exercise cards), and empty states
+  are illustrated (a waving Spark invites the first quest)
 
 ## Testing
 

@@ -1362,7 +1362,14 @@ function renderBadges() {
 function renderQuestLog() {
   const st = activeProfile();
   if (st.completed.length === 0) {
-    el.questLog.innerHTML = `<li class="quest-log-empty">No quests completed yet — go earn some XP!</li>`;
+    el.questLog.innerHTML = `
+      <li class="quest-log-empty-state">
+        <div class="empty-stage" id="empty-quests-stage" aria-hidden="true"></div>
+        <p>No quests yet — Spark is warmed up and waiting for you!</p>
+        <button type="button" class="btn btn-claim btn-compact" id="empty-quests-btn">Start your first quest</button>
+      </li>`;
+    createMascot(document.getElementById("empty-quests-stage"), "pet-wave"); // static waving poster
+    document.getElementById("empty-quests-btn").addEventListener("click", () => switchTab("play"));
     return;
   }
   el.questLog.innerHTML = st.completed.map((entry) => `
