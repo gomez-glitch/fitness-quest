@@ -70,6 +70,26 @@ button {
   cursor: pointer;
 }
 
+/* Icon containers always render color emoji — the rounded text font must
+   never hijack glyphs like ⚡ with its monochrome variants. Chrome (tab bar)
+   uses line-art SVGs; content icons stay emoji. */
+.exercise-tile-icon,
+.spinner-emoji,
+.spinner-hub,
+.badge-emoji,
+.quest-log-icon,
+.daily-quest-icon,
+.daily-chest-emoji,
+.adventure-preset-emoji,
+.pet-food,
+.pet-orb,
+.pet-zzz,
+.hero-avatar,
+.hero-feature-avatar,
+.profile-chip-avatar {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
+
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,

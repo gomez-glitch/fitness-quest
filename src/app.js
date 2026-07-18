@@ -329,7 +329,7 @@ const EXERCISES = [
 
 const INTENSITY_META = {
   1: { label: "Easy", emoji: "🌱" },
-  2: { label: "Steady", emoji: "⚡" },
+  2: { label: "Steady", emoji: "⚡️" },
   3: { label: "Spicy", emoji: "🔥" },
 };
 
@@ -463,7 +463,7 @@ const SPIN_MODS = [
   { id: "half-reps", emoji: "🪄", label: "Half the reps!", desc: "Target cut in half — quick win!" },
   { id: "dino", emoji: "🦖", label: "Dino style!", desc: "Do it roaring like a dinosaur!" },
   { id: "slow-mo", emoji: "🐢", label: "Slow motion!", desc: "Slooow and suuuper controlled." },
-  { id: "speedy", emoji: "⚡", label: "Super speed!", desc: "Fast as lightning — but safe!" },
+  { id: "speedy", emoji: "⚡️", label: "Super speed!", desc: "Fast as lightning — but safe!" },
   { id: "animal", emoji: "🐵", label: "Animal noises!", desc: "A different animal sound every rep!" },
   { id: "hero-pose", emoji: "🦸", label: "Hero pose!", desc: "Strike a superhero pose after each rep!" },
   { id: "giggle", emoji: "😂", label: "Giggle mode!", desc: "Biggest smile the whole time!" },
@@ -496,7 +496,7 @@ const BADGES = [
   { id: "xp-320", emoji: "💜", label: "Core Hero", need: "Earn 320 XP", test: (s) => s.xp >= 320 },
   { id: "xp-520", emoji: "🏆", label: "Quest Champion", need: "Earn 520 XP", test: (s) => s.xp >= 520 },
   { id: "streak-3", emoji: "🔥", label: "On Fire", need: "3-day streak", test: (s) => s.streak >= 3 },
-  { id: "streak-7", emoji: "⚡", label: "Unstoppable Week", need: "7-day streak", test: (s) => s.streak >= 7 },
+  { id: "streak-7", emoji: "⚡️", label: "Unstoppable Week", need: "7-day streak", test: (s) => s.streak >= 7 },
   { id: "tried-all", emoji: "🗺️", label: "Move Master", need: "Try every move", test: (s) => s.stats.tried.length >= EXERCISES.length },
   { id: "legs-5", emoji: "🦵", label: "Leg Legend", need: "5 leg quests", test: (s) => (s.stats.groups.Legs || 0) >= 5 },
   { id: "core-5", emoji: "🌀", label: "Core Commander", need: "5 core quests", test: (s) => (s.stats.groups.Core || 0) >= 5 },
@@ -1256,7 +1256,7 @@ function renderPlayMeta() {
 
   const mult = energyMultiplier(st);
   el.energyNote.textContent =
-    mult === 1 ? "⚡ Full power!"
+    mult === 1 ? "⚡️ Full power!"
     : mult === 0.5 ? "🔋 Muscles getting tired — half XP now. Rest makes you stronger!"
     : "😴 Super tired! Tiny XP until tomorrow — time to rest and recover.";
   el.energyNote.classList.toggle("energy-low", mult < 1);
@@ -2123,7 +2123,7 @@ function petBubbleLine() {
   ]);
   if (mood === "sleepy") pools.push([
     "*yawn* … moving would wake me right up 🥱",
-    "My batteries are low… exercise charges me! ⚡",
+    "My batteries are low… exercise charges me! ⚡️",
   ]);
   if (mood === "super") pools.push([
     "I'M SUPERCHARGED! Watch THIS!",
@@ -2217,8 +2217,8 @@ const BOOP_REACTIONS = [
     lines: ["WHEEE! Jump for joy!", "Boing boing! 🤸", "I could jump over the moon!"] },
   { motion: "pet-flex", dur: 2000, sfx: "fanfare", hearts: ["💪", "⭐", "✨"],
     lines: ["Feel the POWER! 💪", "All our quests made me strong!", "Muscles by Move Quest! 💪"] },
-  { motion: "pet-super", dur: 1500, sfx: "badge", hearts: ["⚡", "🌟", "✨"],
-    lines: ["SUPER SPARK MODE!", "Zoom zoom! ⚡", "Faster than a rocket!"] },
+  { motion: "pet-super", dur: 1500, sfx: "badge", hearts: ["⚡️", "🌟", "✨"],
+    lines: ["SUPER SPARK MODE!", "Zoom zoom! ⚡️", "Faster than a rocket!"] },
 ];
 
 const BOOP_PARTY = {
@@ -2649,7 +2649,7 @@ function renderSpinner() {
         <p class="spinner-prize">${mod.emoji} <strong>${ex.title}</strong> — ${mod.label}</p>
         <p class="spinner-desc">${mod.desc}${spin.claimed ? " ✅ Done!" : ""}</p>
         ${spin.claimed
-          ? `<p class="spinner-desc">⏰ A new spin lands tomorrow!</p>`
+          ? `<p class="spinner-desc">⏰️ A new spin lands tomorrow!</p>`
           : `<button type="button" class="btn btn-primary" data-spin-go="${ex.id}">Go do it! 🎯</button>`}
       </div>
     `;
