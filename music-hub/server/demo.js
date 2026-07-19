@@ -127,6 +127,18 @@ const PLAYERS = [
   { id: "RINCON_DEMO_PATIO", name: "Patio" },
 ];
 
+// Genre tag per demo playlist — powers genre suggestions and genre browse.
+const DEMO_GENRES = {
+  "demo-p-hits": "pop",
+  "demo-p-chill": "chill",
+  "demo-p-rock": "rock",
+  "demo-p-dance": "dance",
+  "demo-p-dinner": "jazz",
+  "demo-p-focus": "electronic",
+  "demo-p-road": "rock",
+  "demo-p-kids": "pop",
+};
+
 class DemoBackend {
   constructor() {
     // groupOf: playerId -> coordinatorId. Start with Living+Kitchen grouped.
@@ -179,6 +191,80 @@ class DemoBackend {
         image: art(PLAYLISTS.indexOf(p), "♫"),
         tracks: p.tracks.length, owner: p.owner,
       })),
+    };
+  }
+
+  // Predictive typeahead across the demo catalog — same shape as
+  // SpotifyClient.suggest().
+  suggest(q) {
+    const needle = q.toLowerCase();
+    const has = (s) => (s || "").toLowerCase().includes(needle);
+    const allTracks = PLAYLISTS.flatMap((p) => p.tracks);
+
+    const tracks = allTracks
+      .filter((t) => has(t.name) || has(t.artist))
+      .slice(0, 4);
+
+    const artistNames = [...new Set(allTracks.map((t) => t.artist))]
+      .filter(has)
+      .slice(0, 3);
+    const artists = artistNames.map((name) => {
+      const t = allTracks.find((x) => x.artist === name);
+      return { id: `demo-ar-${name}`, name, image: t ? t.image : null };
+    });
+
+    const albumNames = [...new Set(allTracks.map((t) => t.album))]
+      .filter(has)
+      .slice(0, 3);
+    const albums = albumNames.map((name) => {
+      const t = allTracks.find((x) => x.album === name);
+      return {
+        id: `demo-al-${name}`, name, artist: t ? t.artist : "",
+        image: t ? t.image : null,
+      };
+    });
+
+    const playlists = PLAYLISTS.filter((p) => has(p.name) || has(p.description))
+      .slice(0, 3)
+      .map((p) => this.playlistSummary(p));
+
+    const genres = [...new Set(Object.values(DEMO_GENRES))]
+      .filter(has)
+      .slice(0, 3);
+
+    return { tracks, artists, albums, playlists, genres };
+  }
+
+  // Browse an entity picked from the suggestions.
+  browse(type, q) {
+    const allTracks = PLAYLISTS.flatMap((p) => p.tracks);
+    if (type === "artist") {
+      const tracks = allTracks.filter((t) => t.artist === q);
+      const albumNames = [...new Set(tracks.map((t) => t.album))];
+      const albums = albumNames.map((name) => {
+        const t = tracks.find((x) => x.album === name);
+        return { id: `demo-al-${name}`, name, artist: q, image: t ? t.image : null };
+      });
+      return { tracks, albums };
+    }
+    if (type === "album") {
+      return { tracks: allTracks.filter((t) => t.album === q), albums: [] };
+    }
+    if (type === "genre") {
+      const ids = Object.keys(DEMO_GENRES).filter((id) => DEMO_GENRES[id] === q);
+      const tracks = PLAYLISTS.filter((p) => ids.includes(p.id)).flatMap(
+        (p) => p.tracks
+      );
+      return { tracks, albums: [] };
+    }
+    throw new Error("Bad browse type");
+  }
+
+  playlistSummary(p) {
+    return {
+      id: p.id, name: p.name, description: p.description,
+      image: art(PLAYLISTS.indexOf(p), "♫"),
+      tracks: p.tracks.length, owner: p.owner,
     };
   }
 

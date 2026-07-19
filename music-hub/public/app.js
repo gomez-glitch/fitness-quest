@@ -225,6 +225,227 @@
     showView("view-search");
   }
 
+  // ---------- predictive suggestions ----------
+
+  const suggest = {
+    timer: null,
+    controller: null,
+    cache: new Map(),
+    items: [], // flat, selectable: { kind, label, data }
+    active: -1,
+  };
+
+  function onSearchInput() {
+    const q = $("#search-input").value.trim();
+    clearTimeout(suggest.timer);
+    if (q.length < 2) return closeSuggest();
+    suggest.timer = setTimeout(() => fetchSuggest(q), 180);
+  }
+
+  async function fetchSuggest(q) {
+    try {
+      let data = suggest.cache.get(q);
+      if (!data) {
+        if (suggest.controller) suggest.controller.abort();
+        suggest.controller = new AbortController();
+        const res = await fetch(`/api/spotify/suggest?q=${encodeURIComponent(q)}`, {
+          signal: suggest.controller.signal,
+        });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Suggest failed");
+        suggest.cache.set(q, data);
+        if (suggest.cache.size > 40) suggest.cache.delete(suggest.cache.keys().next().value);
+      }
+      // Ignore a stale response if the box moved on.
+      if ($("#search-input").value.trim() !== q) return;
+      renderSuggest(data);
+    } catch (err) {
+      if (err.name !== "AbortError") closeSuggest();
+    }
+  }
+
+  function suggestRow(kind, label, sub, image, iconChar, onPick) {
+    const row = el("div", "suggest-row");
+    row.setAttribute("role", "option");
+    const thumb = el("div", `suggest-thumb${kind === "artist" ? " round" : ""}`);
+    if (image) {
+      const img = el("img");
+      img.src = image;
+      img.alt = "";
+      img.loading = "lazy";
+      thumb.appendChild(img);
+    } else {
+      thumb.textContent = iconChar;
+    }
+    const text = el("div", "suggest-text");
+    text.appendChild(el("div", "suggest-name", label));
+    text.appendChild(el("div", "suggest-sub", sub));
+    row.append(thumb, text);
+    suggest.items.push({ el: row, pick: onPick });
+    row.addEventListener("mousedown", (e) => {
+      e.preventDefault(); // keep focus off the blur that would close us
+      onPick();
+    });
+    return row;
+  }
+
+  function renderSuggest(data) {
+    const panel = $("#suggest-panel");
+    panel.textContent = "";
+    suggest.items = [];
+    suggest.active = -1;
+
+    const section = (title, rows) => {
+      if (!rows.length) return;
+      panel.appendChild(el("div", "suggest-head", title));
+      for (const r of rows) panel.appendChild(r);
+    };
+
+    section(
+      "Artists",
+      (data.artists || []).map((a) =>
+        suggestRow("artist", a.name, "Artist", a.image, "🎤", () =>
+          openBrowse("artist", a.name)
+        )
+      )
+    );
+    section(
+      "Songs",
+      (data.tracks || []).map((t) =>
+        suggestRow("song", t.name, t.artist, t.image, "♪", () => {
+          closeSuggest();
+          playList([t], 0);
+        })
+      )
+    );
+    section(
+      "Albums",
+      (data.albums || []).map((a) =>
+        suggestRow("album", a.name, a.artist || "Album", a.image, "💿", () =>
+          openBrowse("album", a.name)
+        )
+      )
+    );
+    section(
+      "Playlists",
+      (data.playlists || []).map((p) =>
+        suggestRow("playlist", p.name, p.owner || "Playlist", p.image, "≡", () => {
+          closeSuggest();
+          openPlaylist(p).catch((e) => toast(e.message));
+        })
+      )
+    );
+    section(
+      "Genres",
+      (data.genres || []).map((g) =>
+        suggestRow("genre", g.replace(/-/g, " "), "Genre", null, "#", () =>
+          openBrowse("genre", g)
+        )
+      )
+    );
+
+    const any = suggest.items.length > 0;
+    panel.classList.toggle("hidden", !any);
+    $("#search-input").setAttribute("aria-expanded", String(any));
+    if (!any) {
+      panel.appendChild(el("div", "suggest-empty", "No matches"));
+      panel.classList.remove("hidden");
+    }
+  }
+
+  function closeSuggest() {
+    clearTimeout(suggest.timer);
+    if (suggest.controller) suggest.controller.abort();
+    suggest.controller = null;
+    suggest.items = [];
+    suggest.active = -1;
+    const panel = $("#suggest-panel");
+    panel.classList.add("hidden");
+    panel.textContent = "";
+    $("#search-input").setAttribute("aria-expanded", "false");
+  }
+
+  function moveActive(delta) {
+    if (!suggest.items.length) return;
+    if (suggest.active >= 0) suggest.items[suggest.active].el.classList.remove("active");
+    suggest.active =
+      (suggest.active + delta + suggest.items.length) % suggest.items.length;
+    const item = suggest.items[suggest.active];
+    item.el.classList.add("active");
+    item.el.scrollIntoView({ block: "nearest" });
+  }
+
+  function onSearchKey(e) {
+    if ($("#suggest-panel").classList.contains("hidden")) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      moveActive(1);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      moveActive(-1);
+    } else if (e.key === "Enter" && suggest.active >= 0) {
+      e.preventDefault();
+      suggest.items[suggest.active].pick();
+    } else if (e.key === "Escape") {
+      closeSuggest();
+    }
+  }
+
+  // ---------- browse (artist / album / genre) ----------
+
+  async function openBrowse(type, q) {
+    closeSuggest();
+    $("#search-input").blur();
+    try {
+      const data = await api(
+        `/api/spotify/browse?type=${type}&q=${encodeURIComponent(q)}`
+      );
+      state.browse = { type, q, tracks: data.tracks || [] };
+      const kindLabel = { artist: "Artist", album: "Album", genre: "Genre" }[type];
+      $("#browse-kind").textContent = kindLabel;
+      $("#browse-name").textContent = type === "genre" ? q.replace(/-/g, " ") : q;
+      const hero = $("#browse-hero");
+      hero.textContent = "";
+      hero.classList.toggle("round", type === "artist");
+      const heroImg = (data.tracks && data.tracks[0] && data.tracks[0].image) || null;
+      if (heroImg) {
+        const img = el("img");
+        img.src = heroImg;
+        img.alt = "";
+        hero.appendChild(img);
+      } else {
+        hero.textContent = { artist: "🎤", album: "💿", genre: "#" }[type] || "♪";
+      }
+      const albumsWrap = $("#browse-albums-wrap");
+      const albums = data.albums || [];
+      albumsWrap.classList.toggle("hidden", !albums.length);
+      const shelf = $("#browse-albums");
+      shelf.textContent = "";
+      for (const a of albums) {
+        const card = el("button", "playlist-card");
+        const art = el("div", "card-art");
+        if (a.image) {
+          const img = el("img");
+          img.src = a.image;
+          img.alt = "";
+          img.loading = "lazy";
+          art.appendChild(img);
+        } else {
+          art.textContent = "💿";
+        }
+        card.appendChild(art);
+        card.appendChild(el("div", "card-name", a.name));
+        card.appendChild(el("div", "card-sub", a.artist || "Album"));
+        card.addEventListener("click", () => openBrowse("album", a.name));
+        shelf.appendChild(card);
+      }
+      renderTracks($("#browse-tracks"), state.browse.tracks);
+      showView("view-browse");
+    } catch (err) {
+      toast(err.message);
+    }
+  }
+
   // ---------- zones ----------
 
   function activeGroup() {
@@ -666,7 +887,29 @@
     $("#search-form").addEventListener("submit", (e) => {
       e.preventDefault();
       const q = $("#search-input").value.trim();
-      if (q) runSearch(q).catch((err) => toast(err.message));
+      if (q) {
+        closeSuggest();
+        runSearch(q).catch((err) => toast(err.message));
+      }
+    });
+    $("#search-input").addEventListener("input", onSearchInput);
+    $("#search-input").addEventListener("keydown", onSearchKey);
+    $("#search-input").addEventListener("focus", onSearchInput);
+    $("#search-input").addEventListener("blur", () => {
+      // Delay so a tap on a suggestion (mousedown) lands first; skip if the
+      // box was refocused in the meantime so we don't clobber a fresh query.
+      setTimeout(() => {
+        if (document.activeElement !== $("#search-input")) closeSuggest();
+      }, 120);
+    });
+    $("#browse-back").addEventListener("click", () => showView("view-home"));
+    $("#browse-play-btn").addEventListener("click", () => {
+      if (state.browse && state.browse.tracks.length) playList(state.browse.tracks, 0);
+    });
+    $("#browse-shuffle-btn").addEventListener("click", () => {
+      if (state.browse && state.browse.tracks.length) {
+        playList(state.browse.tracks, 0, { shuffle: true });
+      }
     });
     $("#surprise-btn").addEventListener("click", surpriseMe);
     $("#playlist-play-btn").addEventListener("click", () => {

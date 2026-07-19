@@ -41,6 +41,34 @@ function simplifyPlaylist(p) {
   };
 }
 
+// Genres for predictive search (Spotify's genre-seed endpoint is deprecated
+// for new apps; search still supports the genre:"…" field filter).
+const GENRES = [
+  "acoustic", "afrobeat", "alternative", "ambient", "blues", "chill",
+  "classical", "country", "dance", "disco", "edm", "electronic", "folk",
+  "funk", "hip-hop", "house", "indie", "jazz", "k-pop", "latin", "metal",
+  "pop", "punk", "r-n-b", "reggae", "rock", "soul", "techno", "trance",
+];
+
+function simplifyArtist(a) {
+  if (!a) return null;
+  return {
+    id: a.id,
+    name: a.name,
+    image: a.images && a.images.length ? a.images[a.images.length - 1].url : null,
+  };
+}
+
+function simplifyAlbum(a) {
+  if (!a) return null;
+  return {
+    id: a.id,
+    name: a.name,
+    artist: (a.artists || []).map((x) => x.name).join(", "),
+    image: a.images && a.images.length ? a.images[a.images.length > 1 ? 1 : 0].url : null,
+  };
+}
+
 function simplifyTrack(t) {
   if (!t) return null;
   return {
@@ -220,6 +248,51 @@ class SpotifyClient {
         .map(simplifyPlaylist),
     };
   }
+
+  // Predictive typeahead: one API round-trip for songs/artists/albums/
+  // playlists, plus genre matches from the static list.
+  async suggest(q) {
+    const d = await this.api(
+      `/search?type=track,artist,album,playlist&limit=5&q=${encodeURIComponent(q)}`
+    );
+    const needle = q.toLowerCase();
+    const pick = (block, fn) =>
+      (((d[block] || {}).items) || []).filter(Boolean).map(fn).filter(Boolean);
+    return {
+      tracks: pick("tracks", simplifyTrack).slice(0, 4),
+      artists: pick("artists", simplifyArtist).slice(0, 3),
+      albums: pick("albums", simplifyAlbum).slice(0, 3),
+      playlists: pick("playlists", simplifyPlaylist).slice(0, 3),
+      genres: GENRES.filter((g) => g.includes(needle)).slice(0, 3),
+    };
+  }
+
+  // Browse an entity picked from the suggestions.
+  async browse(type, q) {
+    const field = { artist: "artist", album: "album", genre: "genre" }[type];
+    if (!field) throw new Error("Bad browse type");
+    const fq = encodeURIComponent(`${field}:"${q}"`);
+    const d = await this.api(`/search?type=track&limit=30&q=${fq}`);
+    const result = {
+      tracks: ((d.tracks && d.tracks.items) || []).map(simplifyTrack).filter(Boolean),
+      albums: [],
+    };
+    if (type === "artist") {
+      const da = await this.api(`/search?type=album&limit=12&q=${fq}`);
+      result.albums = ((da.albums && da.albums.items) || [])
+        .filter(Boolean)
+        .map(simplifyAlbum);
+    }
+    return result;
+  }
 }
 
-module.exports = { SpotifyClient, pkcePair, simplifyTrack, simplifyPlaylist };
+module.exports = {
+  SpotifyClient,
+  pkcePair,
+  simplifyTrack,
+  simplifyPlaylist,
+  simplifyArtist,
+  simplifyAlbum,
+  GENRES,
+};

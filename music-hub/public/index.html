@@ -17,8 +17,12 @@
         <span class="brand-mark"></span> Soundstage
       </button>
       <form id="search-form" class="search" role="search">
-        <input id="search-input" type="search" placeholder="Search songs, artists & playlists"
-               autocomplete="off" enterkeyhint="search" />
+        <input id="search-input" type="search"
+               placeholder="Search artists, songs, albums, playlists, genres"
+               autocomplete="off" enterkeyhint="search"
+               role="combobox" aria-expanded="false" aria-controls="suggest-panel"
+               aria-autocomplete="list" />
+        <div id="suggest-panel" class="suggest-panel hidden" role="listbox"></div>
       </form>
       <div class="top-status">
         <span id="demo-pill" class="pill pill-demo hidden">Demo</span>
@@ -71,6 +75,28 @@
           </div>
           <h3 class="shelf-title" id="search-songs-title">Songs</h3>
           <ol id="search-results" class="track-list"></ol>
+        </div>
+
+        <!-- Browse: artist / album / genre -->
+        <div id="view-browse" class="view hidden">
+          <div class="playlist-head">
+            <button class="back-btn" id="browse-back" aria-label="Back">‹</button>
+            <div class="browse-hero" id="browse-hero"></div>
+            <div class="playlist-meta">
+              <span id="browse-kind" class="browse-kind"></span>
+              <h2 id="browse-name"></h2>
+              <div class="playlist-actions">
+                <button id="browse-play-btn" class="primary-btn small">▶ Play</button>
+                <button id="browse-shuffle-btn" class="chip-btn">🔀 Shuffle</button>
+              </div>
+            </div>
+          </div>
+          <div id="browse-albums-wrap" class="hidden">
+            <h3 class="shelf-title">Albums</h3>
+            <div id="browse-albums" class="shelf"></div>
+          </div>
+          <h3 class="shelf-title" id="browse-songs-title">Songs</h3>
+          <ol id="browse-tracks" class="track-list"></ol>
         </div>
 
         <!-- Setup (live mode, Spotify not connected) -->

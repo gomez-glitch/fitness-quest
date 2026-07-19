@@ -176,6 +176,66 @@ check(
 );
 
 // ---------------------------------------------------------------------------
+console.log("demo predictive suggest");
+
+const sug = demo.suggest("ro");
+check(
+  "suggest returns all five groups",
+  ["tracks", "artists", "albums", "playlists", "genres"].every((k) =>
+    Array.isArray(sug[k])
+  )
+);
+check("suggest caps songs at 4", sug.tracks.length <= 4);
+check("suggest caps artists at 3", sug.artists.length <= 3);
+check(
+  "suggest matches an artist",
+  demo.suggest("meridian").artists.some((a) => a.name === "Iron Meridian")
+);
+check(
+  "artist suggestion carries cover art",
+  demo.suggest("meridian").artists[0].image != null
+);
+check(
+  "suggest matches an album",
+  demo.suggest("singles").albums.some((a) => /Singles/.test(a.name))
+);
+check(
+  "suggest matches a genre",
+  demo.suggest("roc").genres.includes("rock")
+);
+check(
+  "suggest matches a playlist",
+  demo.suggest("dinner").playlists.some((p) => p.name === "Dinner Jazz")
+);
+
+console.log("demo browse");
+
+const brArtist = demo.browse("artist", "Iron Meridian");
+check("browse artist returns tracks", brArtist.tracks.length > 0);
+check(
+  "browse artist tracks all belong to the artist",
+  brArtist.tracks.every((t) => t.artist === "Iron Meridian")
+);
+check("browse artist returns albums", brArtist.albums.length > 0);
+
+const brGenre = demo.browse("genre", "rock");
+check("browse genre returns tracks", brGenre.tracks.length > 0);
+check(
+  "browse genre pulls from rock playlists",
+  brGenre.tracks.length === 9 // Rock Classics (5) + Road Trip Gold (4)
+);
+
+const brAlbum = demo.browse("album", brArtist.tracks[0].album);
+check(
+  "browse album returns that album's tracks",
+  brAlbum.tracks.every((t) => t.album === brArtist.tracks[0].album)
+);
+check(
+  "browse rejects unknown type",
+  (() => { try { demo.browse("nope", "x"); return false; } catch (_) { return true; } })()
+);
+
+// ---------------------------------------------------------------------------
 console.log("queue manager");
 
 function fakeBackend() {

@@ -33,7 +33,11 @@ screen flow.
   song → add to an existing hub playlist or type a name to create one.
   Hub playlists live on the server (they survive restarts), show a HUB badge,
   and are playable/shuffleable like any other playlist.
-- **Search everything** — the top bar searches Spotify songs *and* playlists.
+- **Predictive search** — the top bar suggests as you type, grouped like
+  Spotify into **artists, songs, albums, playlists, and genres**, each with
+  cover art. Tap an artist for their top tracks and albums, an album or genre
+  for its track list, a playlist to open it, or a song to play it. Press Enter
+  for a full results page.
 - **Videos on any screen** — every song has **▶ Video**. Point any TV with a
   browser (smart TV, Fire stick, mini PC, spare tablet) at
   `http://<hub>:5599/screen`, pick it under **Video screen** on the iPad, and
@@ -104,19 +108,48 @@ docker run --net=host -e SPOTIFY_CLIENT_ID=... -v soundstage-data:/app/.data sou
 | `SONOS_SPOTIFY_SN`   | `1`                              | Household Spotify serial number  |
 | `DATA_DIR`           | `music-hub/.data`                | Tokens + hub playlists           |
 
+## Album covers & Spotify API notes
+
+- **Covers come free.** Album, playlist, artist, and track objects returned by
+  the Web API already carry an `images[]` array; the hub uses those URLs
+  directly (hosted on Spotify's `i.scdn.co` CDN) — no extra API calls.
+- **Predictive search stays within rate limits** by design: one combined
+  search request per keystroke-batch (not one per type), a 2-character
+  minimum, ~180 ms debounce, an in-flight cancel, and a small client cache.
+- **Image URLs are ephemeral.** Spotify's terms ask you not to persist or
+  alter cover art; the hub fetches live each session, which is compliant. Hub
+  playlists snapshot a cover URL for their tile — harmless if it later
+  changes, and re-resolved when the playlist is opened.
+- **Development-mode app is fine for a household.** A new Spotify app is
+  capped at 25 manually-added users with lower limits — plenty for your own
+  home. Extended Quota (a Spotify review) is only for public distribution.
+- **Reliable vs. fragile.** Browsing, search, and covers are standard Web API
+  and very robust. The one path to validate on real hardware is *playback to
+  Sonos* (`x-sonos-spotify` URIs, which need the household's linked Spotify
+  and correct `SONOS_SPOTIFY_SID`) — not the search or artwork.
+- If you ever serve the app behind a strict Content-Security-Policy, allow
+  `img-src https://i.scdn.co https://mosaic.scdn.co`.
+
 ## Testing
 
 ```bash
 npm run lint       # syntax-check all JS
-node tests/unit.js # 67 checks: topology parsing, URI/DIDL builders, queue
+node tests/unit.js # 82 checks: topology parsing, URI/DIDL builders, queue
                    # manager (autoplay/shuffle/tick), hub playlist store,
-                   # screen registry, demo state machine
-node tests/e2e.js  # 39 checks: Playwright drives the real UI in demo mode,
-                   # including a second browser page acting as the TV screen
+                   # screen registry, predictive suggest + browse, demo state
+node tests/e2e.js  # 48 checks: Playwright drives the real UI in demo mode —
+                   # predictive dropdown, artist/genre browse, queue, hub
+                   # playlists, and a second browser page acting as the TV
 ```
 
 The e2e suite uses the repo root's `playwright` install; set
 `CHROMIUM_PATH` if Playwright's own browser download isn't available.
+
+## Hardware & deployment
+
+See [`docs/HARDWARE.md`](docs/HARDWARE.md) for a full shopping list, network
+requirements (SSDP, subnets), TV-screen devices, and the WiFi-vs-Bluetooth
+analysis for whole-house audio.
 
 ## Architecture
 

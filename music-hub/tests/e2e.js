@@ -210,8 +210,78 @@ async function main() {
         (await page.textContent("#search-results .track-name")).includes("Driftwood")
       );
 
+      // ---- predictive search + browse ----
+      console.log("predictive search");
+      const firstRowAfter = (head) =>
+        page
+          .locator(".suggest-head", { hasText: head })
+          .locator('xpath=following-sibling::*[contains(@class,"suggest-row")][1]');
+
+      await page.click("#home-btn");
+      await page.fill("#search-input", "");
+      await page.type("#search-input", "ro", { delay: 30 });
+      await page.waitForSelector("#suggest-panel:not(.hidden) .suggest-row");
+      const heads = await page.$$eval(".suggest-head", (els) =>
+        els.map((e) => e.textContent)
+      );
+      check(
+        "dropdown groups artists/songs/albums/playlists/genres",
+        ["Artists", "Songs", "Albums", "Playlists", "Genres"].every((h) =>
+          heads.includes(h)
+        ),
+        JSON.stringify(heads)
+      );
+      check(
+        "dropdown shows cover thumbnails",
+        (await page.locator(".suggest-thumb img").count()) > 0
+      );
+
+      await firstRowAfter("Artists").dispatchEvent("mousedown");
+      await page.waitForSelector("#view-browse:not(.hidden) .track-row");
+      check(
+        "artist suggestion opens an artist browse",
+        (await page.textContent("#browse-kind")) === "Artist"
+      );
+      check(
+        "artist browse lists tracks",
+        (await page.locator("#browse-tracks .track-row").count()) > 0
+      );
+      check(
+        "suggest dropdown closes after navigating",
+        await page.isHidden("#suggest-panel")
+      );
+
+      await page.click("#browse-play-btn");
+      await page.waitForSelector("#nowbar:not(.hidden)");
+      check("browse play-all starts playback", true);
+
+      await page.click("#home-btn");
+      await page.fill("#search-input", "");
+      await page.type("#search-input", "rock", { delay: 30 });
+      await page.waitForSelector('#suggest-panel:not(.hidden) .suggest-row');
+      await firstRowAfter("Genres").dispatchEvent("mousedown");
+      await page.waitForSelector("#view-browse:not(.hidden) .track-row");
+      check(
+        "genre suggestion opens a genre browse",
+        (await page.textContent("#browse-kind")) === "Genre"
+      );
+      check(
+        "genre browse pulls multiple tracks",
+        (await page.locator("#browse-tracks .track-row").count()) >= 5
+      );
+
+      await page.click("#home-btn");
+      await page.fill("#search-input", "");
+      await page.type("#search-input", "r", { delay: 30 });
+      await page.waitForTimeout(300);
+      check(
+        "single character shows no dropdown (min length)",
+        await page.isHidden("#suggest-panel")
+      );
+
       // ---- surprise me ----
       console.log("surprise");
+      await page.fill("#search-input", "");
       await page.click("#home-btn");
       await page.click("#surprise-btn");
       await page.waitForFunction(() =>

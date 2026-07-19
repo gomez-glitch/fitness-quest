@@ -199,6 +199,23 @@ async function handleApi(req, res, url) {
     const result = DEMO ? demo.search(q) : await spotify.search(q);
     return sendJson(res, 200, result);
   }
+  if (p === "/api/spotify/suggest" && method === "GET") {
+    const q = url.searchParams.get("q") || "";
+    if (q.trim().length < 2) {
+      return sendJson(res, 200, {
+        tracks: [], artists: [], albums: [], playlists: [], genres: [],
+      });
+    }
+    const result = DEMO ? demo.suggest(q) : await spotify.suggest(q);
+    return sendJson(res, 200, result);
+  }
+  if (p === "/api/spotify/browse" && method === "GET") {
+    const type = url.searchParams.get("type") || "";
+    const q = url.searchParams.get("q") || "";
+    if (!q.trim()) return sendJson(res, 400, { error: "Missing q" });
+    const result = DEMO ? demo.browse(type, q) : await spotify.browse(type, q);
+    return sendJson(res, 200, result);
+  }
 
   // ---- hub playlists ----
   if (p === "/api/hub-playlists" && method === "GET") {
