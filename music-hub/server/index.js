@@ -1,5 +1,7 @@
-// Soundstage server — serves the iPad frontend and a JSON API that fronts
-// Spotify (cloud) and Sonos (local UPnP). Zero runtime dependencies.
+// Soundstage server — serves the iPad frontend, the TV screen page, and a
+// JSON API that fronts Spotify (cloud) and Sonos (local UPnP), plus the
+// hub-owned play queue, hub playlists, and video screens.
+// Zero runtime dependencies.
 //
 // Usage:
 //   node server/index.js                # live mode (needs SPOTIFY_CLIENT_ID)
@@ -15,6 +17,9 @@ const path = require("path");
 const { SpotifyClient } = require("./spotify");
 const { SonosSystem } = require("./sonos");
 const { DemoBackend } = require("./demo");
+const { QueueManager } = require("./queue");
+const { HubPlaylists } = require("./store");
+const { ScreenRegistry } = require("./screens");
 
 const PORT = Number(process.env.PORT || 5599);
 const DEMO = process.env.DEMO === "1";
@@ -39,6 +44,22 @@ const sonos = DEMO
       sn: Number(process.env.SONOS_SPOTIFY_SN || 1),
     });
 
+const hubPlaylists = new HubPlaylists(DATA_DIR);
+const screens = new ScreenRegistry();
+
+// The queue drives whichever backend is live through one tiny interface.
+const queueBackend = {
+  playTrack: (groupId, track) =>
+    DEMO
+      ? Promise.resolve(demo.playSpotify(groupId, track.uri, track.name))
+      : sonos.playSpotify(groupId, track.uri, track.name),
+  state: (groupId) =>
+    DEMO ? Promise.resolve(demo.state(groupId)) : sonos.state(groupId),
+};
+const queues = new QueueManager(queueBackend);
+const queueTicker = setInterval(() => queues.tick(), 2000);
+queueTicker.unref();
+
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
@@ -49,12 +70,11 @@ const MIME = {
 };
 
 function sendJson(res, status, data) {
-  const body = JSON.stringify(data);
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store",
   });
-  res.end(body);
+  res.end(JSON.stringify(data));
 }
 
 function readBody(req) {
@@ -81,9 +101,7 @@ async function resolveVideo(query) {
       part: "snippet", type: "video", maxResults: "1",
       videoCategoryId: "10", q: query, key: YT_KEY,
     });
-    const res = await fetch(
-      `https://www.googleapis.com/youtube/v3/search?${q}`
-    );
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${q}`);
     const data = await res.json();
     const item = data.items && data.items[0];
     if (item && item.id && item.id.videoId) {
@@ -162,29 +180,108 @@ async function handleApi(req, res, url) {
   }
   if (p === "/api/spotify/shelves" && method === "GET") {
     const shelves = DEMO ? demo.shelves() : await spotify.shelves();
+    shelves.hub = hubPlaylists.list();
     return sendJson(res, 200, shelves);
   }
   const tracksMatch = /^\/api\/spotify\/playlist\/([\w-]+)\/tracks$/.exec(p);
   if (tracksMatch && method === "GET") {
-    const tracks = DEMO
-      ? demo.playlistTracks(tracksMatch[1])
-      : await spotify.playlistTracks(tracksMatch[1]);
+    const id = tracksMatch[1];
+    const tracks = id.startsWith("hub-")
+      ? hubPlaylists.get(id).tracks
+      : DEMO
+        ? demo.playlistTracks(id)
+        : await spotify.playlistTracks(id);
     return sendJson(res, 200, { tracks });
   }
   if (p === "/api/spotify/search" && method === "GET") {
     const q = url.searchParams.get("q") || "";
-    if (!q.trim()) return sendJson(res, 200, { tracks: [] });
-    const tracks = DEMO ? demo.searchTracks(q) : await spotify.searchTracks(q);
-    return sendJson(res, 200, { tracks });
+    if (!q.trim()) return sendJson(res, 200, { tracks: [], playlists: [] });
+    const result = DEMO ? demo.search(q) : await spotify.search(q);
+    return sendJson(res, 200, result);
+  }
+
+  // ---- hub playlists ----
+  if (p === "/api/hub-playlists" && method === "GET") {
+    return sendJson(res, 200, { playlists: hubPlaylists.list() });
+  }
+  if (p === "/api/hub-playlists" && method === "POST") {
+    const b = await readBody(req);
+    const created = hubPlaylists.create(b.name);
+    return sendJson(res, 200, { id: created.id, name: created.name });
+  }
+  const hubMatch = /^\/api\/hub-playlists\/(hub-[\w]+)(\/tracks)?$/.exec(p);
+  if (hubMatch) {
+    const id = hubMatch[1];
+    if (!hubMatch[2] && method === "DELETE") {
+      hubPlaylists.remove(id);
+      return sendJson(res, 200, { ok: true });
+    }
+    if (hubMatch[2] && method === "POST") {
+      const b = await readBody(req);
+      const pl = hubPlaylists.addTrack(id, b.track);
+      return sendJson(res, 200, { tracks: pl.tracks.length });
+    }
+    if (hubMatch[2] && method === "DELETE") {
+      const b = await readBody(req);
+      const pl = hubPlaylists.removeTrack(id, b.uri);
+      return sendJson(res, 200, { tracks: pl.tracks.length });
+    }
+  }
+
+  // ---- queue ----
+  if (p === "/api/queue" && method === "GET") {
+    return sendJson(res, 200, queues.snapshot(url.searchParams.get("groupId")));
+  }
+  if (p === "/api/queue/play" && method === "POST") {
+    const b = await readBody(req);
+    return sendJson(
+      res, 200,
+      await queues.playNow(b.groupId, b.tracks, b.index || 0, {
+        shuffle: b.shuffle,
+      })
+    );
+  }
+  if (p === "/api/queue/add" && method === "POST") {
+    const b = await readBody(req);
+    return sendJson(res, 200, await queues.add(b.groupId, b.track));
+  }
+  if (p === "/api/queue/next" && method === "POST") {
+    const b = await readBody(req);
+    if (queues.queue(b.groupId)) {
+      return sendJson(res, 200, await queues.next(b.groupId));
+    }
+    // No hub queue (e.g. music started from the Sonos app) — plain skip.
+    if (!DEMO) await sonos.transport(b.groupId, "Next");
+    else demo.transport(b.groupId, "Next");
+    return sendJson(res, 200, queues.snapshot(b.groupId));
+  }
+  if (p === "/api/queue/prev" && method === "POST") {
+    const b = await readBody(req);
+    if (queues.queue(b.groupId)) {
+      return sendJson(res, 200, await queues.prev(b.groupId));
+    }
+    if (!DEMO) await sonos.transport(b.groupId, "Previous");
+    else demo.transport(b.groupId, "Previous");
+    return sendJson(res, 200, queues.snapshot(b.groupId));
+  }
+  if (p === "/api/queue/jump" && method === "POST") {
+    const b = await readBody(req);
+    return sendJson(res, 200, await queues.jump(b.groupId, b.index));
+  }
+  if (p === "/api/queue/clear" && method === "POST") {
+    const b = await readBody(req);
+    queues.clear(b.groupId);
+    return sendJson(res, 200, { ok: true });
+  }
+  if (p === "/api/queue/options" && method === "POST") {
+    const b = await readBody(req);
+    return sendJson(res, 200, queues.setOptions(b.groupId, b));
   }
 
   // ---- sonos ----
   if (p === "/api/sonos/zones" && method === "GET") {
     if (DEMO) return sendJson(res, 200, { zones: demo.zones() });
-    if (
-      !sonos.groups.length ||
-      Date.now() - sonos.lastDiscovery > 5 * 60 * 1000
-    ) {
+    if (!sonos.groups.length || Date.now() - sonos.lastDiscovery > 5 * 60 * 1000) {
       try {
         await sonos.refreshTopology();
       } catch (_) {}
@@ -206,17 +303,9 @@ async function handleApi(req, res, url) {
     const state = DEMO ? demo.state(groupId) : await sonos.state(groupId);
     return sendJson(res, 200, state);
   }
-  if (p === "/api/sonos/play-spotify" && method === "POST") {
-    const b = await readBody(req);
-    if (DEMO) demo.playSpotify(b.groupId, b.uri, b.title);
-    else await sonos.playSpotify(b.groupId, b.uri, b.title);
-    return sendJson(res, 200, { ok: true });
-  }
   if (p === "/api/sonos/transport" && method === "POST") {
     const b = await readBody(req);
-    const action = { play: "Play", pause: "Pause", next: "Next", prev: "Previous" }[
-      b.action
-    ];
+    const action = { play: "Play", pause: "Pause" }[b.action];
     if (!action) return sendJson(res, 400, { error: "Bad action" });
     if (DEMO) demo.transport(b.groupId, action);
     else await sonos.transport(b.groupId, action);
@@ -238,17 +327,30 @@ async function handleApi(req, res, url) {
     const b = await readBody(req);
     if (DEMO) demo.join(b.playerId, b.coordinatorId);
     else await sonos.join(b.playerId, b.coordinatorId);
-    return sendJson(res, 200, {
-      zones: DEMO ? demo.zones() : sonos.groups,
-    });
+    return sendJson(res, 200, { zones: DEMO ? demo.zones() : sonos.groups });
   }
   if (p === "/api/sonos/unjoin" && method === "POST") {
     const b = await readBody(req);
     if (DEMO) demo.unjoin(b.playerId);
     else await sonos.unjoin(b.playerId);
-    return sendJson(res, 200, {
-      zones: DEMO ? demo.zones() : sonos.groups,
-    });
+    return sendJson(res, 200, { zones: DEMO ? demo.zones() : sonos.groups });
+  }
+
+  // ---- screens ----
+  if (p === "/api/screens" && method === "GET") {
+    return sendJson(res, 200, { screens: screens.list() });
+  }
+  if (p === "/api/screens/register" && method === "POST") {
+    const b = await readBody(req);
+    return sendJson(res, 200, screens.register(b.name));
+  }
+  if (p === "/api/screens/poll" && method === "GET") {
+    return sendJson(res, 200, screens.poll(url.searchParams.get("id")));
+  }
+  if (p === "/api/screens/send" && method === "POST") {
+    const b = await readBody(req);
+    screens.send(b.screenId, b.command);
+    return sendJson(res, 200, { ok: true });
   }
 
   // ---- video ----
@@ -263,6 +365,7 @@ async function handleApi(req, res, url) {
 
 function serveStatic(res, pathname) {
   let rel = pathname === "/" ? "/index.html" : pathname;
+  if (rel === "/screen") rel = "/screen.html";
   const file = path.normalize(path.join(PUBLIC_DIR, rel));
   if (!file.startsWith(PUBLIC_DIR) || !fs.existsSync(file) || !fs.statSync(file).isFile()) {
     res.writeHead(404, { "Content-Type": "text/plain" });
@@ -290,6 +393,7 @@ if (require.main === module) {
     console.log(
       `Soundstage ${DEMO ? "(demo mode) " : ""}running at http://localhost:${PORT}/`
     );
+    console.log(`TV screens connect at http://<this-host>:${PORT}/screen`);
     if (!DEMO && !process.env.SPOTIFY_CLIENT_ID) {
       console.log(
         "No SPOTIFY_CLIENT_ID set — the hub will show the setup panel. " +

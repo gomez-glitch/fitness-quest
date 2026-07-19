@@ -209,11 +209,16 @@ class SpotifyClient {
     return tracks;
   }
 
-  async searchTracks(q) {
+  async search(q) {
     const d = await this.api(
-      `/search?type=track&limit=25&q=${encodeURIComponent(q)}`
+      `/search?type=track,playlist&limit=20&q=${encodeURIComponent(q)}`
     );
-    return ((d.tracks && d.tracks.items) || []).map(simplifyTrack).filter(Boolean);
+    return {
+      tracks: ((d.tracks && d.tracks.items) || []).map(simplifyTrack).filter(Boolean),
+      playlists: ((d.playlists && d.playlists.items) || [])
+        .filter(Boolean)
+        .map(simplifyPlaylist),
+    };
   }
 }
 

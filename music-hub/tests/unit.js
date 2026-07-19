@@ -11,6 +11,12 @@ const {
 } = require("../server/sonos");
 const { pkcePair } = require("../server/spotify");
 const { DemoBackend } = require("../server/demo");
+const { QueueManager } = require("../server/queue");
+const { HubPlaylists } = require("../server/store");
+const { ScreenRegistry } = require("../server/screens");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 
 const failures = [];
 let checks = 0;
@@ -158,8 +164,146 @@ check("unknown playlist throws", (() => { try { demo.playlistTracks("nope"); ret
 check("unknown group throws", (() => { try { demo.state("nope"); return false; } catch (_) { return true; } })());
 
 // ---------------------------------------------------------------------------
-console.log(`\n${checks - failures.length}/${checks} checks passed`);
-if (failures.length) {
-  console.error(`Failed: ${failures.join(", ")}`);
-  process.exit(1);
+console.log("demo search");
+
+check(
+  "search matches tracks",
+  demo.search("driftwood").tracks.some((t) => t.name === "Driftwood")
+);
+check(
+  "search matches playlists too",
+  demo.search("chill").playlists.some((p) => p.name === "Chill Hits")
+);
+
+// ---------------------------------------------------------------------------
+console.log("queue manager");
+
+function fakeBackend() {
+  const played = [];
+  let stateResult = { playing: true, positionSec: 0, durationSec: 200 };
+  return {
+    played,
+    setState(s) {
+      stateResult = s;
+    },
+    playTrack: async (groupId, track) => played.push(track.uri),
+    state: async () => stateResult,
+  };
 }
+
+const T = (n) => ({ uri: `spotify:track:${n}`, name: n, artist: "A", durationSec: 200 });
+const CTX = [T("t1"), T("t2"), T("t3")];
+
+(async () => {
+  const be = fakeBackend();
+  const qm = new QueueManager(be);
+
+  let snap = await qm.playNow("g1", CTX, 0);
+  check("playNow plays the first track", be.played[0] === "spotify:track:t1");
+  check("snapshot index at 0", snap.index === 0 && snap.items.length === 3);
+  check("snapshot current is t1", snap.current.uri === "spotify:track:t1");
+
+  snap = await qm.next("g1");
+  check("next advances sequentially", be.played[1] === "spotify:track:t2" && snap.index === 1);
+
+  await qm.next("g1");
+  snap = await qm.next("g1"); // past the end -> autoplay refill from context
+  check("autoplay refills from context at queue end", snap.index === 3 && snap.items.length === 4);
+  check("autoplay pick comes from the context", CTX.some((t) => t.uri === snap.current.uri));
+
+  qm.setOptions("g1", { autoplay: false });
+  const before = qm.snapshot("g1").index;
+  // Drain to the (new) end, then confirm it stops there.
+  while (qm.snapshot("g1").index + 1 < qm.snapshot("g1").items.length) await qm.next("g1");
+  const atEnd = qm.snapshot("g1").index;
+  snap = await qm.next("g1");
+  check("autoplay off stops at queue end", snap.index === atEnd, `moved ${before}->${snap.index}`);
+
+  snap = await qm.jump("g1", 0);
+  check("jump replays from index 0", snap.index === 0 && be.played[be.played.length - 1] === "spotify:track:t1");
+
+  snap = await qm.add("g1", T("t9"));
+  check("add appends to queue", snap.items[snap.items.length - 1].uri === "spotify:track:t9");
+
+  const be2 = fakeBackend();
+  const qm2 = new QueueManager(be2);
+  await qm2.add("g2", T("solo"));
+  check("add with empty queue starts playing", be2.played[0] === "spotify:track:solo");
+
+  snap = await qm2.playNow("g2", CTX, 0, { shuffle: true });
+  check(
+    "shuffle keeps the same track set",
+    snap.items.length === 3 &&
+      CTX.every((t) => snap.items.some((i) => i.uri === t.uri))
+  );
+
+  // tick(): playing near the end, then stopped -> advance
+  const be3 = fakeBackend();
+  const qm3 = new QueueManager(be3);
+  await qm3.playNow("g3", CTX, 0);
+  be3.setState({ playing: true, positionSec: 197, durationSec: 200 });
+  await qm3.tick();
+  be3.setState({ playing: false, positionSec: 0, durationSec: 200 });
+  await qm3.tick();
+  check("tick advances when a track finishes", be3.played[1] === "spotify:track:t2");
+
+  // tick(): paused mid-track must NOT advance
+  const be4 = fakeBackend();
+  const qm4 = new QueueManager(be4);
+  await qm4.playNow("g4", CTX, 0);
+  be4.setState({ playing: true, positionSec: 60, durationSec: 200 });
+  await qm4.tick();
+  be4.setState({ playing: false, positionSec: 60, durationSec: 200 });
+  await qm4.tick();
+  check("tick ignores a mid-track pause", be4.played.length === 1);
+
+  qm.clear("g1");
+  check("clear resets the queue", qm.snapshot("g1").index === -1);
+
+  // -------------------------------------------------------------------------
+  console.log("hub playlists store");
+
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ss-store-"));
+  const store = new HubPlaylists(dir);
+  const created = store.create("  Kitchen Bangers  ");
+  check("create trims the name", created.name === "Kitchen Bangers");
+  check("create rejects empty names", (() => { try { store.create("   "); return false; } catch (_) { return true; } })());
+
+  store.addTrack(created.id, T("a"));
+  store.addTrack(created.id, T("b"));
+  store.addTrack(created.id, T("a")); // dupe
+  check("addTrack dedupes by uri", store.get(created.id).tracks.length === 2);
+
+  const store2 = new HubPlaylists(dir);
+  check("playlists persist across restarts", store2.get(created.id).tracks.length === 2);
+
+  store.removeTrack(created.id, "spotify:track:a");
+  check("removeTrack removes", store.get(created.id).tracks.length === 1);
+  check("list exposes hub flag and count", store.list()[0].hub === true && store.list()[0].tracks === 1);
+  store.remove(created.id);
+  check("remove deletes the playlist", store.list().length === 0);
+
+  // -------------------------------------------------------------------------
+  console.log("screen registry");
+
+  const reg = new ScreenRegistry();
+  const scr = reg.register("Lounge TV");
+  check("register returns id + name", scr.id.startsWith("scr-") && scr.name === "Lounge TV");
+  check("registered screen is listed", reg.list().length === 1);
+  reg.send(scr.id, { action: "video", embedUrl: "x" });
+  const polled = reg.poll(scr.id);
+  check("poll drains pending commands", polled.commands.length === 1 && reg.poll(scr.id).commands.length === 0);
+  const scr2 = reg.register("lounge tv");
+  check("same name re-registers (replaces old id)", reg.list().length === 1 && reg.list()[0].id === scr2.id);
+  check("send to unknown screen throws", (() => { try { reg.send("scr-nope", {}); return false; } catch (_) { return true; } })());
+
+  // -------------------------------------------------------------------------
+  console.log(`\n${checks - failures.length}/${checks} checks passed`);
+  if (failures.length) {
+    console.error(`Failed: ${failures.join(", ")}`);
+    process.exit(1);
+  }
+})().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -14,10 +14,10 @@
   <div id="app">
     <header class="topbar">
       <button id="home-btn" class="brand" aria-label="Home">
-        <span class="brand-mark">◉</span> Soundstage
+        <span class="brand-mark"></span> Soundstage
       </button>
       <form id="search-form" class="search" role="search">
-        <input id="search-input" type="search" placeholder="Search songs & artists"
+        <input id="search-input" type="search" placeholder="Search songs, artists & playlists"
                autocomplete="off" enterkeyhint="search" />
       </form>
       <div class="top-status">
@@ -30,7 +30,10 @@
       <section class="content" id="content">
         <!-- Home: playlist shelves -->
         <div id="view-home" class="view">
-          <h2 class="shelf-title">Your playlists</h2>
+          <div class="shelf-head">
+            <h2 class="shelf-title">Your playlists</h2>
+            <button id="surprise-btn" class="chip-btn">🔀 Surprise me</button>
+          </div>
           <div id="shelf-mine" class="shelf" data-shelf="mine"></div>
           <h2 class="shelf-title">Best of Spotify</h2>
           <div id="shelf-curated" class="shelf" data-shelf="curated"></div>
@@ -44,6 +47,11 @@
             <div class="playlist-meta">
               <h2 id="playlist-name"></h2>
               <p id="playlist-desc"></p>
+              <div class="playlist-actions">
+                <button id="playlist-play-btn" class="primary-btn small">▶ Play all</button>
+                <button id="playlist-shuffle-btn" class="chip-btn">🔀 Shuffle</button>
+                <button id="playlist-delete-btn" class="chip-btn danger hidden">Delete playlist</button>
+              </div>
             </div>
           </div>
           <ol id="track-list" class="track-list"></ol>
@@ -57,6 +65,11 @@
               <h2 id="search-title">Search</h2>
             </div>
           </div>
+          <div id="search-playlists-wrap" class="hidden">
+            <h3 class="shelf-title">Playlists</h3>
+            <div id="search-playlists" class="shelf"></div>
+          </div>
+          <h3 class="shelf-title" id="search-songs-title">Songs</h3>
           <ol id="search-results" class="track-list"></ol>
         </div>
 
@@ -81,13 +94,23 @@
           <button id="edit-groups-btn" class="ghost-btn">Edit groups</button>
         </div>
         <div id="zone-list" class="zone-list"></div>
+
+        <div class="zones-head screens-head">
+          <h2>Video screen</h2>
+        </div>
+        <div id="screen-list" class="screen-list"></div>
+        <label class="auto-video-row">
+          <span>Auto-play videos</span>
+          <input type="checkbox" id="auto-video-toggle" />
+        </label>
+        <p class="rail-tip">TVs join at <code id="screen-url">/screen</code></p>
       </aside>
     </main>
 
     <!-- Now playing -->
     <footer class="nowbar hidden" id="nowbar">
       <div class="now-track">
-        <div class="now-art" id="now-art">♪</div>
+        <div class="now-art" id="now-art"><span>♪</span></div>
         <div class="now-meta">
           <div class="now-title" id="now-title">—</div>
           <div class="now-sub" id="now-sub">—</div>
@@ -95,9 +118,16 @@
       </div>
       <div class="now-center">
         <div class="transport">
-          <button id="prev-btn" class="t-btn" aria-label="Previous">⏮</button>
-          <button id="playpause-btn" class="t-btn t-main" aria-label="Play or pause">▶</button>
-          <button id="next-btn" class="t-btn" aria-label="Next">⏭</button>
+          <button id="prev-btn" class="t-btn" aria-label="Previous">
+            <svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9.5 12z"/></svg>
+          </button>
+          <button id="playpause-btn" class="t-btn t-main" aria-label="Play or pause">
+            <svg id="icon-play" viewBox="0 0 24 24"><path d="M7 4.5v15L20 12z"/></svg>
+            <svg id="icon-pause" viewBox="0 0 24 24" class="hidden"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+          </button>
+          <button id="next-btn" class="t-btn" aria-label="Next">
+            <svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l10.5-7z"/></svg>
+          </button>
         </div>
         <div class="progress">
           <span id="pos-label" class="time">0:00</span>
@@ -105,13 +135,16 @@
           <span id="dur-label" class="time">0:00</span>
         </div>
       </div>
-      <div class="now-zone">
-        <span class="now-zone-label">Playing in</span>
-        <span id="now-zone-name">—</span>
+      <div class="now-right">
+        <button id="queue-btn" class="ghost-btn">Queue <span id="queue-count" class="badge hidden">0</span></button>
+        <div class="now-zone">
+          <span class="now-zone-label">Playing in</span>
+          <span id="now-zone-name">—</span>
+        </div>
       </div>
     </footer>
 
-    <!-- Video overlay -->
+    <!-- Video overlay (on the iPad itself) -->
     <div id="video-overlay" class="video-overlay hidden">
       <div class="video-chrome">
         <div class="video-title" id="video-title"></div>
@@ -125,6 +158,33 @@
                 allow="autoplay; encrypted-media; picture-in-picture"
                 allowfullscreen></iframe>
       </div>
+    </div>
+
+    <!-- Bottom sheets -->
+    <div id="sheet-scrim" class="sheet-scrim hidden"></div>
+
+    <div id="track-sheet" class="sheet hidden">
+      <div class="sheet-grip"></div>
+      <div class="sheet-track" id="sheet-track-label"></div>
+      <button class="sheet-row" id="sheet-add-queue">➕ Add to queue</button>
+      <div class="sheet-section">Add to playlist</div>
+      <div id="sheet-playlists"></div>
+      <form id="sheet-new-form" class="sheet-new">
+        <input id="sheet-new-name" type="text" placeholder="New playlist name…" maxlength="60" />
+        <button type="submit" class="primary-btn small">Create</button>
+      </form>
+    </div>
+
+    <div id="queue-sheet" class="sheet hidden">
+      <div class="sheet-grip"></div>
+      <div class="sheet-head-row">
+        <h3>Up next</h3>
+        <div class="sheet-head-actions">
+          <label class="mini-toggle"><input type="checkbox" id="autoplay-toggle" checked /> Autoplay</label>
+          <button id="queue-clear-btn" class="ghost-btn tiny">Clear</button>
+        </div>
+      </div>
+      <ol id="queue-list" class="queue-list"></ol>
     </div>
 
     <div id="toast" class="toast hidden"></div>

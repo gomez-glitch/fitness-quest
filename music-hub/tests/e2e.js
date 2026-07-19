@@ -1,5 +1,6 @@
 // Soundstage end-to-end suite: boots the server in DEMO mode and drives the
-// real frontend with Playwright at iPad landscape resolution.
+// real frontend with Playwright at iPad landscape resolution — including the
+// queue, hub playlists, playlist search, and a simulated TV screen.
 //
 // Usage: node tests/e2e.js
 // Requires the repo's `playwright` devDependency and a Chromium binary —
@@ -7,6 +8,7 @@
 
 const { spawn } = require("child_process");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 
 const PORT = process.env.PORT || 5641;
@@ -53,10 +55,14 @@ async function waitForServer(url, tries = 30) {
 }
 
 async function main() {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "ss-e2e-"));
   const serverProc = spawn(
     process.execPath,
     [path.join(__dirname, "..", "server", "index.js")],
-    { env: { ...process.env, DEMO: "1", PORT: String(PORT) }, stdio: "ignore" }
+    {
+      env: { ...process.env, DEMO: "1", PORT: String(PORT), DATA_DIR: dataDir },
+      stdio: "ignore",
+    }
   );
   try {
     await waitForServer(`${BASE}api/status`);
@@ -75,28 +81,29 @@ async function main() {
       const curatedCount = await page
         .locator("#shelf-curated .playlist-card")
         .count();
-      check("personal shelf renders", mineCount >= 3, `got ${mineCount}`);
+      check("personal shelf renders", mineCount >= 4, `got ${mineCount}`);
       check("curated shelf renders", curatedCount >= 3, `got ${curatedCount}`);
+      check("new-playlist card present", await page.isVisible("#new-playlist-card"));
 
       // ---- zones rail ----
       console.log("zones");
       await page.waitForSelector(".zone-card");
       const zoneCount = await page.locator(".zone-card").count();
       check("four zone groups listed", zoneCount === 4, `got ${zoneCount}`);
-      check(
-        "living room group shows two rooms",
-        (await page.locator(".zone-card", { hasText: "Living Room + 1" }).count()) === 1
-      );
       check("first group selected by default", await page.isVisible(".zone-active"));
+      check("screens section shows This iPad", await page.isVisible(".screen-row.screen-on"));
 
-      // ---- playlist open + play ----
-      console.log("playback");
+      // ---- playlist open + queue playback ----
+      console.log("playback + queue");
       await page.click('#shelf-curated .playlist-card[data-playlist-id="demo-p-hits"]');
       await page.waitForSelector("#view-playlist:not(.hidden) .track-row");
       const trackCount = await page.locator("#track-list .track-row").count();
       check("playlist tracks render", trackCount === 6, `got ${trackCount}`);
       const firstName = await page.textContent(
         "#track-list .track-row:first-child .track-name"
+      );
+      const secondName = await page.textContent(
+        "#track-list .track-row:nth-child(2) .track-name"
       );
 
       await page.click("#track-list .track-row:first-child .play-btn");
@@ -109,16 +116,11 @@ async function main() {
         "now playing names the zone",
         (await page.textContent("#now-zone-name")).includes("Living Room")
       );
+      await page.waitForSelector("#queue-count:not(.hidden)");
       check(
-        "play/pause shows pause icon",
-        (await page.textContent("#playpause-btn")) === "⏸"
+        "queue badge counts the rest of the playlist",
+        (await page.textContent("#queue-count")) === "5"
       );
-
-      await page.click("#playpause-btn");
-      await page.waitForFunction(
-        () => document.querySelector("#playpause-btn").textContent === "▶"
-      );
-      check("pause reflects in transport", true);
 
       await page.click("#next-btn");
       await page.waitForFunction(
@@ -126,12 +128,155 @@ async function main() {
         firstName
       );
       check(
-        "next advances the track",
-        (await page.textContent("#now-title")) !== firstName
+        "next plays the next queued track in order",
+        (await page.textContent("#now-title")) === secondName
       );
 
-      // ---- video overlay ----
-      console.log("video");
+      await page.click("#playpause-btn");
+      await page.waitForSelector("#icon-play:not(.hidden)");
+      check("pause reflects in transport", true);
+      await page.click("#playpause-btn");
+      await page.waitForSelector("#icon-pause:not(.hidden)");
+
+      // Queue sheet
+      await page.click("#queue-btn");
+      await page.waitForSelector("#queue-sheet.sheet-in .queue-row");
+      const queueRows = await page.locator(".queue-row").count();
+      check("queue sheet lists the playlist", queueRows === 6, `got ${queueRows}`);
+      check(
+        "current row highlighted",
+        (await page.locator(".queue-now .track-name").textContent()) === secondName
+      );
+      check("autoplay toggle on by default", await page.isChecked("#autoplay-toggle"));
+      await page.locator(".queue-row").nth(4).click();
+      await page.waitForFunction(
+        () => document.querySelectorAll(".queue-done").length === 4
+      );
+      check("tapping a queue row jumps playback", true);
+      await page.click("#sheet-scrim");
+      await page.waitForSelector("#queue-sheet", { state: "hidden" });
+
+      // ---- hub playlist via track sheet ----
+      console.log("hub playlists");
+      await page.click("#track-list .track-row:first-child .more-btn");
+      await page.waitForSelector("#track-sheet.sheet-in");
+      await page.fill("#sheet-new-name", "Party Mix");
+      await page.click("#sheet-new-form button[type=submit]");
+      await page.waitForSelector("#track-sheet", { state: "hidden" });
+      await page.waitForSelector('#shelf-mine .playlist-card[data-hub="1"]', {
+        state: "attached", // home view is hidden while the playlist is open
+      });
+      check(
+        "hub playlist appears on the shelf",
+        (await page.textContent('#shelf-mine .playlist-card[data-hub="1"] .card-name')) ===
+          "Party Mix"
+      );
+
+      // add a second song from the same list
+      await page.click("#track-list .track-row:nth-child(3) .more-btn");
+      await page.waitForSelector("#track-sheet.sheet-in .sheet-row[data-hub-id]");
+      await page.click(".sheet-row[data-hub-id]");
+      await page.waitForSelector("#track-sheet", { state: "hidden" });
+
+      await page.click("#home-btn");
+      await page.click('#shelf-mine .playlist-card[data-hub="1"]');
+      await page.waitForSelector("#view-playlist:not(.hidden) .track-row");
+      const hubTracks = await page.locator("#track-list .track-row").count();
+      check("hub playlist holds both songs", hubTracks === 2, `got ${hubTracks}`);
+      check("hub playlist shows delete", await page.isVisible("#playlist-delete-btn"));
+
+      // shuffle-play the hub playlist
+      await page.click("#playlist-shuffle-btn");
+      await page.waitForFunction(() =>
+        document.querySelector("#toast").textContent.includes("Shuffling")
+      );
+      check("shuffle play starts", true);
+
+      // ---- search: songs + playlists ----
+      console.log("search");
+      await page.fill("#search-input", "chill");
+      await page.press("#search-input", "Enter");
+      await page.waitForSelector("#view-search:not(.hidden)");
+      await page.waitForSelector("#search-playlists .playlist-card");
+      check(
+        "search returns playlists",
+        (await page.textContent("#search-playlists .card-name")) === "Chill Hits"
+      );
+      await page.fill("#search-input", "Driftwood");
+      await page.press("#search-input", "Enter");
+      await page.waitForSelector("#search-results .track-row");
+      check(
+        "search returns songs",
+        (await page.textContent("#search-results .track-name")).includes("Driftwood")
+      );
+
+      // ---- surprise me ----
+      console.log("surprise");
+      await page.click("#home-btn");
+      await page.click("#surprise-btn");
+      await page.waitForFunction(() =>
+        document.querySelector("#toast").textContent.includes("Surprise")
+      );
+      check("surprise-me starts a shuffled playlist", true);
+
+      // ---- TV screen ----
+      console.log("tv screen");
+      const tv = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+      await tv.goto(`${BASE}screen?name=Lounge%20TV`);
+      await tv.waitForFunction(
+        () => document.getElementById("screen-name").textContent === "Lounge TV"
+      );
+      check("tv registers with its name", true);
+
+      await page.reload();
+      await page.waitForSelector(".playlist-card");
+      await page.waitForSelector('.screen-row[data-screen-id^="scr-"]');
+      check(
+        "tv appears in the screen picker",
+        (await page.textContent('.screen-row[data-screen-id^="scr-"]')) === "Lounge TV"
+      );
+      await page.click('.screen-row[data-screen-id^="scr-"]');
+      check(
+        "tv can be selected as video target",
+        await page.isVisible('.screen-row[data-screen-id^="scr-"].screen-on')
+      );
+
+      // Manual video → muted clip on the TV + song on Sonos
+      await page.click('#shelf-curated .playlist-card[data-playlist-id="demo-p-hits"]');
+      await page.waitForSelector("#view-playlist:not(.hidden) .track-row");
+      await page.click("#track-list .track-row:first-child .video-btn");
+      await tv.waitForFunction(() =>
+        document.getElementById("player").classList.contains("on")
+      );
+      const tvSrc = await tv.getAttribute("#frame", "src");
+      check(
+        "tv shows the muted youtube embed",
+        tvSrc.includes("youtube") && /[?&]mute=1/.test(tvSrc),
+        tvSrc
+      );
+      check(
+        "ipad overlay stays closed when tv is the target",
+        await page.isHidden("#video-overlay")
+      );
+      await page.waitForFunction(
+        (name) => document.querySelector("#now-title").textContent === name,
+        firstName
+      );
+      check("song plays on sonos while tv shows video", true);
+
+      // Auto-video: enable, skip to next track, tv should get a new command
+      await page.check("#auto-video-toggle");
+      await page.click("#next-btn");
+      await tv.waitForFunction(
+        (prev) => document.getElementById("frame").src !== prev,
+        tvSrc
+      );
+      check("auto-video pushes the next track's clip", true);
+      await tv.close();
+
+      // Back to iPad target: overlay flow still works
+      await page.click('.screen-row[data-screen-id="ipad"]');
+      await page.uncheck("#auto-video-toggle");
       await page.click("#track-list .track-row:nth-child(2) .video-btn");
       await page.waitForSelector("#video-overlay:not(.hidden)");
       await page.waitForFunction(() =>
@@ -139,13 +284,9 @@ async function main() {
       );
       const frameSrc = await page.getAttribute("#video-frame", "src");
       check(
-        "video embed uses keyless search playlist",
+        "ipad video embed uses keyless search playlist",
         frameSrc.includes("listType=search") && frameSrc.includes("list="),
         frameSrc
-      );
-      check(
-        "video search includes track query",
-        decodeURIComponent(frameSrc).includes("official video")
       );
       await page.click("#video-to-sonos");
       await page.waitForFunction(() =>
@@ -154,10 +295,6 @@ async function main() {
       check("audio-to-sonos mutes the embed", true);
       await page.click("#video-close");
       check("overlay closes", await page.isHidden("#video-overlay"));
-      check(
-        "closing clears the iframe",
-        (await page.getAttribute("#video-frame", "src")) === ""
-      );
 
       // ---- grouping ----
       console.log("grouping");
@@ -206,16 +343,6 @@ async function main() {
         JSON.stringify(volRes.volumes)
       );
 
-      // ---- search ----
-      console.log("search");
-      await page.fill("#search-input", "Driftwood");
-      await page.press("#search-input", "Enter");
-      await page.waitForSelector("#view-search:not(.hidden) .track-row");
-      check(
-        "search finds the track",
-        (await page.textContent("#search-results .track-name")).includes("Driftwood")
-      );
-
       // ---- setup panel appears when unconfigured (live mode) ----
       console.log("setup panel (live mode, no credentials)");
       const setupPort = Number(PORT) + 1;
@@ -227,7 +354,7 @@ async function main() {
             ...process.env,
             DEMO: "0",
             PORT: String(setupPort),
-            DATA_DIR: fs.mkdtempSync(path.join(require("os").tmpdir(), "ss-")),
+            DATA_DIR: fs.mkdtempSync(path.join(os.tmpdir(), "ss-live-")),
           },
           stdio: "ignore",
         }

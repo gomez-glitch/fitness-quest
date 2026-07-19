@@ -8,14 +8,21 @@
 
   const state = {
     status: null,
-    shelves: null,
+    shelves: { mine: [], curated: [], hub: [] },
     zones: [],
     activeGroupId: null,
     editGroups: false,
-    playlist: null, // { id, name, description, image, tracks }
+    playlist: null, // currently open playlist { id, name, hub, tracks }
     nowState: null,
+    queue: { items: [], index: -1, current: null, autoplay: true },
     pollTimer: null,
+    pollCount: 0,
     videoTrack: null,
+    screens: [],
+    videoTarget: localStorage.getItem("ss-video-target") || "ipad",
+    autoVideo: localStorage.getItem("ss-auto-video") === "1",
+    lastAutoUri: null,
+    sheetTrack: null,
   };
 
   // ---------- helpers ----------
@@ -30,6 +37,13 @@
   const post = (path, body) =>
     api(path, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body || {}),
+    });
+
+  const del = (path, body) =>
+    api(path, {
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body || {}),
     });
@@ -83,21 +97,45 @@
   function playlistCard(p) {
     const card = el("button", "playlist-card");
     card.dataset.playlistId = p.id;
+    if (p.hub) card.dataset.hub = "1";
     const art = el("div", "card-art");
     if (p.image) {
       const img = el("img");
       img.src = p.image;
       img.alt = "";
+      img.loading = "lazy";
       art.appendChild(img);
     } else {
       art.textContent = "♫";
     }
+    if (p.hub) art.appendChild(el("span", "hub-badge", "HUB"));
     card.appendChild(art);
     card.appendChild(el("div", "card-name", p.name));
     card.appendChild(
       el("div", "card-sub", p.tracks != null ? `${p.tracks} tracks` : p.owner || "")
     );
-    card.addEventListener("click", () => openPlaylist(p));
+    card.addEventListener("click", () => openPlaylist(p).catch((e) => toast(e.message)));
+    return card;
+  }
+
+  function newPlaylistCard() {
+    const card = el("button", "playlist-card new-playlist-card");
+    card.id = "new-playlist-card";
+    const art = el("div", "card-art new-art", "＋");
+    card.appendChild(art);
+    card.appendChild(el("div", "card-name", "New playlist"));
+    card.appendChild(el("div", "card-sub", "Make your own"));
+    card.addEventListener("click", async () => {
+      const name = prompt("Name your playlist");
+      if (!name || !name.trim()) return;
+      try {
+        await post("/api/hub-playlists", { name: name.trim() });
+        await loadShelves();
+        toast(`Created “${name.trim()}” — use ＋ on any song to fill it`);
+      } catch (err) {
+        toast(err.message);
+      }
+    });
     return card;
   }
 
@@ -107,11 +145,10 @@
     const curated = $("#shelf-curated");
     mine.textContent = "";
     curated.textContent = "";
+    mine.appendChild(newPlaylistCard());
+    for (const p of state.shelves.hub || []) mine.appendChild(playlistCard(p));
     for (const p of state.shelves.mine) mine.appendChild(playlistCard(p));
     for (const p of state.shelves.curated) curated.appendChild(playlistCard(p));
-    if (!state.shelves.mine.length) {
-      mine.appendChild(el("div", "shelf-empty", "No playlists in your library yet."));
-    }
   }
 
   async function openPlaylist(p) {
@@ -119,6 +156,7 @@
     state.playlist = { ...p, tracks };
     $("#playlist-name").textContent = p.name;
     $("#playlist-desc").textContent = p.description || "";
+    $("#playlist-delete-btn").classList.toggle("hidden", !p.hub);
     const art = $("#playlist-art");
     if (p.image) {
       art.src = p.image;
@@ -126,11 +164,11 @@
     } else {
       art.classList.add("hidden");
     }
-    renderTracks($("#track-list"), tracks);
+    renderTracks($("#track-list"), tracks, { hubId: p.hub ? p.id : null });
     showView("view-playlist");
   }
 
-  function trackRow(t, idx) {
+  function trackRow(t, idx, list, opts = {}) {
     const li = el("li", "track-row");
     li.dataset.trackUri = t.uri;
     const num = el("span", "track-num", String(idx + 1));
@@ -138,35 +176,52 @@
     meta.appendChild(el("div", "track-name", t.name));
     meta.appendChild(el("div", "track-artist", t.artist));
     const dur = el("span", "track-dur", fmtTime(t.durationSec));
+    const moreBtn = el("button", "row-btn more-btn", "＋");
+    moreBtn.setAttribute("aria-label", `Add ${t.name} to queue or playlist`);
+    moreBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openTrackSheet(t, opts.hubId || null);
+    });
     const videoBtn = el("button", "row-btn video-btn", "▶ Video");
     videoBtn.setAttribute("aria-label", `Watch video for ${t.name}`);
     videoBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      openVideo(t);
+      // Keep the surrounding list as queue context so "next" keeps rolling.
+      requestVideo(t, { manual: true, list, index: idx });
     });
     const playBtn = el("button", "row-btn play-btn", "Play");
     playBtn.setAttribute("aria-label", `Play ${t.name} on Sonos`);
     playBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      playOnSonos(t);
+      playList(list, idx);
     });
-    li.append(num, meta, dur, videoBtn, playBtn);
-    li.addEventListener("click", () => playOnSonos(t));
+    li.append(num, meta, dur, moreBtn, videoBtn, playBtn);
+    li.addEventListener("click", () => playList(list, idx));
     return li;
   }
 
-  function renderTracks(listEl, tracks) {
+  function renderTracks(listEl, tracks, opts = {}) {
     listEl.textContent = "";
-    tracks.forEach((t, i) => listEl.appendChild(trackRow(t, i)));
-    if (!tracks.length) listEl.appendChild(el("li", "shelf-empty", "No tracks."));
+    tracks.forEach((t, i) => listEl.appendChild(trackRow(t, i, tracks, opts)));
+    if (!tracks.length) {
+      listEl.appendChild(
+        el("li", "shelf-empty", "Nothing here yet — use ＋ on any song to add it.")
+      );
+    }
   }
 
   // ---------- search ----------
 
   async function runSearch(q) {
-    const { tracks } = await api(`/api/spotify/search?q=${encodeURIComponent(q)}`);
+    const result = await api(`/api/spotify/search?q=${encodeURIComponent(q)}`);
     $("#search-title").textContent = `Search: “${q}”`;
-    renderTracks($("#search-results"), tracks);
+    const plWrap = $("#search-playlists-wrap");
+    const plShelf = $("#search-playlists");
+    plShelf.textContent = "";
+    const playlists = result.playlists || [];
+    plWrap.classList.toggle("hidden", !playlists.length);
+    for (const p of playlists) plShelf.appendChild(playlistCard(p));
+    renderTracks($("#search-results"), result.tracks || []);
     showView("view-search");
   }
 
@@ -266,19 +321,82 @@
     restartPolling();
   }
 
-  // ---------- playback ----------
+  // ---------- screens ----------
 
-  async function playOnSonos(track) {
+  async function loadScreens() {
+    try {
+      const { screens } = await api("/api/screens");
+      state.screens = screens;
+    } catch (_) {
+      state.screens = [];
+    }
+    if (
+      state.videoTarget !== "ipad" &&
+      !state.screens.some((s) => s.id === state.videoTarget)
+    ) {
+      // Chosen TV went away — try to re-match by name, else fall back.
+      state.videoTarget = "ipad";
+    }
+    renderScreens();
+  }
+
+  function renderScreens() {
+    const list = $("#screen-list");
+    list.textContent = "";
+    const options = [{ id: "ipad", name: "This iPad" }, ...state.screens];
+    for (const s of options) {
+      const row = el("button", "screen-row");
+      row.dataset.screenId = s.id;
+      if (s.id === state.videoTarget) row.classList.add("screen-on");
+      row.appendChild(el("span", "screen-dot"));
+      row.appendChild(el("span", null, s.name));
+      row.addEventListener("click", () => {
+        state.videoTarget = s.id;
+        localStorage.setItem("ss-video-target", s.id);
+        renderScreens();
+      });
+      list.appendChild(row);
+    }
+  }
+
+  // ---------- playback / queue ----------
+
+  async function playList(tracks, index, opts = {}) {
     const g = activeGroup();
     if (!g) return toast("No Sonos zone selected");
     try {
-      await post("/api/sonos/play-spotify", {
+      const snap = await post("/api/queue/play", {
         groupId: g.id,
-        uri: track.uri,
-        title: track.name,
+        tracks,
+        index,
+        shuffle: Boolean(opts.shuffle),
       });
-      toast(`Playing “${track.name}” in ${g.name}`);
+      state.queue = snap;
+      const t = snap.current;
+      toast(
+        opts.shuffle
+          ? `Shuffling ${tracks.length} tracks in ${g.name}`
+          : `Playing “${t.name}” in ${g.name}`
+      );
       await pollNow();
+    } catch (err) {
+      toast(err.message);
+    }
+  }
+
+  async function surpriseMe() {
+    const pool = [
+      ...(state.shelves.hub || []).filter((p) => p.tracks > 0),
+      ...state.shelves.mine,
+      ...state.shelves.curated,
+    ];
+    if (!pool.length) return toast("No playlists to surprise you with yet");
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    try {
+      const { tracks } = await api(`/api/spotify/playlist/${pick.id}/tracks`);
+      if (!tracks.length) return toast(`“${pick.name}” is empty — spin again`);
+      await playList(tracks, 0, { shuffle: true });
+      toast(`🔀 Surprise: “${pick.name}”`);
     } catch (err) {
       toast(err.message);
     }
@@ -287,36 +405,60 @@
   async function pollNow() {
     const g = activeGroup();
     if (!g) return;
+    state.pollCount += 1;
     try {
-      state.nowState = await api(
-        `/api/sonos/state?groupId=${encodeURIComponent(g.id)}`
-      );
+      const [now, queue] = await Promise.all([
+        api(`/api/sonos/state?groupId=${encodeURIComponent(g.id)}`),
+        api(`/api/queue?groupId=${encodeURIComponent(g.id)}`),
+      ]);
+      state.nowState = now;
+      state.queue = queue;
       renderNow();
+      maybeAutoVideo();
     } catch (_) {
       // Zone may have regrouped under us; refresh topology next tick.
     }
+    if (state.pollCount % 3 === 1) await loadScreens();
   }
 
   function renderNow() {
     const s = state.nowState;
     const bar = $("#nowbar");
-    if (!s || (!s.title && !s.playing)) {
+    const current = state.queue.current;
+    if ((!s || (!s.title && !s.playing)) && !current) {
       bar.classList.add("hidden");
       return;
     }
     bar.classList.remove("hidden");
-    $("#now-title").textContent = s.title || "—";
-    $("#now-sub").textContent = [s.artist, s.album].filter(Boolean).join(" · ");
-    $("#playpause-btn").textContent = s.playing ? "⏸" : "▶";
-    $("#pos-label").textContent = fmtTime(s.positionSec);
-    $("#dur-label").textContent = fmtTime(s.durationSec);
-    $("#progress-fill").style.width = s.durationSec
-      ? `${Math.min(100, (s.positionSec / s.durationSec) * 100)}%`
-      : "0%";
+    $("#now-title").textContent = (s && s.title) || (current && current.name) || "—";
+    $("#now-sub").textContent = s
+      ? [s.artist, s.album].filter(Boolean).join(" · ")
+      : "";
+    const art = $("#now-art");
+    if (current && current.image) {
+      art.style.backgroundImage = `url("${current.image}")`;
+      art.classList.add("has-img");
+    } else {
+      art.style.backgroundImage = "";
+      art.classList.remove("has-img");
+    }
+    const playing = Boolean(s && s.playing);
+    $("#icon-play").classList.toggle("hidden", playing);
+    $("#icon-pause").classList.toggle("hidden", !playing);
+    $("#pos-label").textContent = fmtTime(s ? s.positionSec : 0);
+    $("#dur-label").textContent = fmtTime(s ? s.durationSec : 0);
+    $("#progress-fill").style.width =
+      s && s.durationSec
+        ? `${Math.min(100, (s.positionSec / s.durationSec) * 100)}%`
+        : "0%";
     const g = activeGroup();
     $("#now-zone-name").textContent = g ? g.name : "—";
+    const upcoming = Math.max(0, state.queue.items.length - state.queue.index - 1);
+    const badge = $("#queue-count");
+    badge.textContent = String(upcoming);
+    badge.classList.toggle("hidden", upcoming === 0);
     // Keep sliders in sync without fighting an in-progress drag.
-    for (const [pid, v] of Object.entries(s.volumes || {})) {
+    for (const [pid, v] of Object.entries((s && s.volumes) || {})) {
       const slider = document.querySelector(
         `.member-row[data-player-id="${pid}"] .member-vol`
       );
@@ -324,6 +466,7 @@
         slider.value = v;
       }
     }
+    if (!$("#queue-sheet").classList.contains("hidden")) renderQueueSheet();
   }
 
   function restartPolling() {
@@ -332,29 +475,169 @@
     state.pollTimer = setInterval(pollNow, 2500);
   }
 
-  async function transport(action) {
+  async function transportPlayPause() {
     const g = activeGroup();
     if (!g) return;
-    await post("/api/sonos/transport", { groupId: g.id, action }).catch((e) =>
-      toast(e.message)
-    );
+    const playing = state.nowState && state.nowState.playing;
+    await post("/api/sonos/transport", {
+      groupId: g.id,
+      action: playing ? "pause" : "play",
+    }).catch((e) => toast(e.message));
     await pollNow();
+  }
+
+  async function skip(dir) {
+    const g = activeGroup();
+    if (!g) return;
+    try {
+      state.queue = await post(`/api/queue/${dir}`, { groupId: g.id });
+      await pollNow();
+    } catch (err) {
+      toast(err.message);
+    }
+  }
+
+  // ---------- queue sheet ----------
+
+  function renderQueueSheet() {
+    const list = $("#queue-list");
+    list.textContent = "";
+    const { items, index } = state.queue;
+    $("#autoplay-toggle").checked = Boolean(state.queue.autoplay);
+    if (!items.length) {
+      list.appendChild(el("li", "shelf-empty", "Queue is empty — play something."));
+      return;
+    }
+    items.forEach((t, i) => {
+      const li = el("li", "queue-row");
+      if (i === index) li.classList.add("queue-now");
+      if (i < index) li.classList.add("queue-done");
+      li.appendChild(el("span", "queue-pos", i === index ? "▶" : String(i + 1)));
+      const meta = el("div", "track-meta");
+      meta.appendChild(el("div", "track-name", t.name));
+      meta.appendChild(el("div", "track-artist", t.artist));
+      li.appendChild(meta);
+      li.appendChild(el("span", "track-dur", fmtTime(t.durationSec)));
+      li.addEventListener("click", async () => {
+        const g = activeGroup();
+        if (!g) return;
+        state.queue = await post("/api/queue/jump", { groupId: g.id, index: i }).catch(
+          (e) => (toast(e.message), state.queue)
+        );
+        await pollNow();
+      });
+      list.appendChild(li);
+    });
+  }
+
+  function openQueueSheet() {
+    renderQueueSheet();
+    openSheet("#queue-sheet");
+  }
+
+  // ---------- track action sheet ----------
+
+  function openTrackSheet(track, hubContextId) {
+    state.sheetTrack = track;
+    $("#sheet-track-label").textContent = `${track.name} — ${track.artist}`;
+    const wrap = $("#sheet-playlists");
+    wrap.textContent = "";
+    for (const p of state.shelves.hub || []) {
+      const row = el("button", "sheet-row", `♫ ${p.name}`);
+      row.dataset.hubId = p.id;
+      row.addEventListener("click", async () => {
+        try {
+          await post(`/api/hub-playlists/${p.id}/tracks`, { track });
+          toast(`Added to “${p.name}”`);
+          closeSheets();
+          await loadShelves();
+        } catch (err) {
+          toast(err.message);
+        }
+      });
+      wrap.appendChild(row);
+    }
+    if (hubContextId) {
+      const rm = el("button", "sheet-row danger", "− Remove from this playlist");
+      rm.addEventListener("click", async () => {
+        try {
+          await del(`/api/hub-playlists/${hubContextId}/tracks`, { uri: track.uri });
+          closeSheets();
+          await loadShelves();
+          const p = (state.shelves.hub || []).find((x) => x.id === hubContextId);
+          const current = state.playlist;
+          if (current && current.id === hubContextId && p) await openPlaylist(p);
+          toast("Removed");
+        } catch (err) {
+          toast(err.message);
+        }
+      });
+      wrap.appendChild(rm);
+    }
+    openSheet("#track-sheet");
+  }
+
+  function openSheet(sel) {
+    $("#sheet-scrim").classList.remove("hidden");
+    $(sel).classList.remove("hidden");
+    requestAnimationFrame(() => $(sel).classList.add("sheet-in"));
+  }
+
+  function closeSheets() {
+    $("#sheet-scrim").classList.add("hidden");
+    for (const s of document.querySelectorAll(".sheet")) {
+      s.classList.add("hidden");
+      s.classList.remove("sheet-in");
+    }
   }
 
   // ---------- video ----------
 
-  async function openVideo(track) {
-    state.videoTrack = track;
-    const q = `${track.name} ${track.artist} official video`;
-    const overlay = $("#video-overlay");
-    $("#video-title").textContent = `${track.name} — ${track.artist}`;
-    overlay.classList.remove("hidden");
+  function videoQuery(track) {
+    return `${track.name} ${track.artist} official video`;
+  }
+
+  // Manual "▶ Video" tap. On the iPad: full-screen overlay with sound. On a
+  // TV screen: muted clip on the TV + the song on Sonos (the room is the
+  // speaker, the TV is the picture).
+  async function requestVideo(track, opts = {}) {
     try {
-      const v = await api(`/api/video/resolve?q=${encodeURIComponent(q)}`);
-      $("#video-frame").src = v.embedUrl;
+      const v = await api(`/api/video/resolve?q=${encodeURIComponent(videoQuery(track))}`);
+      if (state.videoTarget === "ipad") {
+        state.videoTrack = track;
+        $("#video-title").textContent = `${track.name} — ${track.artist}`;
+        $("#video-overlay").classList.remove("hidden");
+        $("#video-frame").src = opts.muted
+          ? `${v.embedUrl}&mute=1`
+          : v.embedUrl;
+      } else {
+        const screen = state.screens.find((s) => s.id === state.videoTarget);
+        await post("/api/screens/send", {
+          screenId: state.videoTarget,
+          command: {
+            action: "video",
+            embedUrl: `${v.embedUrl}&mute=1`,
+            title: `${track.name} — ${track.artist}`,
+          },
+        });
+        state.lastAutoUri = track.uri;
+        if (opts.manual) {
+          await playList(opts.list || [track], opts.index || 0);
+          toast(`Video on ${screen ? screen.name : "TV"} · audio on Sonos`);
+        }
+      }
     } catch (err) {
       toast(err.message);
     }
+  }
+
+  // Auto-play the video for whatever just started, on the chosen screen.
+  function maybeAutoVideo() {
+    if (!state.autoVideo) return;
+    const current = state.queue.current;
+    if (!current || current.uri === state.lastAutoUri) return;
+    state.lastAutoUri = current.uri;
+    requestVideo(current, { muted: true });
   }
 
   function closeVideo() {
@@ -363,9 +646,7 @@
     state.videoTrack = null;
   }
 
-  // Best effort "video on screen, audio in the room": mute the embed and
-  // start the same song on the active Sonos group. (Frame-accurate sync is
-  // not possible across these APIs — this is a vibe, not a cinema.)
+  // Best effort "video on screen, audio in the room" for the iPad overlay.
   async function videoToSonos() {
     const t = state.videoTrack;
     if (!t) return;
@@ -373,7 +654,7 @@
     if (frame.src && !/[?&]mute=1/.test(frame.src)) {
       frame.src = `${frame.src}${frame.src.includes("?") ? "&" : "?"}mute=1`;
     }
-    await playOnSonos(t);
+    await playList([t], 0);
   }
 
   // ---------- wiring ----------
@@ -387,18 +668,91 @@
       const q = $("#search-input").value.trim();
       if (q) runSearch(q).catch((err) => toast(err.message));
     });
+    $("#surprise-btn").addEventListener("click", surpriseMe);
+    $("#playlist-play-btn").addEventListener("click", () => {
+      if (state.playlist) playList(state.playlist.tracks, 0);
+    });
+    $("#playlist-shuffle-btn").addEventListener("click", () => {
+      if (state.playlist) playList(state.playlist.tracks, 0, { shuffle: true });
+    });
+    $("#playlist-delete-btn").addEventListener("click", async () => {
+      const p = state.playlist;
+      if (!p || !p.hub) return;
+      if (!confirm(`Delete “${p.name}”? The songs stay on Spotify.`)) return;
+      try {
+        await del(`/api/hub-playlists/${p.id}`);
+        await loadShelves();
+        showView("view-home");
+        toast("Playlist deleted");
+      } catch (err) {
+        toast(err.message);
+      }
+    });
     $("#edit-groups-btn").addEventListener("click", () => {
       state.editGroups = !state.editGroups;
       $("#edit-groups-btn").textContent = state.editGroups ? "Done" : "Edit groups";
       renderZones();
     });
-    $("#playpause-btn").addEventListener("click", () =>
-      transport(state.nowState && state.nowState.playing ? "pause" : "play")
-    );
-    $("#prev-btn").addEventListener("click", () => transport("prev"));
-    $("#next-btn").addEventListener("click", () => transport("next"));
+    $("#playpause-btn").addEventListener("click", transportPlayPause);
+    $("#prev-btn").addEventListener("click", () => skip("prev"));
+    $("#next-btn").addEventListener("click", () => skip("next"));
+    $("#queue-btn").addEventListener("click", openQueueSheet);
+    $("#queue-clear-btn").addEventListener("click", async () => {
+      const g = activeGroup();
+      if (!g) return;
+      await post("/api/queue/clear", { groupId: g.id }).catch((e) => toast(e.message));
+      await pollNow();
+      renderQueueSheet();
+    });
+    $("#autoplay-toggle").addEventListener("change", async (e) => {
+      const g = activeGroup();
+      if (!g) return;
+      state.queue = await post("/api/queue/options", {
+        groupId: g.id,
+        autoplay: e.target.checked,
+      }).catch(() => state.queue);
+    });
+    $("#auto-video-toggle").checked = state.autoVideo;
+    $("#auto-video-toggle").addEventListener("change", (e) => {
+      state.autoVideo = e.target.checked;
+      localStorage.setItem("ss-auto-video", state.autoVideo ? "1" : "0");
+      if (state.autoVideo) {
+        state.lastAutoUri = null;
+        maybeAutoVideo();
+      }
+    });
     $("#video-close").addEventListener("click", closeVideo);
     $("#video-to-sonos").addEventListener("click", videoToSonos);
+    $("#sheet-scrim").addEventListener("click", closeSheets);
+    $("#sheet-add-queue").addEventListener("click", async () => {
+      const g = activeGroup();
+      const t = state.sheetTrack;
+      if (!g || !t) return;
+      try {
+        state.queue = await post("/api/queue/add", { groupId: g.id, track: t });
+        toast(`Queued “${t.name}”`);
+        closeSheets();
+        renderNow();
+      } catch (err) {
+        toast(err.message);
+      }
+    });
+    $("#sheet-new-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = $("#sheet-new-name").value.trim();
+      const t = state.sheetTrack;
+      if (!name || !t) return;
+      try {
+        const created = await post("/api/hub-playlists", { name });
+        await post(`/api/hub-playlists/${created.id}/tracks`, { track: t });
+        $("#sheet-new-name").value = "";
+        toast(`Created “${name}” with “${t.name}”`);
+        closeSheets();
+        await loadShelves();
+      } catch (err) {
+        toast(err.message);
+      }
+    });
     $("#spotify-login-btn").addEventListener("click", async () => {
       try {
         const { url } = await api("/api/spotify/login");
@@ -408,8 +762,12 @@
       }
     });
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeVideo();
+      if (e.key === "Escape") {
+        closeVideo();
+        closeSheets();
+      }
     });
+    $("#screen-url").textContent = `${location.host}/screen`;
   }
 
   async function init() {
@@ -425,6 +783,7 @@
     } else {
       await loadShelves().catch((err) => toast(err.message));
     }
+    await loadScreens();
     await loadZones().catch(() => renderZones());
   }
 

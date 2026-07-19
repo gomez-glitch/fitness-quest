@@ -8,7 +8,7 @@
     "start": "node server/index.js",
     "demo": "DEMO=1 node server/index.js",
     "test": "node tests/unit.js && node tests/e2e.js",
-    "lint": "node --check server/index.js && node --check server/spotify.js && node --check server/sonos.js && node --check server/demo.js && node --check public/app.js && node --check tests/unit.js && node --check tests/e2e.js"
+    "lint": "node --check server/index.js && node --check server/spotify.js && node --check server/sonos.js && node --check server/demo.js && node --check server/queue.js && node --check server/store.js && node --check server/screens.js && node --check public/app.js && node --check tests/unit.js && node --check tests/e2e.js"
   },
   "devDependencies": {
     "playwright": "^1.61.1"

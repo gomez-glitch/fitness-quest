@@ -74,6 +74,28 @@ music-hub/
   group volume propagates, video overlay opens with the right embed URL, and
   the Spotify setup panel appears when unconfigured.
 
+## v2 additions (shipped)
+
+- **Hub-owned queue** (`server/queue.js`): Sonos only ever holds the current
+  track; the hub owns ordering, shuffle, jump, and a 2-second tick that
+  watches playback and advances when a track finishes. **Autoplay** refills
+  the queue radio-style from the context the music started from (the
+  playlist, search results, or shuffle pool), avoiding the last few plays.
+- **Hub playlists** (`server/store.js`): playlists created on the hub itself,
+  stored as full track objects in `.data/hub-playlists.json` — identical in
+  demo and live mode, persistent across restarts. Created from the ＋ card or
+  inline from any song's action sheet.
+- **Video screens** (`server/screens.js`, `public/screen.html`): any browser
+  opens `/screen`, registers by name, and polls for commands. The iPad picks
+  a target under "Video screen"; manual ▶ Video and the auto-play-videos
+  toggle push muted clips to the TV while Sonos carries audio. Muted
+  autoplay is deliberate — it's the only autoplay TV browsers allow, and the
+  room's audio belongs to Sonos anyway.
+- **Search returns playlists and songs** (one `type=track,playlist` query).
+- **Shuffle / Surprise me**: per-playlist shuffle and a random-playlist
+  shuffle from home.
+- **Docker packaging**: `music-hub/Dockerfile`, `--net=host` for SSDP.
+
 ## Out of scope (v1)
 
 - Perfect audio/video sync between the iPad video and Sonos audio (physically

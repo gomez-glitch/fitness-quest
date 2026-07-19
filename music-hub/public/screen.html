@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Soundstage Screen</title>
+  <style>
+    :root { --bg: #06080d; --text: #eef2f8; --dim: #8b98ac; --accent: #4ade80; --accent-2: #22d3ee; }
+    * { box-sizing: border-box; margin: 0; }
+    html, body { height: 100%; background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden; cursor: none; }
+    #idle { height: 100%; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 18px; text-align: center;
+      background: radial-gradient(1200px 700px at 50% 30%, #101826 0%, #06080d 70%); }
+    .mark { width: 92px; height: 92px; border-radius: 50%; border: 7px solid var(--accent);
+      display: flex; align-items: center; justify-content: center; animation: breathe 4s ease-in-out infinite; }
+    .mark::after { content: ""; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-2); }
+    @keyframes breathe { 0%,100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.06); opacity: 1; } }
+    h1 { font-size: 34px; letter-spacing: .4px; }
+    #screen-name { color: var(--accent-2); }
+    #clock { font-size: 72px; font-weight: 200; font-variant-numeric: tabular-nums; letter-spacing: 2px; }
+    .hint { color: var(--dim); font-size: 17px; max-width: 46ch; line-height: 1.5; }
+    #player { position: fixed; inset: 0; background: #000; display: none; }
+    #player.on { display: block; }
+    #frame { width: 100%; height: 100%; border: 0; }
+    #banner { position: fixed; left: 0; right: 0; bottom: 0; padding: 14px 26px;
+      background: linear-gradient(0deg, rgba(0,0,0,.85), transparent);
+      font-size: 20px; display: none; }
+    #player.on ~ #banner { display: block; }
+    #banner b { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div id="idle">
+    <div class="mark"></div>
+    <h1>Soundstage · <span id="screen-name">Screen</span></h1>
+    <div id="clock">--:--</div>
+    <p class="hint">This display is connected to the hub. Pick it as the video
+      screen on the iPad and music videos will appear here while Sonos plays
+      the sound.</p>
+  </div>
+  <div id="player"><iframe id="frame" title="Music video"
+    allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
+  <div id="banner"><b>Now showing</b> <span id="banner-title"></span></div>
+
+  <script>
+    (() => {
+      "use strict";
+      const qs = new URLSearchParams(location.search);
+      const wanted = qs.get("name") || localStorage.getItem("soundstage-screen-name") || "";
+      let screenId = null;
+
+      const clockEl = document.getElementById("clock");
+      function tickClock() {
+        const d = new Date();
+        clockEl.textContent =
+          String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+      }
+      tickClock();
+      setInterval(tickClock, 5000);
+
+      async function register() {
+        const res = await fetch("/api/screens/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: wanted }),
+        });
+        const data = await res.json();
+        screenId = data.id;
+        localStorage.setItem("soundstage-screen-name", data.name);
+        document.getElementById("screen-name").textContent = data.name;
+        document.title = "Soundstage · " + data.name;
+      }
+
+      function run(cmd) {
+        const player = document.getElementById("player");
+        const frame = document.getElementById("frame");
+        if (cmd.action === "video") {
+          frame.src = cmd.embedUrl;
+          document.getElementById("banner-title").textContent = cmd.title || "";
+          player.classList.add("on");
+        } else if (cmd.action === "clear") {
+          frame.src = "";
+          player.classList.remove("on");
+        }
+      }
+
+      async function poll() {
+        try {
+          if (!screenId) await register();
+          const res = await fetch("/api/screens/poll?id=" + encodeURIComponent(screenId));
+          if (!res.ok) throw new Error("re-register");
+          const { commands } = await res.json();
+          for (const cmd of commands || []) run(cmd);
+        } catch (_) {
+          screenId = null; // server restarted — register again next tick
+        }
+      }
+      poll();
+      setInterval(poll, 1500);
+    })();
+  </script>
+</body>
+</html>

@@ -162,13 +162,24 @@ class DemoBackend {
     return p.tracks;
   }
 
-  searchTracks(q) {
+  search(q) {
     const needle = q.toLowerCase();
-    return PLAYLISTS.flatMap((p) => p.tracks).filter(
-      (t) =>
-        t.name.toLowerCase().includes(needle) ||
-        t.artist.toLowerCase().includes(needle)
-    );
+    return {
+      tracks: PLAYLISTS.flatMap((p) => p.tracks).filter(
+        (t) =>
+          t.name.toLowerCase().includes(needle) ||
+          t.artist.toLowerCase().includes(needle)
+      ),
+      playlists: PLAYLISTS.filter(
+        (p) =>
+          p.name.toLowerCase().includes(needle) ||
+          p.description.toLowerCase().includes(needle)
+      ).map((p) => ({
+        id: p.id, name: p.name, description: p.description,
+        image: art(PLAYLISTS.indexOf(p), "♫"),
+        tracks: p.tracks.length, owner: p.owner,
+      })),
+    };
   }
 
   trackByUri(uri) {
@@ -261,13 +272,15 @@ class DemoBackend {
         positionSec: 0, durationSec: 0, volumes,
       };
     }
+    const pos = Math.round(this.position(np));
     return {
       groupId: g.id,
-      playing: np.playing,
+      // A finished track reads as stopped so the queue can advance.
+      playing: np.playing && pos < np.track.durationSec,
       title: np.track.name,
       artist: np.track.artist,
       album: np.track.album,
-      positionSec: Math.round(this.position(np)),
+      positionSec: pos,
       durationSec: np.track.durationSec,
       volumes,
     };
