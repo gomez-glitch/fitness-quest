@@ -92,6 +92,18 @@ Living list, roughly priority-ordered. Move items up/down freely.
 7. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
    added; add a CONTRIBUTING-style note if anyone else joins the project.
 
+## Audio roadmap (phases 2 and 4 remain)
+
+- **Phase 2 — the living world** (planned, not built): generative ambience in
+  Spark's Corner (birdsong by day, crickets at night), a real 4-bar dance
+  groove with bass/hats/stabs, and per-zone adventure music themes (volcano
+  rumbles, deep-sea plucks, airy space fifths). The bus architecture and
+  ducking from phase 1 are the foundation for all of it.
+- **Phase 4 — recorded audio** (not recommended): vendored CC0 packs or
+  recorded voice clips would raise the ceiling but break the zero-asset,
+  fully-offline philosophy and add licensing weight. Revisit only if phases
+  1-3 leave something wanting.
+
 ## Ideas shelf
 
 - **Magic Counting** — devicemotion/accelerometer auto-counts jumps for
@@ -118,11 +130,11 @@ Living list, roughly priority-ordered. Move items up/down freely.
 - **Tablet / landscape layout** — two-column grids on wide screens (Play:
   board left + quest card right; Home panels side by side); currently
   everything is portrait-phone stretched.
-- **Sound mixer** — split the single mute into three toggles: effects /
-  calm music / voice coach (parents want voice off at 7am; kids want
-  effects without narration).
-- **Per-hero voice** — vary speechSynthesis pitch/rate per profile so each
-  sibling's Spark sounds subtly different.
+- **Sound mixer UI** — the three channels (effects / music / voice) are
+  built and persist via `sound.setChannel()`; all that's left is the
+  settings UI to expose them (today only the global mute is wired up).
+- **Per-hero voice** ✅ SHIPPED — each profile gets a continuous, deterministic
+  pitch/pace fingerprint, plus best-installed-voice selection and mood prosody.
 - **Split app.js into modules** — ~3,300 lines now; carve out pet.js,
   spinner.js, adventure.js, state.js for faster, safer future work.
 - **Trophy share cards** — canvas-generated celebration card (avatar, rank,

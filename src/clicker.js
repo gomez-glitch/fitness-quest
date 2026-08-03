@@ -129,7 +129,7 @@ export function createClicker(container, { onChange = () => {}, onComplete = () 
     if (next === count) return;
     count = next;
     if (delta > 0) {
-      sound.tick();
+      sound.progressTick(target > 0 ? count / target : 0); // taps climb the scale
       if (navigator.vibrate) navigator.vibrate(8);
       bump();
       if (count === target) {

@@ -1507,6 +1507,7 @@ function animateNumber(target, to) {
 }
 
 function renderAll() {
+  voice.setProfile(data.activeProfileId); // each hero's coach has its own character
   renderHero();
   renderProfileSwitcher();
   renderProfileForm();

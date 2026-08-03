@@ -84,12 +84,23 @@ colors, big buttons, and encouraging, positive language throughout.
 - One shared rotating clicker dial in both the Play panel and Adventure mode:
   tap it or spin it like a tally counter, with a ratcheting notched ring,
   springy feedback, and optional sounds
-- Synthesized sound effects (rep tick, target chime, XP fanfare, badge jingle)
-  via the Web Audio API — no audio files — with a persistent mute toggle
-- A voice coach (browser speech synthesis, no assets): counts down the last
-  five seconds of holds, calls "Ready? 3, 2, 1, Go!", cheers at halfway, and
-  celebrates finishes, rests, quest completions, and level-ups — silenced by
-  the same mute toggle
+- A synthesized audio engine (Web Audio, no audio files): sounds run through
+  separate effects/music buses into a master compressor, so overlapping audio
+  sits in a mix instead of clipping. Every note has a real attack envelope
+  plus tiny random detune and velocity, so no two plays are identical; chimes
+  and fanfares use FM bells, ticks and claps use filtered-noise transients,
+  and the dance kick drops in pitch like a real drum. All tones live in one
+  pentatonic scale — and rep taps climb that scale as you approach your
+  target, so progress is something you can hear
+- An expressive voice coach (browser speech synthesis, no assets): it ranks
+  the device's installed voices and picks the warmest natural-sounding one
+  (iPads hide far better voices than the default, and joke voices like
+  Zarvox are never chosen), gives every hero their own subtle pitch and pace
+  so each sibling's coach sounds like theirs, and varies delivery by mood —
+  excited lines lift and quicken, stretch cues slow and soften, countdown
+  numbers stay snappy. It counts down the last five seconds of holds, calls
+  "Ready? 3, 2, 1, Go!", cheers at halfway, and celebrates finishes, rests,
+  quest completions, and level-ups. Music ducks politely while it speaks
 - Progress dashboard: level, XP, streak, and total reps, with a level-up progress bar
 - Balanced progression: a quadratic level curve (level n costs 50×(n²−1) total
   XP) keeps early levels quick and later ones earned; rep targets grow +1 per

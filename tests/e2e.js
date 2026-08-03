@@ -410,6 +410,48 @@ async function main() {
     check("badge case has 22 badges", total === 22, String(total));
     check("seeded state earns 18 badges", earned === 18, String(earned));
 
+    console.log("# Audio engine & voice");
+    const audio = await page.evaluate(async () => {
+      const { sound } = await import("./src/sound.js");
+      const { voice } = await import("./src/voice.js");
+      const out = { threw: [] };
+
+      // every public sound must run without throwing
+      for (const fn of ["tick", "beep", "thump", "chomp", "burp", "giggle", "clap",
+        "whee", "achoo", "hic", "groove", "chime", "fanfare", "badge"]) {
+        try { sound[fn](); } catch (e) { out.threw.push(fn); }
+      }
+      try { sound.progressTick(0.5); } catch (e) { out.threw.push("progressTick"); }
+
+      // mixer channels gate and persist
+      sound.setChannel("music", false);
+      out.musicOff = sound.channelOn("music") === false;
+      out.persisted = (localStorage.getItem("move-quest-mix") || "").includes('"music":false');
+      sound.setChannel("music", true);
+
+      // voice prosody: calm lines must be slower than excited ones,
+      // and two heroes must not sound identical
+      const spoken = [];
+      const orig = window.speechSynthesis.speak;
+      window.speechSynthesis.speak = (u) => spoken.push({ pitch: u.pitch, rate: u.rate });
+      voice.setProfile("hero-a");
+      voice.go();
+      voice.breatheIn();
+      voice.setProfile("hero-b-different-seed");
+      voice.go();
+      window.speechSynthesis.speak = orig;
+      out.spoken = spoken.length;
+      if (spoken.length === 3) {
+        out.calmSlower = spoken[1].rate < spoken[0].rate;
+        out.heroesDiffer = spoken[2].pitch !== spoken[0].pitch || spoken[2].rate !== spoken[0].rate;
+      }
+      return out;
+    });
+    check("all sound effects run clean", audio.threw.length === 0, audio.threw.join(","));
+    check("mixer channel gates and persists", audio.musicOff && audio.persisted);
+    check("calm speech is slower than excited", audio.calmSlower === true);
+    check("each hero gets its own voice character", audio.heroesDiffer === true);
+
     console.log("# Hygiene");
     check("no page errors", pageErrors.length === 0, pageErrors.join(" | "));
   } finally {
