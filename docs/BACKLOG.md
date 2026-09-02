@@ -2,6 +2,9 @@
 
 Living list, roughly priority-ordered. Move items up/down freely.
 
+See `RETROSPECTIVE.md` for the "what we'd do differently" review that produced
+items 2 and 3 below.
+
 ## Next up
 
 1. **Protection pack** (⏸️ PAUSED — parked by request 2026-07-18; still the
@@ -13,12 +16,27 @@ Living list, roughly priority-ordered. Move items up/down freely.
      Remove hero, so siblings can't wipe each other.
    - Streak shield: earn one per active week; auto-spends to protect one
      missed day (Duolingo-style kindness).
-2. **Painted art integration** — prompts delivered ✅ (done); images being
+2. **Local activity log** (from the retrospective — we design blind today).
+   A local-only event log: exercise started / completed / abandoned, session
+   length, time of day, panel visited. Stored in localStorage, never sent
+   anywhere, exportable as CSV from the (future) grown-up area. Answers the
+   questions we currently guess at: are the roller moves ever used? does she
+   abandon 30s holds, and at what second? is the spinner a daily ritual?
+   Roughly an afternoon of work; pairs naturally with the protection pack's
+   export plumbing.
+3. **Economy simulator** (from the retrospective — the 850-XP incident should
+   not have needed a live child to surface). Pull the level curve, target
+   scaling and energy taper into a pure `economy.js`, then a harness that
+   simulates "20 minutes a day for 90 days" and prints level, targets and XP
+   per session. Unit-test the curve and the daily quest picker (never two
+   holds, never two same-group) while the logic is out in the open. Tells us
+   what level 30 feels like *before* the 10-year-old gets there.
+4. **Painted art integration** — prompts delivered ✅ (done); images being
    generated now. Once PNGs land in `art/` (see `ART.md`): layer paintings
    under the journey map path, adventure cards, hero banner, dance overlay,
    and level-up screen, with SVG fallback when a file is missing. Update the
    service-worker precache list.
-3. **World expansion: zones 7–19** — NOT in the live build (by design).
+5. **World expansion: zones 7–19** — NOT in the live build (by design).
    Ship as staged content drops so the app keeps feeling new:
    - **Live today:** zones 1–6 (through Rainbow Castle), 36 steps.
    - **Drop A — "Beneath the Castle":** Glow Crystal Caves, Dino Jungle,
@@ -32,7 +50,7 @@ Living list, roughly priority-ordered. Move items up/down freely.
    Each drop: new zone-crossing voice lines, painted backgrounds from the
    ready-made prompts in `ART.md`, SVG fallback scenery per zone. Heroes
    already past the old finale roll their lap progress into the new lands.
-4. **Stretch & Calm pack** ✅ SHIPPED — 10 poses live as a "Stretch" group
+6. **Stretch & Calm pack** ✅ SHIPPED — 10 poses live as a "Stretch" group
    with calm generative music, breathing cues, and the Sunset Stretch
    adventure. Original spec kept below for reference:
    - **Downward Dog** 🐕 (30s) — hands and feet down, hips high in a
@@ -63,7 +81,7 @@ Living list, roughly priority-ordered. Move items up/down freely.
      Sky Reach, ends in Child's Pose.
    - Warm-up tie-in: Marching + Arm Circles + two stretches could form an
      auto-suggested warm-up row at the top of Play.
-5. **Foam roller set** ✅ SHIPPED — all eight moves live as 20–30s timed
+7. **Foam roller set** ✅ SHIPPED — all eight moves live as 20–30s timed
    items in the Stretch group with a 🛞 roller gear marker, calm music +
    breathing cues, and a blue end-on roller drawn into each FK animation.
    Original spec kept below for reference:
@@ -81,7 +99,7 @@ Living list, roughly priority-ordered. Move items up/down freely.
    - **Roller Reach-Over** (20s) — kneel, roller ahead, roll it away and
      reach into a long stretch.
    Safety copy: "roll slowly", "skip anything that hurts", "grown-up nearby".
-6. **Animal Moves pack** ✅ SHIPPED — eight moves in their own "Animal"
+8. **Animal Moves pack** ✅ SHIPPED — eight moves in their own "Animal"
    filter group (Bunny Hops, Bear Crawl, Crab Walk, Frog Hops, Inchworm,
    Duck Waddle, Cheetah Sprint, Kangaroo Jumps), Animal Antics 🐾 badge,
    Jungle Jamboree 🦁 adventure, bunny/frog moves added to Dance Party and
@@ -89,7 +107,7 @@ Living list, roughly priority-ordered. Move items up/down freely.
    dresses Spark in that costume for the day (8 costume accessories on the
    mascot, costume beats nightcap/crown, bragging bubble lines). (Idea sparked by reviewing the
    exercises-dataset repo — built natively, no external assets.)
-7. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
+9. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
    added; add a CONTRIBUTING-style note if anyone else joins the project.
 
 ## Audio roadmap (phases 2 and 4 remain)
