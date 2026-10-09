@@ -27,7 +27,7 @@ const PERSONAS = [
 
 const AVATARS = ["👟", "🦄", "🐯", "🦊", "🐼", "🛼", "🌟", "🚀"];
 
-const GROUPS = ["All", "Core", "Arms", "Legs", "Whole body", "Animal", "Stretch"];
+const GROUPS = ["All", "Core", "Arms", "Legs", "Whole body", "Animal", "Stand Tall", "Stretch"];
 
 const EXERCISES = [
   {
@@ -325,6 +325,46 @@ const EXERCISES = [
     muscles: "Legs + power", cue: "Big two-foot bounces with your paws tucked — boing across the outback.",
     steps: ["Bend low like a spring", "Jump BIG", "Soft knees when you land"],
   },
+  {
+    id: "shoulder-rolls", title: "Shoulder Rolls", target: 10, xp: 35, icon: "🔄", group: "Stand Tall", intensity: 1,
+    muscles: "Shoulders", cue: "Roll your shoulders up, back and down in big slow circles \u2014 like swimming backwards with just your shoulders.",
+    steps: ["Arms hang loose", "Up, back, down, slow", "Let the circles get bigger"],
+  },
+  {
+    id: "wall-angels", title: "Wall Angels", target: 8, xp: 50, icon: "👼", group: "Stand Tall", intensity: 2,
+    muscles: "Upper back + shoulders", cue: "Back against a wall, arms up like goalposts, then slide them up and down like making a snow angel.",
+    steps: ["Back and arms touch the wall", "Slide up slowly", "Slide back down \u2014 stay touching"],
+  },
+  {
+    id: "proud-chest", title: "Proud Chest", mode: "timed", target: 20, xp: 40, icon: "🦚", group: "Stand Tall", intensity: 1,
+    muscles: "Chest", cue: "Put one hand on a doorway or wall and turn gently away until your chest feels open and proud.",
+    steps: ["Hand flat on the wall", "Turn away slowly", "Gentle stretch, never a pull"],
+  },
+  {
+    id: "wing-squeeze", title: "Wing Squeeze", target: 10, xp: 40, icon: "🪶", group: "Stand Tall", intensity: 1,
+    muscles: "Upper back", cue: "Bend your elbows and squeeze your shoulder blades together like you are holding a pencil between your wings.",
+    steps: ["Elbows bent and back", "Squeeze and count to two", "Release nice and slow"],
+  },
+  {
+    id: "tall-tower-check", title: "Tall Tower Check", mode: "timed", target: 20, xp: 40, icon: "🗼", group: "Stand Tall", intensity: 1,
+    muscles: "Whole spine", cue: "Stand with your back on a wall and grow as tall as a tower \u2014 remember how tall feels.",
+    steps: ["Heels, bottom and back on the wall", "Grow up through the top of your head", "Breathe and stay tall"],
+  },
+  {
+    id: "open-book", title: "Open Book", mode: "timed", target: 20, xp: 40, icon: "📖", group: "Stand Tall", intensity: 1,
+    muscles: "Upper back (rotation)", cue: "Lie on your side with knees bent and open your top arm across like a book opening. Swap sides next time.",
+    steps: ["Knees stacked and still", "Open the top arm slowly", "Follow your hand with your eyes"],
+  },
+  {
+    id: "bear-hug-swing", title: "Bear Hug Swing", target: 10, xp: 40, icon: "🫂", group: "Stand Tall", intensity: 1,
+    muscles: "Chest + upper back", cue: "Give yourself a big bear hug, then fling your arms wide open. Hug, open, hug, open.",
+    steps: ["Wrap up tight", "Fling wide and proud", "Keep it smooth, not floppy"],
+  },
+  {
+    id: "baby-bird", title: "Baby Bird", target: 8, xp: 50, icon: "🐣", group: "Stand Tall", intensity: 2,
+    muscles: "Upper back", cue: "Lie on your tummy with arms bent like little wings, and lift just your wings and chest a tiny bit.",
+    steps: ["Arms bent like a W", "Lift the wings only", "Tiny lifts \u2014 small is strong"],
+  },
 ];
 
 const INTENSITY_META = {
@@ -435,6 +475,15 @@ const ADVENTURES = [
     ],
   },
   {
+    id: "tall-tower", name: "Tall Tower Reset", emoji: "🗼", calm: true,
+    moves: [
+      { id: "shoulder-rolls", line: "Shake the screen-wobbles out of your shoulders\u2026" },
+      { id: "wall-angels", line: "Sweep your wings up the tower wall\u2026" },
+      { id: "proud-chest", line: "Open the tower doors \u2014 big proud chest\u2026" },
+      { id: "tall-tower-check", line: "Now grow tall as the tallest tower in the kingdom." },
+    ],
+  },
+  {
     id: "sunset-stretch", name: "Sunset Stretch", emoji: "🌇", calm: true,
     moves: [
       { id: "sky-reach", line: "Reach up for the setting sun…" },
@@ -513,6 +562,7 @@ const BADGES = [
   { id: "adv-10", emoji: "🗻", label: "Quest Conqueror", need: "Finish 10 adventures", test: (s) => (s.stats.adventuresDone || 0) >= 10 },
   { id: "whole-5", emoji: "🌟", label: "Whole-Body Wonder", need: "5 whole body quests", test: (s) => (s.stats.groups["Whole body"] || 0) >= 5 },
   { id: "animal-5", emoji: "🐾", label: "Animal Antics", need: "5 animal moves", test: (s) => (s.stats.groups["Animal"] || 0) >= 5 },
+  { id: "posture-5", emoji: "🦚", label: "Proud Peacock", need: "5 Stand Tall moves", test: (s) => (s.stats.groups["Stand Tall"] || 0) >= 5 },
 ];
 
 // Fancy dress: finishing an animal move earns Spark that costume for the
@@ -792,7 +842,9 @@ function targetFor(exercise, level = levelForXp(activeProfile().xp)) {
 }
 
 function isCalmExercise(exercise) {
-  return exercise.group === "Stretch" && exercise.mode === "timed";
+  // Stretch and Stand Tall holds both get the calm pad + breathing cues.
+  return (exercise.group === "Stretch" || exercise.group === "Stand Tall") &&
+    exercise.mode === "timed";
 }
 
 // "20s hold" vs "8 reps" — used everywhere a target is displayed.
@@ -1203,6 +1255,14 @@ function renderFilterChips() {
     <div class="filter-chip-row" role="group" aria-label="Filter by muscle group">${groupRow}</div>
     <div class="filter-chip-row" role="group" aria-label="Filter by intensity">${intensityRow}</div>
   `;
+
+  // The group row scrolls, so keep the selected chip visible — otherwise
+  // picking a later group (Stand Tall, Stretch) leaves no on-screen sign of
+  // which filter is active.
+  const active = el.filterChips.querySelector('[data-filter-group][aria-pressed="true"]');
+  if (active && active.scrollIntoView) {
+    active.scrollIntoView({ inline: "center", block: "nearest" });
+  }
 }
 
 function renderExerciseBoard() {

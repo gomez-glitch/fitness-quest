@@ -651,6 +651,106 @@ export const MOTIONS = {
     ],
   },
 
+  // --- Stand Tall pack: shoulders, upper back and chest ---
+  // Mostly side view on purpose: posture lives in the sagittal plane, so the
+  // side silhouette is what actually reads as "slumped" versus "tall".
+
+  "shoulder-rolls": {
+    view: "side", duration: 2400, poster: 0.5,
+    base: { ...SIDE_BASE, torso: 2, neck: 0 },
+    frames: [
+      { t: 0, y: 75, a1: [16, 8], a2: [20, 10] },
+      { t: 0.25, y: 73.4, a1: [24, 8], a2: [28, 10] },
+      { t: 0.5, y: 73, a1: [-8, 8], a2: [-5, 10] },
+      { t: 0.75, y: 75.4, a1: [-15, 8], a2: [-12, 10] },
+      { t: 1, y: 75, a1: [16, 8], a2: [20, 10] },
+    ],
+  },
+
+  "wall-angels": {
+    view: "front", duration: 2600, poster: 0.5,
+    base: { ...FRONT_BASE, y: 75 },
+    frames: [
+      { t: 0, a1: [70, 95], a2: [70, 95] },
+      { t: 0.5, a1: [150, 18], a2: [150, 18], y: 73.5 },
+      { t: 1, a1: [70, 95], a2: [70, 95] },
+    ],
+  },
+
+  "proud-chest": {
+    view: "side", duration: 3000, poster: 0.5, prop: "wall",
+    base: {
+      ...SIDE_BASE, x: 62,
+      a2: [12, 8],
+      l1: [2, 3, 0], l2: [6, 5, 0],
+    },
+    frames: [
+      { t: 0, y: 75, torso: -1, neck: 2, a1: [-70, 6] },
+      { t: 0.5, y: 74.6, torso: -5, neck: 5, a1: [-80, 4] },
+      { t: 1, y: 75, torso: -1, neck: 2, a1: [-70, 6] },
+    ],
+  },
+
+  "wing-squeeze": {
+    view: "side", duration: 1800, poster: 0.5,
+    base: { ...SIDE_BASE, torso: 0 },
+    frames: [
+      { t: 0, y: 75, neck: 2, a1: [-15, 80], a2: [-19, 78] },
+      { t: 0.5, y: 74.4, neck: -2, a1: [-45, 95], a2: [-49, 93] },
+      { t: 1, y: 75, neck: 2, a1: [-15, 80], a2: [-19, 78] },
+    ],
+  },
+
+  // The centrepiece: starts slumped, grows tall against the wall, and holds
+  // there for most of the loop. Poster frame is the tall pose, never the slump.
+  "tall-tower-check": {
+    view: "side", duration: 4200, poster: 0.6, prop: "wall",
+    base: { ...SIDE_BASE, x: 54, l1: [1, 2, 0], l2: [4, 4, 0] },
+    frames: [
+      { t: 0, y: 76.5, torso: 15, neck: 26, a1: [24, 16], a2: [28, 18] },
+      { t: 0.35, y: 74, torso: 0, neck: 0, a1: [8, 5], a2: [12, 6] },
+      { t: 0.85, y: 73.6, torso: 0, neck: -1, a1: [8, 4], a2: [12, 5] },
+      { t: 1, y: 76.5, torso: 15, neck: 26, a1: [24, 16], a2: [28, 18] },
+    ],
+  },
+
+  "open-book": {
+    view: "side", duration: 3600, poster: 0.5,
+    base: {
+      ...SIDE_BASE, x: 58, y: 96, neck: 10,
+      a2: [-92, 8],
+      l1: [92, 96, 0], l2: [88, 92, 0],
+    },
+    frames: [
+      { t: 0, torso: -88, a1: [-95, 8] },
+      { t: 0.5, torso: -84, a1: [-10, 10] },
+      { t: 1, torso: -88, a1: [-95, 8] },
+    ],
+  },
+
+  "bear-hug-swing": {
+    view: "front", duration: 1400, poster: 0.5,
+    base: { ...FRONT_BASE, y: 75 },
+    frames: [
+      { t: 0, a1: [14, 128], a2: [14, 128], torso: 2 },
+      { t: 0.5, a1: [95, 10], a2: [95, 10], torso: -2, y: 74 },
+      { t: 1, a1: [14, 128], a2: [14, 128], torso: 2 },
+    ],
+  },
+
+  "baby-bird": {
+    view: "side", duration: 2400, poster: 0.5,
+    base: {
+      ...SIDE_BASE, x: 56, y: 99,
+      l1: [-92, 3, -80], l2: [-95, 4, -80],
+    },
+    frames: [
+      { t: 0, torso: 87, neck: 6, a1: [20, 105], a2: [23, 108] },
+      { t: 0.5, torso: 70, neck: 22, a1: [15, 120], a2: [18, 123] },
+      { t: 1, torso: 87, neck: 6, a1: [20, 105], a2: [23, 108] },
+    ],
+  },
+
   // --- foam roller set: gentle rolling moves over the blue wheel ---
 
   "calf-rollers": {

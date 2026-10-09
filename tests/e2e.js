@@ -249,6 +249,7 @@ async function main() {
     await page.click("#tab-adventure");
     check("sunset stretch adventure listed", !!(await page.$('.adventure-preset[data-adventure="sunset-stretch"]')));
     check("jungle jamboree adventure listed", !!(await page.$('.adventure-preset[data-adventure="jungle-jamboree"]')));
+    check("tall tower reset adventure listed", !!(await page.$('.adventure-preset[data-adventure="tall-tower"]')));
     await page.click("#tab-play");
 
     console.log("# Energy taper");
@@ -305,13 +306,16 @@ async function main() {
     check("spicy filter shows 8 moves", (await page.$$("#exercise-board .exercise-tile")).length === 8,
       String((await page.$$("#exercise-board .exercise-tile")).length));
     await page.click('.filter-chip[data-filter-intensity="1"]');
-    check("easy filter shows 26 moves", (await page.$$("#exercise-board .exercise-tile")).length === 26,
+    check("easy filter shows 32 moves", (await page.$$("#exercise-board .exercise-tile")).length === 32,
       String((await page.$$("#exercise-board .exercise-tile")).length));
     await page.click('.filter-chip[data-filter-intensity="All"]');
-    check("all levels shows 59 moves", (await page.$$("#exercise-board .exercise-tile")).length === 59,
+    check("all levels shows 67 moves", (await page.$$("#exercise-board .exercise-tile")).length === 67,
       String((await page.$$("#exercise-board .exercise-tile")).length));
     await page.click('.filter-chip[data-filter-group="Stretch"]');
     check("stretch group shows 18 moves", (await page.$$("#exercise-board .exercise-tile")).length === 18,
+      String((await page.$$("#exercise-board .exercise-tile")).length));
+    await page.click('.filter-chip[data-filter-group="Stand Tall"]');
+    check("stand tall group shows 8 moves", (await page.$$("#exercise-board .exercise-tile")).length === 8,
       String((await page.$$("#exercise-board .exercise-tile")).length));
     await page.click('.filter-chip[data-filter-group="All"]');
 
@@ -407,8 +411,26 @@ async function main() {
     await page.click("#tab-awards");
     const earned = (await page.$$(".badge:not(.locked)")).length;
     const total = (await page.$$(".badge")).length;
-    check("badge case has 22 badges", total === 22, String(total));
+    check("badge case has 23 badges", total === 23, String(total));
     check("seeded state earns 18 badges", earned === 18, String(earned));
+
+    console.log("# Stand Tall calm treatment");
+    await freshPage(page);
+    await page.click("#tab-play");
+    const calmSpy = await page.evaluate(async () => {
+      const { sound } = await import("./src/sound.js");
+      window.__calmStarted = false;
+      const orig = sound.startCalm.bind(sound);
+      sound.startCalm = () => { window.__calmStarted = true; return orig(); };
+      return true;
+    });
+    await page.click('.exercise-tile[data-exercise="tall-tower-check"]');
+    await page.click("#view-play .clicker", { position: { x: 85, y: 85 } });
+    await page.waitForTimeout(600);
+    check("stand tall hold gets calm music + breathing cues",
+      calmSpy && (await page.evaluate(() => window.__calmStarted === true)));
+    await page.click("#view-play .clicker", { position: { x: 85, y: 85 } }); // pause the timer
+    await freshPage(page);
 
     console.log("# Audio engine & voice");
     const audio = await page.evaluate(async () => {

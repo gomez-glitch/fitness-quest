@@ -107,7 +107,15 @@ items 2 and 3 below.
    dresses Spark in that costume for the day (8 costume accessories on the
    mascot, costume beats nightcap/crown, bragging bubble lines). (Idea sparked by reviewing the
    exercises-dataset repo — built natively, no external assets.)
-9. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
+9. **Stand Tall pack** ✅ SHIPPED — eight shoulder/upper-back/chest moves in
+   their own "Stand Tall" group for young screen users, a Proud Peacock 🦚
+   badge, and the calm Tall Tower Reset 🗼 adventure. Two constraints set by
+   the user and worth preserving: **purely self-directed** (no reminders, no
+   timers, no Spark slumping to prompt anyone — the app never raises posture
+   unprompted) and **no neck work at all** (shoulders, upper back and chest
+   only). The `tall-tower-check` motion carries the teaching: it starts
+   slumped and grows tall against a wall, so nothing has to be said out loud.
+10. **Documentation upkeep** — keep `ARCHITECTURE.md` current as modules are
    added; add a CONTRIBUTING-style note if anyone else joins the project.
 
 ## Audio roadmap (phases 2 and 4 remain)

@@ -55,6 +55,10 @@ stored data.
 - Rep targets: +1 per 2 levels (holds +2s per level), capped at 2× base;
   push-ups exempt. Spinner "half-reps" prize halves today's spun move.
 - Energy: first 6 claims/day full XP, next 4 half, then quarter.
+- Groups: Core / Arms / Legs / Whole body / Animal / Stand Tall / Stretch.
+  `isCalmExercise()` gates the calm pad + breathing cues and covers timed
+  holds in **both** Stretch and Stand Tall — extend it when adding a gentle
+  group, or the holds silently lose their audio treatment.
 - Daily quests are date-seeded *and* balanced: one easy rep move, exactly one
   timed hold, one rep wildcard, never two from the same muscle group.
 - `awardCompletion(exercise, reps)` is the single completion pipeline —
