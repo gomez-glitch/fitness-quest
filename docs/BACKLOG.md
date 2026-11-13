@@ -31,7 +31,12 @@ items 2 and 3 below.
    per session. Unit-test the curve and the daily quest picker (never two
    holds, never two same-group) while the logic is out in the open. Tells us
    what level 30 feels like *before* the 10-year-old gets there.
-4. **Painted art integration** — prompts delivered ✅ (done); images being
+4. **Painted art integration** — 🧪 PILOT DONE: zone-1 (Sunny Meadows)
+   generated through the Figma connector, processed to a 39 KB WebP and
+   layered over its SVG with automatic fallback. Pipeline documented in
+   `ART.md`. Remaining zones 2–6 await go-ahead; ship them as one set, since a
+   half-painted map makes the flat zones look worse. Earlier plan, kept for
+   reference: prompts delivered ✅ (done); images being
    generated now. Once PNGs land in `art/` (see `ART.md`): layer paintings
    under the journey map path, adventure cards, hero banner, dance overlay,
    and level-up screen, with SVG fallback when a file is missing. Update the

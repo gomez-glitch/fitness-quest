@@ -140,6 +140,31 @@ function paintCastle(svg, top) {
 
 const PAINTERS = [paintMeadow, paintVolcano, paintSea, paintMountains, paintSpace, paintCastle];
 
+// Painted zone art (see docs/ART.md), layered over each zone's SVG scenery.
+// Files are 1080x720 WebP — exactly 3x the 360x240 zone, so crisp on retina.
+// A zone listed as null keeps its SVG. If a listed file fails to load
+// (offline before its first view, say), SVG <image> renders nothing and the
+// hand-drawn scenery underneath shows through — a fallback with no JS.
+const ZONE_ART = [
+  "art/zone-1-meadow.webp",
+  null, // volcano
+  null, // sea
+  null, // mountains
+  null, // space
+  null, // castle
+];
+
+function paintZone(svg, zoneIdx, top) {
+  PAINTERS[zoneIdx](svg, top);
+  const art = ZONE_ART[zoneIdx];
+  if (art) {
+    svg.appendChild(el("image", {
+      href: art, x: 0, y: top, width: W, height: ZONE_H,
+      preserveAspectRatio: "xMidYMid slice", class: "zone-art",
+    }));
+  }
+}
+
 // --- Public renderer ---------------------------------------------------------
 
 // A single zone's scenery as a standalone card (used by the Discovery screen).
@@ -150,7 +175,7 @@ export function renderZoneCard(container, zoneIdx) {
   // tab, and paint servers in non-rendered subtrees don't paint.
   addGradients(defs, "card-");
   svg.appendChild(defs);
-  PAINTERS[Math.max(0, Math.min(PAINTERS.length - 1, zoneIdx))](svg, 0);
+  paintZone(svg, Math.max(0, Math.min(PAINTERS.length - 1, zoneIdx)), 0);
   svg.querySelectorAll("[fill^='url(#g-']").forEach((node) => {
     node.setAttribute("fill", node.getAttribute("fill").replace("url(#g-", "url(#card-g-"));
   });
@@ -205,9 +230,7 @@ export function renderJourneyMap(container, totalJourney, opts = {}) {
   svg.appendChild(defs);
 
   // Zones stack bottom-up: meadow at the bottom of the map, castle on top.
-  PAINTERS.forEach((paint, zoneIdx) => {
-    paint(svg, H - (zoneIdx + 1) * ZONE_H);
-  });
+  PAINTERS.forEach((_, zoneIdx) => paintZone(svg, zoneIdx, H - (zoneIdx + 1) * ZONE_H));
 
   // Soft cloud bands feather the hard seams between zone backgrounds.
   for (let z = 1; z < PAINTERS.length; z++) {

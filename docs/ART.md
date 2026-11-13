@@ -13,6 +13,47 @@ This document is the upgrade path to richer painted artwork.
 
 Only local repo files are allowed. Never hotlink external image URLs.
 
+## Status
+
+| Asset | State |
+|---|---|
+| `zone-1-meadow` | ✅ generated + integrated (pilot, 2026-11-13) |
+| `zone-2` … `zone-6` | ⏳ awaiting go-ahead after pilot review |
+| all other assets | not started |
+
+## Generation pipeline (proven on the zone-1 pilot)
+
+How the pilot was actually produced — follow this for the remaining assets.
+
+1. **Generate** with the Figma connector's `generate_image` into the working
+   file *Move Quest — zone art*: the shared style block + the asset prompt +
+   the zone suffix below, at **1536×1024** (native 3:2). Model
+   `gpt-image-2.5-flare`. Each call spends Figma AI credits.
+2. **Retrieve.** The returned `image.url` lives on `www.figma.com`, which the
+   cloud session's network does not allow. Instead call `get_screenshot` on
+   the image's node with `maxDimension: 1536` and `enableBase64Response:
+   true`; the full-resolution PNG comes back through the connector and is
+   saved to disk.
+3. **Resize** to the spec size (zones: **1080×720**, exactly 3× the 360×240
+   zone, so crisp on retina) with ImageMagick, flattening alpha:
+   `convert src.png -background "#e9e6fb" -alpha remove -alpha off
+   -filter Lanczos -resize 1080x720! -strip ref.png`
+4. **Encode WebP with ffmpeg, not ImageMagick.** ImageMagick's WebP encoder
+   here silently ignores `-quality` (q75/q82/q88 produced byte-identical
+   files). Use:
+   `ffmpeg -i ref.png -c:v libwebp -quality 90 -compression_level 6
+   -preset drawing art/<name>.webp`
+   q90 is the sweet spot for this art: the meadow is **39 KB at 40.8 dB
+   PSNR**, with no banding in the sky gradient at 2× zoom. q95 adds 46% for
+   +0.6 dB.
+5. **Wire it in** by adding the path to `ZONE_ART` in `src/journey.js`. The
+   image layers over that zone's SVG painter, so a failed load falls back to
+   the hand-drawn scenery with no JS. `scripts/build.js` copies `art/` into
+   `dist/`, and a test fetches every listed file to prove it ships.
+
+Don't ship a partial set: a painted zone beside flat SVG zones makes the
+flat ones look noticeably worse than they did on their own.
+
 ## File spec
 
 | File | Content | Aspect | Min size |
@@ -39,7 +80,7 @@ the service worker precaches everything for offline use.
 
 ## Copy-paste prompts
 
-**Status: prompt set below delivered ✅ (done) — first images being generated.**
+**Status: prompt set below delivered ✅ — zone-1 generated as the pilot (see Status above).**
 Future-zone prompts (world expansion, zones 7–14) are at the bottom, ready
 for the next generation session.
 

@@ -364,6 +364,14 @@ async function main() {
     check("journey map renders 36 nodes", (await page.$$("#journey-map .journey-node, #journey-map circle.journey-node")).length >= 36,
       String((await page.$$("#journey-map circle.journey-node, #journey-map g.journey-node")).length));
     check("journey status at start", (await page.textContent("#journey-status")).includes("Sunny Meadows"));
+    // Painted zone art must actually ship: the build once copied src/ and
+    // icons/ but not art/, so every image would 404 behind its SVG fallback.
+    const zoneArt = await page.$$eval("#journey-map image.zone-art", (n) => n.map((x) => x.getAttribute("href")));
+    check("journey map layers painted zone art", zoneArt.includes("art/zone-1-meadow.webp"), zoneArt.join(","));
+    const artStatus = await page.evaluate(async (urls) =>
+      Promise.all(urls.map(async (u) => (await fetch(u)).status)), zoneArt);
+    check("every zone art file is built and served", artStatus.length > 0 && artStatus.every((s) => s === 200),
+      artStatus.join(","));
     await claimReps(page, "sit-ups");
     const journeyStep = await page.evaluate(() => {
       const d = JSON.parse(localStorage.getItem("move-quest-progress-v3"));

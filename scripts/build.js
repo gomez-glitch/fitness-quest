@@ -26,5 +26,6 @@ copyRecursive(path.join(root, "src"), path.join(distDir, "src"));
 copyRecursive(path.join(root, "manifest.webmanifest"), path.join(distDir, "manifest.webmanifest"));
 copyRecursive(path.join(root, "sw.js"), path.join(distDir, "sw.js"));
 copyRecursive(path.join(root, "icons"), path.join(distDir, "icons"));
+copyRecursive(path.join(root, "art"), path.join(distDir, "art"));
 
-console.log("Build complete: dist/ is ready (app, manifest, service worker, icons).");
+console.log("Build complete: dist/ is ready (app, manifest, service worker, icons, art).");
