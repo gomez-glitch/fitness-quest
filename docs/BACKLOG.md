@@ -40,20 +40,26 @@ items 2 and 3 below.
    wear a painted badge disc (76 KB total), with the emoji kept underneath
    as the fallback. Still to paint, using the same pipeline in `ART.md`:
    hero banner, dance overlay, celebration backdrop.
-5. **World expansion: zones 7–19** — NOT in the live build (by design).
-   Ship as staged content drops so the app keeps feeling new:
-   - **Live today:** zones 1–6 (through Rainbow Castle), 36 steps.
-   - **Drop A — "Beneath the Castle":** Glow Crystal Caves, Dino Jungle,
-     Bubblegum Canyon (zones 7–9).
+5. **World expansion: zones 7–19**, shipped as staged content drops so the
+   app keeps feeling new:
+   - **Live today:** zones 1–9 (through Bubblegum Canyon), 54 steps.
+   - **Drop A — "Beneath the Castle"** ✅ SHIPPED 2026-11-14: Glow Crystal
+     Caves, Dino Jungle, Bubblegum Canyon (zones 7–9), painted from day one.
+     Heroes who had already passed the old castle were moved to the caves
+     on the same lap, and their lifetime step count was left alone.
    - **Drop B — "Into the Sky":** Firefly Forest, Frozen Wonderland,
      Cloud Kingdom, Moon Base (zones 10–13).
    - **Drop C — "The Strange Lands"** (older-kid drop): Upside-Down Land,
      Neon Cyber City, Dragon Peaks (zones 14–16).
    - **Drop D — "The Final Frontier":** Shipwreck Cove, Glitch Dimension,
      Galaxy Gardens finale (zones 17–19).
-   Each drop: new zone-crossing voice lines, painted backgrounds from the
-   ready-made prompts in `ART.md`, SVG fallback scenery per zone. Heroes
-   already past the old finale roll their lap progress into the new lands.
+   Each drop needs: a `cheer` line per zone (Spark says it on the discovery
+   screen), painted backgrounds from the ready-made prompts in `ART.md`, and
+   SVG fallback scenery per zone (it is clipped to its zone, so it can't
+   spill over a neighbour). Migration is automatic: `migrateMap()` in
+   `app.js` compares each hero's stored `mapSize` with the new
+   `TOTAL_STEPS`. Heroes past the old finale move to the first new zone,
+   keeping their lap number, then hop in and see its discovery card.
 6. **Stretch & Calm pack** ✅ SHIPPED — 10 poses live as a "Stretch" group
    with calm generative music, breathing cues, and the Sunset Stretch
    adventure. Original spec kept below for reference:

@@ -1,7 +1,9 @@
 // Move Quest — Spark's Journey: a cartoon world-map campaign.
 //
-// A tall serpentine path through six hand-drawn SVG zones. Every completed
-// quest moves Spark one step; finishing the map starts a new lap.
+// A tall serpentine path through painted zones (hand-drawn SVG underneath as
+// the fallback). Every completed quest moves Spark one step; finishing the
+// map starts a new lap. Zones arrive in content drops (docs/BACKLOG.md);
+// app.js migrates heroes when the map grows, see migrateMap().
 
 const NS = "http://www.w3.org/2000/svg";
 
@@ -11,12 +13,16 @@ const REDUCED_MOTION =
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export const JOURNEY_ZONES = [
-  { name: "Sunny Meadows", emoji: "🌻" },
-  { name: "Lava Volcano", emoji: "🌋" },
-  { name: "Deep Sea", emoji: "🐠" },
-  { name: "Crystal Mountains", emoji: "💎" },
-  { name: "Outer Space", emoji: "🪐" },
-  { name: "Rainbow Castle", emoji: "🏰" },
+  { name: "Sunny Meadows", emoji: "🌻", cheer: "Smell those flowers!" },
+  { name: "Lava Volcano", emoji: "🌋", cheer: "Feel that toasty glow!" },
+  { name: "Deep Sea", emoji: "🐠", cheer: "Bubbles everywhere!" },
+  { name: "Crystal Mountains", emoji: "💎", cheer: "Look how high we are!" },
+  { name: "Outer Space", emoji: "🪐", cheer: "Zero gravity, here we go!" },
+  { name: "Rainbow Castle", emoji: "🏰", cheer: "We made it to the castle!" },
+  // Drop A, "Beneath the Castle"
+  { name: "Glow Crystal Caves", emoji: "🔮", cheer: "The crystals are glowing just for us!" },
+  { name: "Dino Jungle", emoji: "🦕", cheer: "Look, giant dino footprints!" },
+  { name: "Bubblegum Canyon", emoji: "🍭", cheer: "Everything here is pink and bouncy!" },
 ];
 
 export const STEPS_PER_ZONE = 6;
@@ -163,7 +169,48 @@ function paintCastle(svg, top) {
   emoji(svg, 305, top + 90, 22, "🎉");
 }
 
-const PAINTERS = [paintMeadow, paintVolcano, paintSea, paintMountains, paintSpace, paintCastle];
+function paintCaves(svg, top) {
+  svg.appendChild(el("rect", { x: 0, y: top, width: W, height: ZONE_H, fill: "url(#g-caves)" }));
+  // Rock walls framing the sides, a shaft of light from above
+  svg.appendChild(el("path", { d: `M 0 ${top} L 70 ${top} Q 40 ${top + 120} 85 ${top + 240} L 0 ${top + 240} Z`, fill: "#a78bfa" }));
+  svg.appendChild(el("path", { d: `M 360 ${top} L 295 ${top} Q 325 ${top + 120} 280 ${top + 240} L 360 ${top + 240} Z`, fill: "#a78bfa" }));
+  svg.appendChild(el("path", { d: `M 150 ${top} L 210 ${top} L 250 ${top + 200} L 110 ${top + 200} Z`, fill: "rgba(254, 249, 195, 0.35)" }));
+  emoji(svg, 40, top + 110, 24, "💎");
+  emoji(svg, 318, top + 160, 22, "🔮");
+  emoji(svg, 90, top + 215, 20, "🍄");
+  emoji(svg, 270, top + 220, 18, "✨");
+}
+
+function paintJungle(svg, top) {
+  svg.appendChild(el("rect", { x: 0, y: top, width: W, height: ZONE_H, fill: "url(#g-jungle)" }));
+  svg.appendChild(el("path", { d: `M 210 ${top + 120} L 255 ${top + 55} L 300 ${top + 120} Z`, fill: "#c4b5fd" }));
+  svg.appendChild(el("circle", { cx: 262, cy: top + 42, r: 9, fill: "#f5f5f4", opacity: 0.8 }));
+  svg.appendChild(el("ellipse", { cx: 180, cy: top + 245, rx: 220, ry: 70, fill: "#4ade80" }));
+  svg.appendChild(el("path", { d: `M 140 ${top + 240} Q 180 ${top + 180} 230 ${top + 150}`, stroke: "#d6a77a", "stroke-width": 22, fill: "none", "stroke-linecap": "round" }));
+  emoji(svg, 40, top + 120, 28, "🌿");
+  emoji(svg, 320, top + 200, 24, "🌴");
+  emoji(svg, 90, top + 200, 22, "🦕");
+  emoji(svg, 200, top + 200, 16, "🐾");
+}
+
+function paintCanyon(svg, top) {
+  svg.appendChild(el("rect", { x: 0, y: top, width: W, height: ZONE_H, fill: "url(#g-canyon)" }));
+  const stripes = ["#f9a8d4", "#ddd6fe", "#fbcfe8", "#c4b5fd"];
+  [[0, 95], [270, 90]].forEach(([x, w]) => {
+    stripes.forEach((c, i) => {
+      svg.appendChild(el("rect", { x, y: top + 70 + i * 42, width: w, height: 42, fill: c }));
+    });
+  });
+  svg.appendChild(el("path", { d: `M 150 ${top + 240} Q 200 ${top + 190} 165 ${top + 150} T 190 ${top + 90}`, stroke: "#f472b6", "stroke-width": 16, fill: "none", "stroke-linecap": "round" }));
+  emoji(svg, 48, top + 60, 26, "🍭");
+  emoji(svg, 315, top + 58, 24, "🍬");
+  emoji(svg, 230, top + 120, 18, "🫧");
+}
+
+const PAINTERS = [
+  paintMeadow, paintVolcano, paintSea, paintMountains, paintSpace, paintCastle,
+  paintCaves, paintJungle, paintCanyon,
+];
 
 // Painted zone art (see docs/ART.md), layered over each zone's SVG scenery.
 // Files are 1080x720 WebP — exactly 3x the 360x240 zone, so crisp on retina.
@@ -177,14 +224,27 @@ const ZONE_ART = [
   "art/zone-4-mountains.webp",
   "art/zone-5-space.webp",
   "art/zone-6-castle.webp",
+  "art/zone-7-caves.webp",
+  "art/zone-8-jungle.webp",
+  "art/zone-9-canyon.webp",
 ];
 
 function paintZone(svg, zoneIdx, top) {
-  PAINTERS[zoneIdx](svg, top);
+  // A nested <svg> clips to its own box, so scenery that reaches past the zone
+  // edge (a hill, a river's round cap) can't spill over the painting next door.
+  // Its viewBox keeps the outer map's coordinates, so painters need no change.
+  const zone = el("svg", {
+    x: 0, y: top, width: W, height: ZONE_H, viewBox: `0 ${top} ${W} ${ZONE_H}`, class: "zone",
+  });
+  svg.appendChild(zone);
+  PAINTERS[zoneIdx](zone, top);
   const art = ZONE_ART[zoneIdx];
   if (art) {
+    // The painting sits outside the clip and overlaps each edge by 1 unit:
+    // clipped edges anti-alias, and a half-covered row would let the scenery
+    // underneath show through as a hairline (a green one under Dino Jungle).
     svg.appendChild(el("image", {
-      href: art, x: 0, y: top, width: W, height: ZONE_H,
+      href: art, x: 0, y: top - 1, width: W, height: ZONE_H + 2,
       preserveAspectRatio: "xMidYMid slice", class: "zone-art",
     }));
   }
@@ -215,6 +275,9 @@ function addGradients(defs, prefix = "") {
   grad(defs, `${prefix}g-mountains`, [["0", "#ede9fe"], ["1", "#a78bfa"]]);
   grad(defs, `${prefix}g-space`, [["0", "#1e1b4b"], ["1", "#4c1d95"]]);
   grad(defs, `${prefix}g-castle`, [["0", "#fdf2f8"], ["1", "#fbcfe8"]]);
+  grad(defs, `${prefix}g-caves`, [["0", "#f5d0fe"], ["1", "#ddd6fe"]]);
+  grad(defs, `${prefix}g-jungle`, [["0", "#fef9c3"], ["1", "#bbf7d0"]]);
+  grad(defs, `${prefix}g-canyon`, [["0", "#ffedd5"], ["1", "#fbcfe8"]]);
 }
 
 function buildToken(x, y) {
@@ -376,5 +439,5 @@ export function renderJourneyMap(container, totalJourney, opts = {}) {
     setTimeout(() => requestAnimationFrame(frame), 350);
   }
 
-  return { step, lap, zone: zoneForStep(step) };
+  return { step, lap, zone: zoneForStep(step), animating };
 }

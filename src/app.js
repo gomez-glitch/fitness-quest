@@ -5,7 +5,9 @@ import { sound } from "./sound.js";
 import { createClicker } from "./clicker.js";
 import { voice } from "./voice.js";
 import { wake } from "./wake.js";
-import { renderJourneyMap, renderZoneCard, zoneForStep, TOTAL_STEPS } from "./journey.js";
+import {
+  renderJourneyMap, renderZoneCard, zoneForStep, JOURNEY_ZONES, STEPS_PER_ZONE, TOTAL_STEPS,
+} from "./journey.js";
 
 const STORAGE_KEY = "move-quest-progress-v3";
 const LEGACY_KEY = "move-quest-progress-v2";
@@ -597,7 +599,8 @@ function defaultProfileState(nickname = "Spark") {
     lastCompletedDate: null,
     counters,
     profile: { nickname, persona: "spark-sprinter", avatar: "👟" },
-    stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0, timedDone: 0, adventuresDone: 0, journey: 0, seenJourney: 0, boops: 0 },
+    stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0, timedDone: 0, adventuresDone: 0, journey: 0, seenJourney: 0, boops: 0,
+             mapOffset: 0, mapSize: TOTAL_STEPS, mapNews: null },
     pet: { tummy: 60, tummyAt: Date.now(), meals: 0, favDate: null, costume: null },
     daily: { date: null, done: [], bonusClaimed: false, spin: null },
     days: {},
@@ -616,6 +619,28 @@ function isValidLogEntry(entry) {
     typeof entry.xp === "number" &&
     typeof entry.reps === "number"
   );
+}
+
+// The journey map grows in content drops. stats.journey stays the true
+// lifetime count ("quest steps together"); stats.mapOffset only changes where
+// that count lands on the map. A hero who has finished the old map at least
+// once moves to the first new zone, keeping their lap number, and Spark hops
+// in from the old finale (followed by a discovery card) the next time the map
+// is on screen. Heroes still on their first lap simply walk on into the new
+// lands. Deterministic, so re-running it on an unsaved load is harmless.
+const LEGACY_MAP_STEPS = 36;
+
+function migrateMap(stats, fromSize) {
+  if (fromSize >= TOTAL_STEPS) return;
+  const pos = stats.journey + stats.mapOffset;
+  const lapsDone = Math.floor(pos / fromSize);
+  if (lapsDone >= 1) {
+    const newPos = lapsDone * TOTAL_STEPS + fromSize;
+    stats.mapOffset = newPos - stats.journey;
+    stats.seenJourney = Math.max(0, stats.journey - 1);
+    stats.mapNews = Math.floor(fromSize / STEPS_PER_ZONE);
+  }
+  stats.mapSize = TOTAL_STEPS;
 }
 
 function normalizeProfile(parsed) {
@@ -676,6 +701,13 @@ function normalizeProfile(parsed) {
         ? Math.min(st.seenJourney, state.stats.journey)
         : state.stats.journey;
     if (typeof st.boops === "number" && st.boops >= 0) state.stats.boops = st.boops;
+    if (Number.isInteger(st.mapOffset) && st.mapOffset >= 0) state.stats.mapOffset = st.mapOffset;
+    if (Number.isInteger(st.mapNews) && st.mapNews >= 0 && st.mapNews < JOURNEY_ZONES.length) {
+      state.stats.mapNews = st.mapNews;
+    }
+    // Stats saved before the map grew carry no size: that was the 36-step map.
+    const mapSize = Number.isInteger(st.mapSize) && st.mapSize > 0 ? st.mapSize : LEGACY_MAP_STEPS;
+    migrateMap(state.stats, mapSize);
   }
 
   const pt = parsed.pet;
@@ -1530,15 +1562,17 @@ function renderJourney() {
   const st = activeProfile();
   const journey = st.stats.journey || 0;
   const seen = Math.min(typeof st.stats.seenJourney === "number" ? st.stats.seenJourney : journey, journey);
+  const offset = st.stats.mapOffset || 0;
   // Hop animation only plays when the map is actually on screen.
   const mapVisible =
     !document.getElementById("view-adventure").hidden &&
     !adventure.active && !dance.active;
   const animate = mapVisible && seen < journey;
 
-  const { step, lap, zone } = renderJourneyMap(el.journeyMap, journey, animate ? {
-    animateFrom: seen,
+  const { step, lap, zone, animating } = renderJourneyMap(el.journeyMap, journey + offset, animate ? {
+    animateFrom: seen + offset,
     onHop: () => sound.tick(),
+    onDone: () => maybeShowDiscovery(),
   } : {});
 
   if (mapVisible && seen !== journey) {
@@ -1546,10 +1580,22 @@ function renderJourney() {
     saveData();
   }
 
-  const left = TOTAL_STEPS - step;
+  // New lands opened by a content drop: announce them once the map is seen.
+  if (mapVisible && typeof st.stats.mapNews === "number") {
+    const idx = st.stats.mapNews;
+    st.stats.mapNews = null;
+    saveData();
+    pendingDiscovery = { zone: JOURNEY_ZONES[idx], index: idx };
+    if (!animating) maybeShowDiscovery();
+  }
+
+  // Aim at the next land, so the goal is always a few quests away.
+  const nextZone = Math.floor(step / STEPS_PER_ZONE) + 1;
+  const left = nextZone * STEPS_PER_ZONE - step;
+  const goal = nextZone < JOURNEY_ZONES.length ? JOURNEY_ZONES[nextZone].name : "the finish flag";
   el.journeyStatus.textContent =
     `${zone.emoji} ${activeProfile().profile.nickname} is exploring ${zone.name}` +
-    `${lap > 1 ? ` (lap ${lap}!)` : ""} — ${left} quest${left === 1 ? "" : "s"} to the castle!`;
+    `${lap > 1 ? ` (lap ${lap}!)` : ""} — ${left} quest${left === 1 ? "" : "s"} to ${goal}!`;
 }
 
 // Count-up tween for stat numbers. First paint (and reduced motion) snaps
@@ -2023,7 +2069,7 @@ function maybeShowDiscovery() {
   document.body.classList.add("no-scroll");
   renderZoneCard(document.getElementById("discovery-scene"), index);
   sound.fanfare();
-  setTimeout(() => voice.say(`New land discovered! Welcome to the ${zone.name}!`), 600);
+  setTimeout(() => voice.say(`New land discovered! Welcome to the ${zone.name}! ${zone.cheer || ""}`), 600);
   spawnConfetti(el.discoveryOverlay.querySelector(".adventure-stage"), 20);
 }
 
@@ -3053,13 +3099,15 @@ function awardCompletion(exercise, reps) {
   st.stats.bestStreak = Math.max(st.stats.bestStreak, st.streak);
 
   // Spark's Journey: every completion is one step along the world map.
-  const zoneBefore = zoneForStep(st.stats.journey);
+  const mapOffset = st.stats.mapOffset || 0;
+  const zoneBefore = zoneForStep(st.stats.journey + mapOffset);
   st.stats.journey = (st.stats.journey || 0) + 1;
-  const zoneAfter = zoneForStep(st.stats.journey);
+  const mapPos = st.stats.journey + mapOffset;
+  const zoneAfter = zoneForStep(mapPos);
   if (zoneAfter !== zoneBefore) {
     pendingDiscovery = {
       zone: zoneAfter,
-      index: Math.floor((st.stats.journey % TOTAL_STEPS) / 6),
+      index: Math.floor((mapPos % TOTAL_STEPS) / STEPS_PER_ZONE),
     };
   }
 

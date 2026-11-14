@@ -397,13 +397,15 @@ async function main() {
     console.log("# Spark's Journey");
     await freshPage(page);
     await page.click("#tab-adventure");
-    check("journey map renders 36 nodes", (await page.$$("#journey-map .journey-node, #journey-map circle.journey-node")).length >= 36,
-      String((await page.$$("#journey-map circle.journey-node, #journey-map g.journey-node")).length));
-    check("journey status at start", (await page.textContent("#journey-status")).includes("Sunny Meadows"));
+    const nodeCount = (await page.$$("#journey-map circle.journey-node")).length;
+    check("journey map renders 54 nodes", nodeCount === 54, String(nodeCount));
+    const startStatus = await page.textContent("#journey-status");
+    check("journey status at start", startStatus.includes("Sunny Meadows"), startStatus);
+    check("status aims at the next land", startStatus.includes("6 quests to Lava Volcano"), startStatus);
     // Painted zone art must actually ship: the build once copied src/ and
     // icons/ but not art/, so every image would 404 behind its SVG fallback.
     const zoneArt = await page.$$eval("#journey-map image.zone-art", (n) => n.map((x) => x.getAttribute("href")));
-    check("journey map layers painted art on all six zones", zoneArt.length === 6, zoneArt.join(","));
+    check("journey map layers painted art on all nine zones", zoneArt.length === 9, zoneArt.join(","));
     const artStatus = await page.evaluate(async (urls) =>
       Promise.all(urls.map(async (u) => (await fetch(u)).status)), zoneArt);
     check("every zone art file is built and served", artStatus.length > 0 && artStatus.every((s) => s === 200),
@@ -455,6 +457,57 @@ async function main() {
       return d.profiles[d.activeProfileId].stats.seenJourney;
     });
     check("map visit records hop progress", seenAfter === 6, String(seenAfter));
+
+    // Drop A grew the map from 36 to 54 steps. A hero who had already passed
+    // the old castle moves on into the new lands: same lap, same lifetime
+    // step count, one hop in from the castle and a discovery card.
+    const seedLegacyJourney = (steps) => page.evaluate((n) => {
+      const d = JSON.parse(localStorage.getItem("move-quest-progress-v3"));
+      const p = d.profiles[d.activeProfileId];
+      p.stats.journey = n;
+      p.stats.seenJourney = n;
+      delete p.stats.mapSize;
+      delete p.stats.mapOffset;
+      delete p.stats.mapNews;
+      localStorage.setItem("move-quest-progress-v3", JSON.stringify(d));
+    }, steps);
+    const storedJourney = () => page.evaluate(() => {
+      const d = JSON.parse(localStorage.getItem("move-quest-progress-v3"));
+      const { journey, seenJourney, mapOffset, mapSize, mapNews } = d.profiles[d.activeProfileId].stats;
+      return { journey, seenJourney, mapOffset, mapSize, mapNews };
+    });
+    await seedLegacyJourney(40); // old map: lap 2, step 4 (meadow)
+    await page.reload();
+    await page.waitForSelector(".tab-bar");
+    await page.click("#tab-adventure");
+    await page.waitForSelector(".discovery-card", { timeout: 5000 }).catch(() => {});
+    const grownHeading = await page.textContent(".discovery-card .levelup-heading").catch(() => "");
+    check("a grown map announces the new land", grownHeading.includes("Glow Crystal Caves"), grownHeading);
+    const grownStatus = await page.textContent("#journey-status");
+    check("a hero past the old castle continues into the caves, same lap",
+      grownStatus.includes("Glow Crystal Caves") && grownStatus.includes("lap 2"), grownStatus);
+    const grown = await storedJourney();
+    check("migration keeps the lifetime step count", grown.journey === 40 && grown.mapSize === 54 &&
+      grown.mapNews === null && grown.seenJourney === 40, JSON.stringify(grown));
+    if (grownHeading) await page.click('[data-action="close-discovery"]');
+    await page.reload();
+    await page.waitForSelector(".tab-bar");
+    await page.click("#tab-adventure");
+    await page.waitForTimeout(1500);
+    check("the new land is announced only once", await page.$eval("#discovery-overlay", (e) => e.hidden));
+    const grownAgain = await storedJourney();
+    check("migration runs once", grownAgain.mapOffset === grown.mapOffset, JSON.stringify(grownAgain));
+
+    await seedLegacyJourney(20); // still on the first lap: nothing moves
+    await page.reload();
+    await page.waitForSelector(".tab-bar");
+    await page.click("#tab-adventure");
+    await page.waitForTimeout(600);
+    const lap1Status = await page.textContent("#journey-status");
+    const lap1 = await storedJourney();
+    check("a first-lap hero keeps their place on the grown map",
+      lap1Status.includes("Crystal Mountains") && !lap1Status.includes("lap") && lap1.mapOffset === 0 &&
+      await page.$eval("#discovery-overlay", (e) => e.hidden), `${lap1Status} ${JSON.stringify(lap1)}`);
 
     console.log("# Badges");
     await seedProfile(page, {

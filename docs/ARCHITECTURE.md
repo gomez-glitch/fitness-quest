@@ -11,7 +11,7 @@ persistence, deployed to GitHub Pages by CI on every push to `main`.
 | `src/app.js` | Everything stateful: storage + migrations, profiles, exercises data, XP/levels/streaks/energy, badges, daily quests, spinner, dance party, adventure engine, journey wiring, Spark's Corner (pet moods, boop roulette, feeding, naps, costumes), home pager, rendering, and event handlers. ~3,300 lines — see `RETROSPECTIVE.md` §7. |
 | `src/mascot.js` | Spark, the articulated mascot: an SVG skeleton posed by forward kinematics from per-exercise joint-angle keyframes (`MOTIONS`). `createMascot` animates via rAF; `renderStaticMascot` draws poster poses. |
 | `src/clicker.js` | The shared rotating dial: tap/spin rep counting, and the GO → 3-2-1 → countdown engine for timed holds. Used by both the Play panel and Adventure mode via `createClicker(container, {onChange, onComplete})`. |
-| `src/journey.js` | The world-map campaign: six zones, a 36-node serpentine path, Spark token. Each zone is painted WebP art (`ZONE_ART`, from `art/`) layered over a hand-drawn SVG painter, which shows through if the image fails to load. `plateX()` slides zone name plates clear of the zone's last node, which always lands at plate height. `renderJourneyMap(container, steps)`, `renderZoneCard(container, zoneIdx)`. |
+| `src/journey.js` | The world-map campaign: nine zones (six original plus Drop A), a 54-node serpentine path, Spark token. Each zone carries a `cheer` line for its discovery screen, and its SVG scenery is clipped to the zone by a nested `<svg>`. Each zone is painted WebP art (`ZONE_ART`, from `art/`) layered over a hand-drawn SVG painter, which shows through if the image fails to load. `plateX()` slides zone name plates clear of the zone's last node, which always lands at plate height. `renderJourneyMap(container, steps)`, `renderZoneCard(container, zoneIdx)`. |
 | `src/wake.js` | Screen Wake Lock with reasons: `wake.hold("hold" / "adventure" / "dance")` and `wake.release(reason)`. The lock is held while any reason is active and re-requested when the page becomes visible again. Without browser support it does nothing. |
 | `src/sound.js` | Web Audio engine. `sfx` + `music` gain buses → master compressor. Every note carries an attack envelope, ±10 cents detune and velocity jitter; FM bells for chime/fanfare/badge, filtered-noise transients for ticks/claps, pitch-dropping kick for the dance thump. All tones sit in C-major pentatonic, and `progressTick(ratio)` climbs that scale toward the rep target. `setChannel()` gates sfx/music/voice (persisted); `duck()` dips music while the coach speaks. |
 | `src/voice.js` | Expressive speech-synthesis coach. Ranks installed voices (premium/neural first, joke voices like Zarvox excluded, local preferred) and picks the best; `setProfile(id)` gives each hero a continuous pitch/pace fingerprint; mood presets (`excited` / `calm` / `count`) shape delivery. Honours mute and the `voice` channel. |
@@ -35,7 +35,8 @@ Key `move-quest-progress-v3`:
       counters: { [exerciseId]: reps },
       profile: { nickname, persona, avatar },
       stats: { tried[], groups{}, todayDate, todayCount, bestDay, bestStreak,
-               timedDone, adventuresDone, journey, seenJourney, boops },
+               timedDone, adventuresDone, journey, seenJourney, boops,
+               mapOffset, mapSize, mapNews },
       pet: { tummy, tummyAt, meals, favDate, costume:{id,date} },
       daily: { date, done[], bonusClaimed, spin },
       days: { [yyyy-mm-dd]: {xp, reps} },                  // pruned to 14d
@@ -47,6 +48,13 @@ Key `move-quest-progress-v3`:
 
 Migrations: v2 (single-profile) auto-wraps into the first v3 profile; the
 `curve` flag tops XP up so the old flat level curve never demotes anyone.
+When the journey map grows, `migrateMap()` runs. `journey` is the true
+lifetime count, shown as "quest steps together", and is never rewritten.
+The map position is `journey + mapOffset`. `mapSize` records which map the
+offset was computed for (missing means the original 36 steps). A hero who
+had finished the old map moves to the first new zone with the same lap
+number, and `mapNews` queues that zone's discovery card for the next time
+the map is on screen.
 `normalizeProfile()` defensively re-shapes everything on load — never trust
 stored data.
 

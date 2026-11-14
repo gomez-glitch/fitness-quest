@@ -20,7 +20,8 @@ Only local repo files are allowed. Never hotlink external image URLs.
 | `zone-1` … `zone-6` | ✅ shipped (2026-11-14) — 1080×720 WebP, 295 KB total |
 | `adventure-<id>` × 7 | ✅ shipped (2026-11-14) — 256×256 WebP discs, 76 KB total |
 | hero banner, dance, celebration | not started |
-| expansion zones 7–19 | not started (staged drops, see BACKLOG) |
+| `zone-7` … `zone-9` (Drop A) | ✅ shipped (2026-11-14) — caves 63 KB, jungle 109 KB (q85), canyon 67 KB |
+| expansion zones 10–19 | not started (staged drops, see BACKLOG) |
 
 ## Generation pipeline (proven on all six zones)
 
@@ -78,6 +79,29 @@ flat ones look noticeably worse than they did on their own.
 - **Use `contentsOnly: true` when retrieving** once several image frames
   share the canvas; otherwise an overlapping frame can bleed into the
   render.
+
+### Drop A zones (shipped)
+
+- **Ask for pale edges explicitly when the subject is dark.** The caves
+  prompt below was tightened to "soft violet rock walls framing the left
+  and right sides … light and luminous", with a closing line asking that
+  "the very top and very bottom rows should be pale, not dark rock". The
+  result matched the castle on the first try: castle top `#F4E2F8`, caves
+  bottom `#F5E2FC`. No haze pass was needed this time.
+- **Measured seams:** caves top `#F0D8F9` / jungle bottom `#F6E9F6`, and
+  jungle top `#F5EDF8` / canyon bottom `#FEF1EC`. The canyon's top is the
+  top of the map.
+- **Dense foliage costs bytes.** The jungle was 143 KB at q90 (35.3 dB), so
+  it ships at q85: 109 KB at 34.6 dB, and no visible difference behind the
+  path.
+- **Clip the fallback, overlap the painting.** The first map render showed a
+  green band over the caves and a pink blob over the jungle: the new SVG
+  painters' hills and river caps reached past their zone, and the painting
+  only covers its own zone. Each zone's SVG now draws into a nested `<svg>`
+  that clips to the zone. That clipping left an anti-aliased hairline on
+  the seam, where the half-covered row let the scenery underneath show
+  through. The painting now sits outside the clip and overlaps each edge
+  by one unit.
 
 ### Adventure card badges (shipped)
 
@@ -205,16 +229,20 @@ style block, add *"Landscape 3:2. Soften the top and bottom edges toward a
 plain sky tone so tiles blend when stacked vertically."* File names continue
 the series.
 
-13. **zone-7-caves** (underground) — "A magical underground crystal cave:
-    deep violet rock walls, clusters of glowing pink and turquoise crystals,
-    softly glowing round mushrooms along the floor, gentle light shafts from
-    a hole above, sparkling mineral dust in the air. Cosy and wonder-filled,
-    not dark or scary."
-14. **zone-8-jungle** — "A friendly dinosaur-age jungle: giant ferns and
+13. **zone-7-caves** ✅ shipped (underground) — "A magical underground
+    crystal cave: soft violet rock walls framing the left and right sides,
+    clusters of glowing pink and turquoise crystals, softly glowing round
+    mushrooms along the floor, gentle light shafts from an opening above,
+    sparkling mineral dust in the air. Cosy and wonder-filled, light and
+    luminous, not dark or scary." Edge line used: *"Soften the top and
+    bottom edges toward a plain pale pink-lavender mist so tiles blend when
+    stacked vertically; the very top and very bottom rows should be pale,
+    not dark rock."*
+14. **zone-8-jungle** ✅ shipped (with "No dinosaurs or animals shown, only their footprints.") — "A friendly dinosaur-age jungle: giant ferns and
     rounded prehistoric leaves in layered greens, a smoking volcano far in
     the background, big cartoon dinosaur footprints pressed into a mud path,
     hanging vines, warm dappled light."
-15. **zone-9-canyon** — "A playful bubblegum canyon: rounded rock towers in
+15. **zone-9-canyon** ✅ shipped — "A playful bubblegum canyon: rounded rock towers in
     pastel pink and lavender stripes, giant swirly lollipop-shaped rock
     formations, a winding bubblegum-pink river, floating bubbles, soft peach
     sky."
