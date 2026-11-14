@@ -289,8 +289,25 @@ the series.
     budding on curving light stems, shooting stars, deep indigo space behind.
     Magical, triumphant, endlessly playful."
 
-When these land in `art/`, the map grows from 6 to 19 zones (36 → 114 steps)
-and the lap system carries over automatically.
+Requested by the kids (Drop E in BACKLOG, can ship before B–D). Number the
+files in the order the zones actually ship.
+
+26. **zone-NN-puppy**: "Puppy Land" 🐶. "A cheerful puppy playland: a sunny
+    grassy park with rounded hedges, colourful doghouses with pointed roofs,
+    giant cartoon bones, bouncy tennis balls and a frisbee in mid-air, a
+    paw-print trail winding through, a small splash puddle, fluffy clouds.
+    Playful and bright. No dogs or animals shown, only their toys, houses
+    and paw prints." Suggested cheer: "Woof woof! Who wants to play fetch?"
+27. **zone-NN-waterpark**: "Splash Water Park" 💦. "A sunny water park:
+    twisting water slides in pink, violet and yellow, sparkling blue splash
+    pools, fountains spraying arcs of water, floating rubber rings, a big
+    tipping splash bucket, palm trees, droplets glittering in the sun. Fun
+    and refreshing, with nobody in the water." Suggested cheer: "Splash!
+    Last one down the slide is a soggy noodle!"
+
+Each drop grows the map by six steps per zone (zones 1–9 are live today, 54
+steps). The lap system and the hero migration (`migrateMap()`) carry over
+automatically.
 
 ## Tips for consistent results
 

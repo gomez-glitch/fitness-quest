@@ -53,6 +53,15 @@ items 2 and 3 below.
      Neon Cyber City, Dragon Peaks (zones 14–16).
    - **Drop D — "The Final Frontier":** Shipwreck Cove, Glitch Dimension,
      Galaxy Gardens finale (zones 17–19).
+   - **Drop E — "Fun Day Out"** (requested by the kids, 2026-11-14): Puppy
+     Land 🐶 and Splash Water Park 💦. Prompts are ready in `ART.md`. It
+     can ship before B–D, since each drop stands alone. Puppy Land
+     follows the no-creatures art rule the way Dino Jungle did: puppies
+     show up through toys, doghouses and paw-print trails, plus the 🐶
+     emoji on the map and Spark's "Woof woof!" line.
+   - Lollies are covered by **Bubblegum Canyon**, live since Drop A (swirly
+     lollipop rocks, bubblegum river). A fuller sweet-shop land could join
+     a later drop if the kids want more.
    Each drop needs: a `cheer` line per zone (Spark says it on the discovery
    screen), painted backgrounds from the ready-made prompts in `ART.md`, and
    SVG fallback scenery per zone (it is clipped to its zone, so it can't
