@@ -17,11 +17,11 @@ Only local repo files are allowed. Never hotlink external image URLs.
 
 | Asset | State |
 |---|---|
-| `zone-1-meadow` | ✅ generated + integrated (pilot, 2026-11-13) |
-| `zone-2` … `zone-6` | ⏳ awaiting go-ahead after pilot review |
-| all other assets | not started |
+| `zone-1` … `zone-6` | ✅ shipped (2026-11-14) — 1080×720 WebP, 295 KB total |
+| hero banner, adventure cards, dance, celebration | not started |
+| expansion zones 7–19 | not started (staged drops, see BACKLOG) |
 
-## Generation pipeline (proven on the zone-1 pilot)
+## Generation pipeline (proven on all six zones)
 
 How the pilot was actually produced — follow this for the remaining assets.
 
@@ -53,6 +53,30 @@ How the pilot was actually produced — follow this for the remaining assets.
 
 Don't ship a partial set: a painted zone beside flat SVG zones makes the
 flat ones look noticeably worse than they did on their own.
+
+### Lessons from producing the set
+
+- **Keep a set consistent with words.** Figma's generator takes no reference
+  image, so zones 2–6 carried this extra line after the style block, which
+  describes the accepted meadow pilot. All five matched on the first try:
+  > Match a soft pastel painterly storybook look: gentle airbrushed
+  > gradients, soft hazy glow, rounded friendly shapes, and a soft misty fade
+  > along the bottom edge.
+- **Measure the seams, don't eyeball them.** Average the top and bottom
+  40px rows of each image (`convert … -crop 1536x40+0+0 -resize 1x1!`) and
+  compare each zone's top with the next zone's bottom. Five seams were
+  pastel against pastel. Space's top stayed deep indigo (`#5243DC`) against
+  the castle's near-white bottom (`#F4E8FC`), even though the prompt asked
+  for a soft top edge.
+- **Fix edges in post, not with credits.** Space got an eased haze over its
+  top 120px in the castle's bottom tone (`#F4E8FC`, `gradient:white-black
+  -evaluate pow 1.7` as the opacity mask). That moved its top edge to
+  `#D6CAF6`, and it reads as rising out of mist, matching every other
+  image's misty bottom edge. Free and deterministic, where a regeneration
+  is neither.
+- **Use `contentsOnly: true` when retrieving** once several image frames
+  share the canvas; otherwise an overlapping frame can bleed into the
+  render.
 
 ## File spec
 

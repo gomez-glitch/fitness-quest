@@ -62,6 +62,13 @@ colors, big buttons, and encouraging, positive language throughout.
   Tall Tower Reset, or a surprise mix) — every move carries a
   narrative line, chains open with a warm-up, halfway cheer bubbles pop up,
   and a combo-bonus celebration ends the quest
+- Spark's Journey: a world-map campaign where every completed quest moves
+  Spark one step along a winding 36-step path through six painted storybook
+  zones (Sunny Meadows → Lava Volcano → Deep Sea → Crystal Mountains → Outer
+  Space → Rainbow Castle), with a discovery card for each new land and a new
+  lap after the castle. The zone paintings are about 295 KB in total, load
+  lazily, work offline once seen, and fall back to hand-drawn SVG scenery if
+  an image can't load
 - 23 badges and 52 rotating daily fun facts
 - A last-7-days activity chart on the dashboard with best-day and
   longest-streak callouts

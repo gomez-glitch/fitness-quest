@@ -31,16 +31,13 @@ items 2 and 3 below.
    per session. Unit-test the curve and the daily quest picker (never two
    holds, never two same-group) while the logic is out in the open. Tells us
    what level 30 feels like *before* the 10-year-old gets there.
-4. **Painted art integration** — 🧪 PILOT DONE: zone-1 (Sunny Meadows)
-   generated through the Figma connector, processed to a 39 KB WebP and
-   layered over its SVG with automatic fallback. Pipeline documented in
-   `ART.md`. Remaining zones 2–6 await go-ahead; ship them as one set, since a
-   half-painted map makes the flat zones look worse. Earlier plan, kept for
-   reference: prompts delivered ✅ (done); images being
-   generated now. Once PNGs land in `art/` (see `ART.md`): layer paintings
-   under the journey map path, adventure cards, hero banner, dance overlay,
-   and level-up screen, with SVG fallback when a file is missing. Update the
-   service-worker precache list.
+4. **Painted art integration** — ✅ ZONES SHIPPED: all six journey zones
+   are painted storybook art (295 KB of WebP total), generated through the
+   Figma connector and layered over the SVG scenery as an automatic fallback.
+   Also fixed a long-standing map bug the new art made obvious: each zone's
+   last node landed on its name plate ("Outer ◯pace"); plates now slide into
+   the clearest gap. Still to paint, using the same pipeline in `ART.md`:
+   hero banner, four adventure cards, dance overlay, celebration backdrop.
 5. **World expansion: zones 7–19** — NOT in the live build (by design).
    Ship as staged content drops so the app keeps feeling new:
    - **Live today:** zones 1–6 (through Rainbow Castle), 36 steps.

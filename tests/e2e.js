@@ -367,11 +367,20 @@ async function main() {
     // Painted zone art must actually ship: the build once copied src/ and
     // icons/ but not art/, so every image would 404 behind its SVG fallback.
     const zoneArt = await page.$$eval("#journey-map image.zone-art", (n) => n.map((x) => x.getAttribute("href")));
-    check("journey map layers painted zone art", zoneArt.includes("art/zone-1-meadow.webp"), zoneArt.join(","));
+    check("journey map layers painted art on all six zones", zoneArt.length === 6, zoneArt.join(","));
     const artStatus = await page.evaluate(async (urls) =>
       Promise.all(urls.map(async (u) => (await fetch(u)).status)), zoneArt);
     check("every zone art file is built and served", artStatus.length > 0 && artStatus.every((s) => s === 200),
       artStatus.join(","));
+    // Each zone's last node lands at its name plate's height; a centred plate
+    // used to be covered mid-word ("Outer ◯pace"). No plate may overlap a node.
+    const plateHits = await page.evaluate(() => {
+      const plates = [...document.querySelectorAll("#journey-map .zone-plate rect")].map((r) => r.getBBox());
+      const nodes = [...document.querySelectorAll("#journey-map circle.journey-node")].map((c) => c.getBBox());
+      return plates.filter((p) => nodes.some((n) =>
+        n.x < p.x + p.width && n.x + n.width > p.x && n.y < p.y + p.height && n.y + n.height > p.y)).length;
+    });
+    check("no zone name plate is covered by a node", plateHits === 0, String(plateHits));
     await claimReps(page, "sit-ups");
     const journeyStep = await page.evaluate(() => {
       const d = JSON.parse(localStorage.getItem("move-quest-progress-v3"));

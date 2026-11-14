@@ -37,6 +37,31 @@ function nodePos(i) {
   return [x, y];
 }
 
+const PLATE_W = 168;
+
+// A zone's last node always lands at its name plate's height (top + 20,
+// inside the plate's top + 8 .. top + 34 band), so a centred plate gets
+// covered wherever the path swings near the middle ("Outer ◯pace"). Keep the
+// plate centred when that's clear; otherwise slide it to the nearest gap
+// beside the node (and, on the final zone, beside the lap flag).
+function plateX(zoneIdx) {
+  const GAP = 6, PAD = 8;
+  const [nx] = nodePos((zoneIdx + 1) * STEPS_PER_ZONE - 1);
+  const blocked = [[nx - 7.5 - GAP, nx + 7.5 + GAP]];
+  if (zoneIdx === JOURNEY_ZONES.length - 1) {
+    blocked.push([nx + 26 - 12 - GAP, nx + 26 + 12 + GAP]); // lap flag
+  }
+  const clear = (x) => blocked.every(([a, b]) => x + PLATE_W <= a || x >= b);
+  const centred = W / 2 - PLATE_W / 2;
+  if (clear(centred)) return centred;
+  const options = blocked
+    .flatMap(([a, b]) => [b, a - PLATE_W])
+    .filter((x) => x >= PAD && x + PLATE_W <= W - PAD && clear(x));
+  if (!options.length) return centred;
+  return options.reduce((best, x) =>
+    (Math.abs(x - centred) < Math.abs(best - centred) ? x : best));
+}
+
 function el(tag, attrs, text) {
   const node = document.createElementNS(NS, tag);
   for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
@@ -147,11 +172,11 @@ const PAINTERS = [paintMeadow, paintVolcano, paintSea, paintMountains, paintSpac
 // hand-drawn scenery underneath shows through — a fallback with no JS.
 const ZONE_ART = [
   "art/zone-1-meadow.webp",
-  null, // volcano
-  null, // sea
-  null, // mountains
-  null, // space
-  null, // castle
+  "art/zone-2-volcano.webp",
+  "art/zone-3-sea.webp",
+  "art/zone-4-mountains.webp",
+  "art/zone-5-space.webp",
+  "art/zone-6-castle.webp",
 ];
 
 function paintZone(svg, zoneIdx, top) {
@@ -263,13 +288,14 @@ export function renderJourneyMap(container, totalJourney, opts = {}) {
   // Zone name plates
   JOURNEY_ZONES.forEach((zone, zoneIdx) => {
     const top = H - (zoneIdx + 1) * ZONE_H;
-    const plate = el("g", {});
+    const px = plateX(zoneIdx);
+    const plate = el("g", { class: "zone-plate" });
     plate.appendChild(el("rect", {
-      x: W / 2 - 84, y: top + 8, width: 168, height: 26, rx: 13,
+      x: px, y: top + 8, width: PLATE_W, height: 26, rx: 13,
       fill: "rgba(255,255,255,0.85)",
     }));
     plate.appendChild(el("text", {
-      x: W / 2, y: top + 26, "text-anchor": "middle", "font-size": 15,
+      x: px + PLATE_W / 2, y: top + 26, "text-anchor": "middle", "font-size": 15,
       "font-weight": "bold", fill: "#3b0764",
       "font-family": "inherit",
     }, `${zone.emoji} ${zone.name}`));
