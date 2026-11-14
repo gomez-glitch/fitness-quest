@@ -2060,7 +2060,7 @@ function maybeShowDiscovery() {
       <div class="adventure-stage">
         <div class="discovery-scene" id="discovery-scene" role="img" aria-label="${zone.name} scenery"></div>
         <p class="discovery-kicker">🗺️ NEW LAND DISCOVERED!</p>
-        <h3 class="levelup-heading">${zone.emoji} ${zone.name}</h3>
+        <h3 class="levelup-heading"><span class="heading-emoji">${zone.emoji}</span> ${zone.name}</h3>
         <button type="button" class="btn btn-primary detail-try" data-action="close-discovery">Explore on! 🥾</button>
       </div>
     </div>

@@ -446,6 +446,9 @@ async function main() {
     check("zone crossing shows discovery screen",
       (await page.textContent(".discovery-card .levelup-heading")).includes("Lava Volcano"));
     check("discovery shows zone scenery", !!(await page.$("#discovery-scene svg")));
+    // The heading is gradient text (transparent glyphs); its emoji must not be.
+    check("discovery emoji stays in colour", await page.$eval(".discovery-card .heading-emoji",
+      (e) => getComputedStyle(e).color !== "rgba(0, 0, 0, 0)"));
     await page.click('[data-action="close-discovery"]');
     check("discovery closes", await page.$eval("#discovery-overlay", (e) => e.hidden));
 

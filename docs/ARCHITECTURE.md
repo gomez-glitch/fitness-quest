@@ -19,7 +19,7 @@ persistence, deployed to GitHub Pages by CI on every push to `main`.
 | `manifest.webmanifest` | PWA install: icons, shortcuts (deep links `./?tab=...`), standalone display. |
 | `scripts/build.js` | Copies the shell into `dist/` (no bundler). |
 | `scripts/dev-server.js` | Zero-dependency static file server (`npm run dev` / `preview`). |
-| `tests/e2e.js` | Playwright end-to-end suite (`npm test`), 92 checks. Test hooks: `__MQ_TEST_FREEZE_TRAY`, `__MQ_TEST_NO_TWEEN`, `__MQ_TEST_FORCE_NAP`, `__MQ_TEST_DANCE_SECONDS`. The suite stubs `navigator.wakeLock` so it can count held locks, and its Offline section relaunches the app with only `PRECACHE` cached and no network. |
+| `tests/e2e.js` | Playwright end-to-end suite (`npm test`), 100 checks. Test hooks: `__MQ_TEST_FREEZE_TRAY`, `__MQ_TEST_NO_TWEEN`, `__MQ_TEST_FORCE_NAP`, `__MQ_TEST_DANCE_SECONDS`. The suite stubs `navigator.wakeLock` so it can count held locks, and its Offline section relaunches the app with only `PRECACHE` cached and no network. |
 
 ## Data model (localStorage)
 
@@ -86,6 +86,9 @@ stored data.
   exercises, badges, foods, spinner, avatars — are always colour emoji, and
   their containers declare an emoji-first font stack so no text font can
   substitute a monochrome glyph. Ambiguous characters (⚡, ⏰) carry U+FE0F.
+  Gradient text (`background-clip: text` with transparent glyphs) flattens
+  any emoji inside it into a gradient silhouette, so wrap the emoji in
+  `.heading-emoji`, which restores an opaque fill.
 - Kid-facing copy: positive, playful, never guilt-based. Exclamation marks are
   earned — reserved for Spark's speech and celebrations, not instructions.
 

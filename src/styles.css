@@ -81,6 +81,7 @@ button {
 .daily-quest-icon,
 .daily-chest-emoji,
 .adventure-preset-emoji,
+.heading-emoji,
 .pet-food,
 .pet-orb,
 .pet-zzz,
@@ -1289,6 +1290,13 @@ body.no-scroll {
   background-clip: text;
   color: transparent;
   letter-spacing: 0.05em;
+}
+
+/* Gradient text is clipped to transparent glyphs, which would flatten an
+   emoji into a gradient silhouette; give the emoji an opaque fill back. */
+.heading-emoji {
+  color: var(--ink);
+  -webkit-text-fill-color: currentColor;
 }
 
 .levelup-level {
