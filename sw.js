@@ -1,7 +1,7 @@
 // Move Quest service worker — network-first with cache fallback, so the app
 // always gets fresh code when online but still opens fully offline.
 
-const CACHE_NAME = "move-quest-v21";
+const CACHE_NAME = "move-quest-v22";
 
 const PRECACHE = [
   "./",
@@ -10,6 +10,10 @@ const PRECACHE = [
   "./src/app.js",
   "./src/mascot.js",
   "./src/sound.js",
+  "./src/clicker.js",
+  "./src/voice.js",
+  "./src/journey.js",
+  "./src/wake.js",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-maskable.svg",

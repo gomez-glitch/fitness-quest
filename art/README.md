@@ -8,5 +8,8 @@ Claude to integrate them into the app.
 - Expected first batch: `zone-1-meadow.png` … `zone-6-castle.png`,
   `hero-banner.png`, `adventure-*.png`, `dance-party.png`,
   `celebration.png`, `app-icon.png`
-- Keep files under ~400 KB each where possible (the service worker
-  precaches everything for offline play)
+- Shipped so far: the six journey zones (`zone-*.webp`) and seven adventure
+  badges (`adventure-*.webp`), all WebP, converted with the pipeline in
+  `docs/ART.md`
+- Keep files small: art is cached as it's viewed, not precached, so size
+  matters mainly for the first load

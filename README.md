@@ -59,9 +59,12 @@ colors, big buttons, and encouraging, positive language throughout.
   device), with a +40 XP bonus chest for finishing all three
 - Adventure mode: story-driven guided workouts (Lava Volcano Escape, Deep Sea
   Dive, Space Station Rescue, Jungle Jamboree, the calm Sunset Stretch and
-  Tall Tower Reset, or a surprise mix) — every move carries a
+  Tall Tower Reset, or a surprise mix), each with its own painted badge
+  card — every move carries a
   narrative line, chains open with a warm-up, halfway cheer bubbles pop up,
-  and a combo-bonus celebration ends the quest
+  and a combo-bonus celebration ends the quest. The screen stays awake for
+  the whole adventure, through every timed hold and the dance countdown,
+  so a phone never dims mid-plank
 - Spark's Journey: a world-map campaign where every completed quest moves
   Spark one step along a winding 36-step path through six painted storybook
   zones (Sunny Meadows → Lava Volcano → Deep Sea → Crystal Mountains → Outer
@@ -210,6 +213,9 @@ src/mascot.js                 Articulated Spark mascot (FK motion engine)
 src/clicker.js                Shared rotating clicker dial component
 src/sound.js                  Web Audio sound effects
 src/voice.js                  Speech-synthesis voice coach
+src/journey.js                World-map campaign (painted zones)
+src/wake.js                   Screen wake-lock during holds and adventures
+art/                          Painted WebP art (zones, adventure badges)
 src/styles.css                Design system and styles
 tests/e2e.js                  Playwright end-to-end suite (npm test)
 scripts/build.js              Builds dist/

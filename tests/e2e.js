@@ -100,6 +100,27 @@ async function main() {
     await page.addInitScript(() => {
       window.__MQ_TEST_FREEZE_TRAY = true;
       window.__MQ_TEST_NO_TWEEN = true;
+      // A stand-in Screen Wake Lock: headless Chromium refuses the real one,
+      // and this lets the suite count how many locks are held at any moment.
+      const held = new Set();
+      window.__MQ_WAKE_HELD = () => held.size;
+      Object.defineProperty(navigator, "wakeLock", {
+        configurable: true,
+        value: {
+          request: async () => {
+            const lock = new EventTarget();
+            lock.released = false;
+            lock.release = async () => {
+              if (lock.released) return;
+              lock.released = true;
+              held.delete(lock);
+              lock.dispatchEvent(new Event("release"));
+            };
+            held.add(lock);
+            return lock;
+          },
+        },
+      });
     });
     const pageErrors = [];
     page.on("pageerror", (e) => pageErrors.push(String(e.message)));
@@ -235,9 +256,11 @@ async function main() {
     await page.click("#view-play .clicker", { position: { x: 85, y: 85 } });
     await page.waitForTimeout(1200);
     check("get-ready phase runs first", (await page.textContent("#view-play .clicker-hint")) === "get ready…");
+    check("screen stays awake during a hold", (await page.evaluate(() => window.__MQ_WAKE_HELD())) === 1);
     // 3s ready lead-in + the hold itself + a little slack
     await page.waitForTimeout((holdSeconds + 3.5) * 1000);
     check("hold completes and is claimable", !(await page.$eval("#claim-xp-btn", (b) => b.disabled)));
+    check("screen may sleep again once the hold ends", (await page.evaluate(() => window.__MQ_WAKE_HELD())) === 0);
     await page.click("#claim-xp-btn");
     await page.waitForTimeout(80);
     check("timed claim recorded", (await page.$$(".quest-log-item")).length === 2);
@@ -250,6 +273,15 @@ async function main() {
     check("sunset stretch adventure listed", !!(await page.$('.adventure-preset[data-adventure="sunset-stretch"]')));
     check("jungle jamboree adventure listed", !!(await page.$('.adventure-preset[data-adventure="jungle-jamboree"]')));
     check("tall tower reset adventure listed", !!(await page.$('.adventure-preset[data-adventure="tall-tower"]')));
+    const cardArt = await page.$$eval(".adventure-preset", (cards) =>
+      cards.map((c) => (c.querySelector(".adventure-preset-art img") || {}).getAttribute?.("src") || ""));
+    check("every adventure card carries a painting", cardArt.length === 7 && cardArt.every(Boolean), cardArt.join(","));
+    const cardArtStatus = await page.evaluate(async (urls) =>
+      Promise.all(urls.map(async (u) => (await fetch(u)).status)), cardArt.filter(Boolean));
+    check("every adventure painting is built and served", cardArtStatus.length === 7 && cardArtStatus.every((x) => x === 200),
+      cardArtStatus.join(","));
+    check("every adventure card keeps its emoji fallback",
+      (await page.$$(".adventure-preset .adventure-preset-art .adventure-preset-emoji")).length === 7);
     await page.click("#tab-play");
 
     console.log("# Energy taper");
@@ -270,6 +302,7 @@ async function main() {
     await page.waitForSelector(".adventure-card");
     check("story line shown", (await page.textContent(".story-line")).includes("mountain"));
     check("adventure uses the rotating dial", !!(await page.$(".adventure-card .clicker")));
+    check("screen stays awake through an adventure", (await page.evaluate(() => window.__MQ_WAKE_HELD())) === 1);
     for (let move = 0; move < 4; move++) {
       await page.waitForSelector(".adventure-card .clicker");
       const target = Number(await page.textContent(".adventure-card .dial-target-val"));
@@ -283,6 +316,7 @@ async function main() {
     check("celebration reached", true);
     await page.click('[data-action="close"]');
     await page.waitForTimeout(150);
+    check("leaving the adventure lets the screen sleep", (await page.evaluate(() => window.__MQ_WAKE_HELD())) === 0);
     const heldLevelUp = await page.$(".levelup-card");
     check("level-up held until adventure closed", !!heldLevelUp);
     if (heldLevelUp) await page.click('[data-action="close-levelup"]');
@@ -350,8 +384,10 @@ async function main() {
     await page.click("#dance-btn");
     await page.waitForSelector(".dance-card");
     check("dance overlay opens with countdown", (await page.textContent("#dance-countdown")) === "3");
+    check("screen stays awake while dancing", (await page.evaluate(() => window.__MQ_WAKE_HELD())) === 1);
     await page.waitForSelector(".adventure-trophy", { timeout: 8000 });
     check("dance finishes with reward screen", true);
+    check("screen may sleep on the dance results", (await page.evaluate(() => window.__MQ_WAKE_HELD())) === 0);
     await page.click('[data-action="dance-close"]');
     check("dance awards XP", (await page.textContent("#stat-xp")) === "45");
     await page.click("#tab-awards");
@@ -490,6 +526,48 @@ async function main() {
     check("mixer channel gates and persists", audio.musicOff && audio.persisted);
     check("calm speech is slower than excited", audio.calmSlower === true);
     check("each hero gets its own voice character", audio.heroesDiffer === true);
+
+    console.log("# Offline");
+    // Every module the app loads must be precached, or an offline launch
+    // right after an update (old cache deleted, only PRECACHE refilled)
+    // never starts. This shipped broken once: three modules were missing.
+    const root = path.join(__dirname, "..");
+    const swSrc = fs.readFileSync(path.join(root, "sw.js"), "utf8");
+    const precache = JSON.parse(swSrc.match(/const PRECACHE = (\[[\s\S]*?\]);/)[1].replace(/,\s*\]/, "]"));
+    const modules = new Set();
+    for (const f of fs.readdirSync(path.join(root, "src")).filter((n) => n.endsWith(".js"))) {
+      const src = fs.readFileSync(path.join(root, "src", f), "utf8");
+      for (const m of src.matchAll(/from\s+"\.\/([\w-]+\.js)"/g)) modules.add(`./src/${m[1]}`);
+    }
+    const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+    for (const m of html.matchAll(/(?:src|href)="(\.\/src\/[\w-]+\.(?:js|css))"/g)) modules.add(m[1]);
+    const unprecached = [...modules].filter((m) => !precache.includes(m));
+    check("every module the app loads is precached", modules.size > 4 && unprecached.length === 0,
+      unprecached.join(","));
+
+    const offlineCtx = await browser.newContext({ viewport: { width: 420, height: 850 } });
+    try {
+      const op = await offlineCtx.newPage();
+      await op.goto(BASE);
+      await op.waitForSelector(".tab-bar");
+      await op.evaluate(() => navigator.serviceWorker.ready);
+      await op.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 5000 });
+      // Recreate the cache exactly as a freshly activated update leaves it.
+      await op.evaluate(async (list) => {
+        for (const k of await caches.keys()) await caches.delete(k);
+        await (await caches.open("post-update")).addAll(list);
+      }, precache);
+      await offlineCtx.setOffline(true);
+      await op.reload({ waitUntil: "domcontentloaded" }).catch(() => {});
+      await op.waitForFunction(() => document.querySelectorAll(".exercise-tile").length > 0, null,
+        { timeout: 6000 }).catch(() => {});
+      const offlineGreeting = await op.textContent("#hero-greeting").catch(() => "");
+      const offlineTiles = await op.$$eval(".exercise-tile", (n) => n.length).catch(() => 0);
+      check("app starts offline from the precache alone", offlineGreeting !== "Hello!" && offlineTiles > 0,
+        `${offlineGreeting} / ${offlineTiles} tiles`);
+    } finally {
+      await offlineCtx.close();
+    }
 
     console.log("# Hygiene");
     check("no page errors", pageErrors.length === 0, pageErrors.join(" | "));

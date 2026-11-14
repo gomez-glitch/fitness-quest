@@ -4,6 +4,7 @@ import { createMascot, renderStaticMascot } from "./mascot.js";
 import { sound } from "./sound.js";
 import { createClicker } from "./clicker.js";
 import { voice } from "./voice.js";
+import { wake } from "./wake.js";
 import { renderJourneyMap, renderZoneCard, zoneForStep, TOTAL_STEPS } from "./journey.js";
 
 const STORAGE_KEY = "move-quest-progress-v3";
@@ -436,7 +437,7 @@ const FUN_FACTS = [
 // like a little quest. Every chain opens with a gentle warm-up move.
 const ADVENTURES = [
   {
-    id: "lava-volcano", name: "Lava Volcano Escape", emoji: "🌋",
+    id: "lava-volcano", name: "Lava Volcano Escape", emoji: "🌋", art: "art/adventure-lava-volcano.webp",
     moves: [
       { id: "marching", line: "March up the rumbling mountain path…" },
       { id: "jumping-jacks", line: "Leap across the lava stepping stones!" },
@@ -445,7 +446,7 @@ const ADVENTURES = [
     ],
   },
   {
-    id: "deep-sea", name: "Deep Sea Dive", emoji: "🌊",
+    id: "deep-sea", name: "Deep Sea Dive", emoji: "🌊", art: "art/adventure-deep-sea.webp",
     moves: [
       { id: "arm-circles", line: "Warm up your fins on the boat deck…" },
       { id: "flutter-kicks", line: "Swim down with the dolphin crew!" },
@@ -455,7 +456,7 @@ const ADVENTURES = [
     ],
   },
   {
-    id: "space-rescue", name: "Space Station Rescue", emoji: "🚀",
+    id: "space-rescue", name: "Space Station Rescue", emoji: "🚀", art: "art/adventure-space-rescue.webp",
     moves: [
       { id: "marching", line: "Suit up and march to the launch pad…" },
       { id: "overhead-press", line: "Push open the heavy airlock!" },
@@ -465,7 +466,7 @@ const ADVENTURES = [
     ],
   },
   {
-    id: "jungle-jamboree", name: "Jungle Jamboree", emoji: "🦁",
+    id: "jungle-jamboree", name: "Jungle Jamboree", emoji: "🦁", art: "art/adventure-jungle-jamboree.webp",
     moves: [
       { id: "marching", line: "Tiptoe into the jungle — the animals are waiting…" },
       { id: "bear-crawl", line: "Prowl through the ferns with the bear patrol!" },
@@ -475,7 +476,7 @@ const ADVENTURES = [
     ],
   },
   {
-    id: "tall-tower", name: "Tall Tower Reset", emoji: "🗼", calm: true,
+    id: "tall-tower", name: "Tall Tower Reset", emoji: "🗼", art: "art/adventure-tall-tower.webp", calm: true,
     moves: [
       { id: "shoulder-rolls", line: "Shake the screen-wobbles out of your shoulders\u2026" },
       { id: "wall-angels", line: "Sweep your wings up the tower wall\u2026" },
@@ -484,7 +485,7 @@ const ADVENTURES = [
     ],
   },
   {
-    id: "sunset-stretch", name: "Sunset Stretch", emoji: "🌇", calm: true,
+    id: "sunset-stretch", name: "Sunset Stretch", emoji: "🌇", art: "art/adventure-sunset-stretch.webp", calm: true,
     moves: [
       { id: "sky-reach", line: "Reach up for the setting sun…" },
       { id: "butterfly", line: "Flutter your wings slowly as the sky turns pink…" },
@@ -492,7 +493,7 @@ const ADVENTURES = [
       { id: "childs-pose", line: "Curl up cosy — the stars are coming out." },
     ],
   },
-  { id: "surprise", name: "Surprise Quest", emoji: "🎲", moves: null },
+  { id: "surprise", name: "Surprise Quest", emoji: "🎲", art: "art/adventure-surprise.webp", moves: null },
 ];
 
 const DANCE_SECONDS = 45;
@@ -1196,6 +1197,7 @@ function switchTab(name) {
   }
   if (name !== "play" && playClicker) {
     playClicker.pauseTimer();
+    wake.release("hold");
     if (!adventure.active) sound.stopCalm();
   }
   if (name === "adventure") renderJourney(); // re-render so auto-scroll works once visible
@@ -1348,6 +1350,7 @@ function syncPlayClicker() {
     count: st.counters[exercise.id] || 0,
   });
   sound.stopCalm();
+  wake.release("hold");
   renderPlayMeta();
 }
 
@@ -1360,9 +1363,13 @@ function initPlayClicker() {
       // Timed holds only bank progress once finished; reps persist as they go.
       st.counters[exercise.id] = timed ? (done ? targetFor(exercise) : 0) : count;
       markPlayActivity();
+      const holding = timed && (phase === "counting" || phase === "ready");
+      // Keep the screen awake through the countdown: nobody taps mid-plank.
+      if (holding) wake.hold("hold");
+      else wake.release("hold");
       // Calm music accompanies stretch holds while they run.
       if (isCalmExercise(exercise)) {
-        if (phase === "counting" || phase === "ready") sound.startCalm();
+        if (holding) sound.startCalm();
         else sound.stopCalm();
       }
       saveData();
@@ -1755,12 +1762,19 @@ function renderAdventurePresets() {
       : "❓ ❓ ❓";
     return `
       <button type="button" class="adventure-preset" data-adventure="${a.id}">
-        <span class="adventure-preset-emoji" aria-hidden="true">${a.emoji}</span>
+        <span class="adventure-preset-art" aria-hidden="true">
+          <span class="adventure-preset-emoji">${a.emoji}</span>
+          ${a.art ? `<img src="${a.art}" alt="" loading="lazy" decoding="async">` : ""}
+        </span>
         <span class="adventure-preset-name">${a.name}</span>
         <span class="adventure-preset-moves">${moves}</span>
       </button>
     `;
   }).join("");
+  // The emoji sits under each painting; if a painting can't load, it shows.
+  el.adventurePresets.querySelectorAll(".adventure-preset-art img").forEach((img) => {
+    img.addEventListener("error", () => img.remove(), { once: true });
+  });
 }
 
 function randomMoves(count) {
@@ -1807,6 +1821,7 @@ function stopAdventureExtras() {
 
 function startAdventure(preset) {
   adventure.active = true;
+  wake.hold("adventure");
   adventure.calm = Boolean(preset.calm);
   if (adventure.calm) sound.startCalm();
   adventure.name = `${preset.emoji} ${preset.name}`;
@@ -1816,12 +1831,14 @@ function startAdventure(preset) {
   el.adventureOverlay.hidden = false;
   document.body.classList.add("no-scroll");
   if (playClicker) playClicker.pauseTimer();
+  wake.release("hold");
   showAdventureMove();
 }
 
 function closeAdventure() {
   stopAdventureExtras();
   sound.stopCalm();
+  wake.release("adventure");
   adventure.active = false;
   el.adventureOverlay.hidden = true;
   el.adventureOverlay.innerHTML = "";
@@ -2795,6 +2812,7 @@ function clearDanceTimers() {
 
 function closeDance() {
   clearDanceTimers();
+  wake.release("dance");
   dance.active = false;
   el.adventureOverlay.hidden = true;
   el.adventureOverlay.innerHTML = "";
@@ -2812,6 +2830,7 @@ function startDance() {
   let remaining = total;
   dance.active = true;
   dance.frozen = false;
+  wake.hold("dance");
 
   el.adventureOverlay.innerHTML = `
     <div class="adventure-card dance-card" role="dialog" aria-modal="true" aria-label="Dance party">
@@ -2873,6 +2892,7 @@ function startDance() {
 
 function finishDance(seconds) {
   clearDanceTimers();
+  wake.release("dance"); // the music has stopped; the results screen can dim
   const earned = awardCompletion(
     { id: "dance-party", title: "Dance Party", icon: "🪩", xp: DANCE_XP, unit: "seconds" },
     seconds

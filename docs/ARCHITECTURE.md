@@ -12,13 +12,14 @@ persistence, deployed to GitHub Pages by CI on every push to `main`.
 | `src/mascot.js` | Spark, the articulated mascot: an SVG skeleton posed by forward kinematics from per-exercise joint-angle keyframes (`MOTIONS`). `createMascot` animates via rAF; `renderStaticMascot` draws poster poses. |
 | `src/clicker.js` | The shared rotating dial: tap/spin rep counting, and the GO → 3-2-1 → countdown engine for timed holds. Used by both the Play panel and Adventure mode via `createClicker(container, {onChange, onComplete})`. |
 | `src/journey.js` | The world-map campaign: six zones, a 36-node serpentine path, Spark token. Each zone is painted WebP art (`ZONE_ART`, from `art/`) layered over a hand-drawn SVG painter, which shows through if the image fails to load. `plateX()` slides zone name plates clear of the zone's last node, which always lands at plate height. `renderJourneyMap(container, steps)`, `renderZoneCard(container, zoneIdx)`. |
+| `src/wake.js` | Screen Wake Lock with reasons: `wake.hold("hold" / "adventure" / "dance")` and `wake.release(reason)`. The lock is held while any reason is active and re-requested when the page becomes visible again. Without browser support it does nothing. |
 | `src/sound.js` | Web Audio engine. `sfx` + `music` gain buses → master compressor. Every note carries an attack envelope, ±10 cents detune and velocity jitter; FM bells for chime/fanfare/badge, filtered-noise transients for ticks/claps, pitch-dropping kick for the dance thump. All tones sit in C-major pentatonic, and `progressTick(ratio)` climbs that scale toward the rep target. `setChannel()` gates sfx/music/voice (persisted); `duck()` dips music while the coach speaks. |
 | `src/voice.js` | Expressive speech-synthesis coach. Ranks installed voices (premium/neural first, joke voices like Zarvox excluded, local preferred) and picks the best; `setProfile(id)` gives each hero a continuous pitch/pace fingerprint; mood presets (`excited` / `calm` / `count`) shape delivery. Honours mute and the `voice` channel. |
-| `sw.js` | Network-first service worker with precached shell → full offline support. Bump `CACHE_NAME` when precache list changes. |
+| `sw.js` | Network-first service worker with precached shell → full offline support. Bump `CACHE_NAME` when precache list changes. Every module the app imports must be in `PRECACHE` (a test enforces it). Art is cached at runtime, not precached. |
 | `manifest.webmanifest` | PWA install: icons, shortcuts (deep links `./?tab=...`), standalone display. |
 | `scripts/build.js` | Copies the shell into `dist/` (no bundler). |
 | `scripts/dev-server.js` | Zero-dependency static file server (`npm run dev` / `preview`). |
-| `tests/e2e.js` | Playwright end-to-end suite (`npm test`), 75 checks. Test hooks: `__MQ_TEST_FREEZE_TRAY`, `__MQ_TEST_NO_TWEEN`, `__MQ_TEST_FORCE_NAP`, `__MQ_TEST_DANCE_SECONDS`. |
+| `tests/e2e.js` | Playwright end-to-end suite (`npm test`), 92 checks. Test hooks: `__MQ_TEST_FREEZE_TRAY`, `__MQ_TEST_NO_TWEEN`, `__MQ_TEST_FORCE_NAP`, `__MQ_TEST_DANCE_SECONDS`. The suite stubs `navigator.wakeLock` so it can count held locks, and its Offline section relaunches the app with only `PRECACHE` cached and no network. |
 
 ## Data model (localStorage)
 

@@ -36,8 +36,10 @@ items 2 and 3 below.
    Figma connector and layered over the SVG scenery as an automatic fallback.
    Also fixed a long-standing map bug the new art made obvious: each zone's
    last node landed on its name plate ("Outer ◯pace"); plates now slide into
-   the clearest gap. Still to paint, using the same pipeline in `ART.md`:
-   hero banner, four adventure cards, dance overlay, celebration backdrop.
+   the clearest gap. ✅ ADVENTURE CARDS SHIPPED: all seven adventures
+   wear a painted badge disc (76 KB total), with the emoji kept underneath
+   as the fallback. Still to paint, using the same pipeline in `ART.md`:
+   hero banner, dance overlay, celebration backdrop.
 5. **World expansion: zones 7–19** — NOT in the live build (by design).
    Ship as staged content drops so the app keeps feeling new:
    - **Live today:** zones 1–6 (through Rainbow Castle), 36 steps.
@@ -180,7 +182,11 @@ items 2 and 3 below.
   launch flash.
 - **Fact collection ("Brain Gems")** — tapping the daily fact adds it to a
   collectible album.
-- **Screen wake-lock** during adventures/holds so phones don't dim mid-plank.
+- **Screen wake-lock** ✅ SHIPPED: the screen stays awake through timed
+  holds (the get-ready lead-in included), whole adventures and the dance
+  countdown, then is allowed to sleep again. `src/wake.js` counts reasons,
+  so overlapping features never release each other's lock, and it
+  re-acquires the lock when the app comes back to the foreground.
 - **Adaptive/seated exercise variants** for accessibility.
 
 ## Engineering debt / hygiene
@@ -189,4 +195,7 @@ items 2 and 3 below.
   install step in the workflow).
 - Consider splitting `src/app.js` (~1,900 lines) into feature modules
   (profiles, badges, adventure, spinner/dance) now that patterns are stable.
-- Periodic check of `sw.js` precache list vs. actual shipped files.
+- ✅ Precache drift is now caught by a test. Three modules (clicker, voice,
+  journey) had been missing from `PRECACHE`, so after an update an offline
+  launch never started. The suite now checks that every imported module is
+  precached, and it launches the app offline from the precache alone.

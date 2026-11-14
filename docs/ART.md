@@ -18,7 +18,8 @@ Only local repo files are allowed. Never hotlink external image URLs.
 | Asset | State |
 |---|---|
 | `zone-1` … `zone-6` | ✅ shipped (2026-11-14) — 1080×720 WebP, 295 KB total |
-| hero banner, adventure cards, dance, celebration | not started |
+| `adventure-<id>` × 7 | ✅ shipped (2026-11-14) — 256×256 WebP discs, 76 KB total |
+| hero banner, dance, celebration | not started |
 | expansion zones 7–19 | not started (staged drops, see BACKLOG) |
 
 ## Generation pipeline (proven on all six zones)
@@ -78,6 +79,37 @@ flat ones look noticeably worse than they did on their own.
   share the canvas; otherwise an overlapping frame can bleed into the
   render.
 
+### Adventure card badges (shipped)
+
+Seven square badges, one per adventure, generated at 1024×1024 with the
+badge style block below. Every one landed on the first try.
+
+- **Badge style block.** It is the shared style block, minus "background
+  illustration" and "clear open space through the middle", plus the
+  consistency line (without the misty bottom edge) and this framing line:
+  > A single bold emblem centred on a softly glowing pastel circular
+  > backdrop that fills most of the square; keep everything important
+  > inside the central circle and nothing in the corners. Bold, simple and
+  > readable at small size. Square 1:1.
+- **Emblems used.** Volcano with a lava glow and smoke ring; cresting wave
+  with bubbles; rocket with a star trail; a golden paw print framed by
+  tropical leaves and hibiscus (Jungle Jamboree: no animals, per the style
+  block); an upright fairytale tower in the clouds (Tall Tower Reset, where
+  "upright" carries the quiet posture cue); a sunset with a crescent moon;
+  and a glowing gift box with no question mark.
+- **Crop to the disc, let CSS round it.** The generator draws the disc at a
+  slightly different size each time (radius 338–364 px at 768). Each one
+  was cropped to its own disc, inset a few pixels past the soft rim, resized
+  to 256×256, and encoded at q90. The card applies `border-radius: 50%`, so
+  no alpha channel is needed and all seven discs line up exactly.
+- **Small images cap out near 32 dB PSNR, whatever the quality setting**:
+  q90, q95 and q100 all scored 31.6–32.2 dB on the jungle badge. WebP's
+  half-resolution colour sets the ceiling, not compression, so judge the
+  result by eye on a contact sheet rather than chasing the number.
+- **Fallback.** The emoji sits under each painting, and a failed load removes
+  the `<img>` so it shows through. A test forces a 404 on purpose to check
+  this.
+
 ## File spec
 
 | File | Content | Aspect | Min size |
@@ -89,10 +121,7 @@ flat ones look noticeably worse than they did on their own.
 | `art/zone-5-space.png` | Outer Space zone | 3:2 landscape | 1080×720 |
 | `art/zone-6-castle.png` | Rainbow Castle zone | 3:2 landscape | 1080×720 |
 | `art/hero-banner.png` | Home hero backdrop | 16:9 | 1600×900 |
-| `art/adventure-volcano.png` | Adventure card | 1:1 | 768×768 |
-| `art/adventure-sea.png` | Adventure card | 1:1 | 768×768 |
-| `art/adventure-space.png` | Adventure card | 1:1 | 768×768 |
-| `art/adventure-surprise.png` | Adventure card | 1:1 | 768×768 |
+| `art/adventure-<id>.webp` | Adventure card badge (one per `ADVENTURES` id) | 1:1 disc | 256×256 shipped |
 | `art/dance-party.png` | Dance overlay backdrop | 4:5 portrait | 1024×1280 |
 | `art/celebration.png` | Level-up backdrop | 1:1 | 1024×1024 |
 | `art/app-icon.png` | Painted app icon | 1:1 | 1024×1024 |

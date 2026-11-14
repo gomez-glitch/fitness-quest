@@ -1030,6 +1030,25 @@ fieldset.avatar-field {
   transform: translateY(-2px);
 }
 
+.adventure-preset-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  margin-bottom: 0.2rem;
+}
+
+.adventure-preset-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 3px var(--white), 0 6px 14px rgba(124, 58, 237, 0.22);
+}
+
 .adventure-preset-emoji {
   font-size: 2rem;
 }
