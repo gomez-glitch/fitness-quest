@@ -23,6 +23,9 @@ export const JOURNEY_ZONES = [
   { name: "Glow Crystal Caves", emoji: "🔮", cheer: "The crystals are glowing just for us!" },
   { name: "Dino Jungle", emoji: "🦕", cheer: "Look, giant dino footprints!" },
   { name: "Bubblegum Canyon", emoji: "🍭", cheer: "Everything here is pink and bouncy!" },
+  // Drop E, "Fun Day Out" (the kids' own picks)
+  { name: "Puppy Land", emoji: "🐶", cheer: "Woof woof! Who wants to play fetch?" },
+  { name: "Splash Water Park", emoji: "💦", cheer: "Splash! Last one down the slide is a soggy noodle!" },
 ];
 
 export const STEPS_PER_ZONE = 6;
@@ -207,9 +210,36 @@ function paintCanyon(svg, top) {
   emoji(svg, 230, top + 120, 18, "🫧");
 }
 
+function paintPuppy(svg, top) {
+  svg.appendChild(el("rect", { x: 0, y: top, width: W, height: ZONE_H, fill: "url(#g-puppy)" }));
+  svg.appendChild(el("ellipse", { cx: 180, cy: top + 250, rx: 230, ry: 90, fill: "#bef264" }));
+  // A doghouse on each side
+  [[22, "#a78bfa"], [282, "#f472b6"]].forEach(([x, roof]) => {
+    svg.appendChild(el("rect", { x, y: top + 110, width: 56, height: 46, rx: 4, fill: "#fff7ed" }));
+    svg.appendChild(el("path", { d: `M ${x - 6} ${top + 112} L ${x + 28} ${top + 82} L ${x + 62} ${top + 112} Z`, fill: roof }));
+    svg.appendChild(el("rect", { x: x + 18, y: top + 128, width: 20, height: 28, rx: 10, fill: "#7c3aed", opacity: 0.6 }));
+  });
+  emoji(svg, 60, top + 205, 26, "🐶");
+  emoji(svg, 300, top + 210, 24, "🐕");
+  emoji(svg, 120, top + 225, 18, "🎾");
+  emoji(svg, 240, top + 120, 18, "🦴");
+}
+
+function paintWaterPark(svg, top) {
+  svg.appendChild(el("rect", { x: 0, y: top, width: W, height: ZONE_H, fill: "url(#g-waterpark)" }));
+  svg.appendChild(el("ellipse", { cx: 180, cy: top + 230, rx: 240, ry: 75, fill: "#5eead4" }));
+  // Twisting slides down each side
+  svg.appendChild(el("path", { d: `M 10 ${top + 40} C 110 ${top + 60} -10 ${top + 120} 90 ${top + 170}`, stroke: "#f472b6", "stroke-width": 14, fill: "none", "stroke-linecap": "round" }));
+  svg.appendChild(el("path", { d: `M 350 ${top + 50} C 250 ${top + 70} 370 ${top + 130} 270 ${top + 180}`, stroke: "#facc15", "stroke-width": 14, fill: "none", "stroke-linecap": "round" }));
+  emoji(svg, 120, top + 215, 22, "🛟");
+  emoji(svg, 250, top + 220, 20, "💦");
+  emoji(svg, 40, top + 205, 22, "🌴");
+}
+
 const PAINTERS = [
   paintMeadow, paintVolcano, paintSea, paintMountains, paintSpace, paintCastle,
   paintCaves, paintJungle, paintCanyon,
+  paintPuppy, paintWaterPark,
 ];
 
 // Painted zone art (see docs/ART.md), layered over each zone's SVG scenery.
@@ -227,6 +257,8 @@ const ZONE_ART = [
   "art/zone-7-caves.webp",
   "art/zone-8-jungle.webp",
   "art/zone-9-canyon.webp",
+  "art/zone-10-puppy.webp",
+  "art/zone-11-waterpark.webp",
 ];
 
 function paintZone(svg, zoneIdx, top) {
@@ -278,6 +310,8 @@ function addGradients(defs, prefix = "") {
   grad(defs, `${prefix}g-caves`, [["0", "#f5d0fe"], ["1", "#ddd6fe"]]);
   grad(defs, `${prefix}g-jungle`, [["0", "#fef9c3"], ["1", "#bbf7d0"]]);
   grad(defs, `${prefix}g-canyon`, [["0", "#ffedd5"], ["1", "#fbcfe8"]]);
+  grad(defs, `${prefix}g-puppy`, [["0", "#ede9fe"], ["1", "#ecfccb"]]);
+  grad(defs, `${prefix}g-waterpark`, [["0", "#ede9fe"], ["1", "#a5f3fc"]]);
 }
 
 function buildToken(x, y) {

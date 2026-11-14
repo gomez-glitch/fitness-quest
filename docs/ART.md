@@ -21,6 +21,7 @@ Only local repo files are allowed. Never hotlink external image URLs.
 | `adventure-<id>` × 7 | ✅ shipped (2026-11-14) — 256×256 WebP discs, 76 KB total |
 | hero banner, dance, celebration | not started |
 | `zone-7` … `zone-9` (Drop A) | ✅ shipped (2026-11-14) — caves 63 KB, jungle 109 KB (q85), canyon 67 KB |
+| `zone-10`, `zone-11` (Drop E) | ✅ shipped (2026-11-14) — puppy 86 KB, water park 81 KB (q85) |
 | expansion zones 10–19 | not started (staged drops, see BACKLOG) |
 
 ## Generation pipeline (proven on all six zones)
@@ -289,25 +290,39 @@ the series.
     budding on curving light stems, shooting stars, deep indigo space behind.
     Magical, triumphant, endlessly playful."
 
-Requested by the kids (Drop E in BACKLOG, can ship before B–D). Number the
-files in the order the zones actually ship.
+Drop E, requested by the kids. It shipped as zones 10–11, ahead of B–D;
+later drops take the next free numbers.
 
-26. **zone-NN-puppy**: "Puppy Land" 🐶. "A cheerful puppy playland: a sunny
-    grassy park with rounded hedges, colourful doghouses with pointed roofs,
-    giant cartoon bones, bouncy tennis balls and a frisbee in mid-air, a
-    paw-print trail winding through, a small splash puddle, fluffy clouds.
-    Playful and bright. No dogs or animals shown, only their toys, houses
-    and paw prints." Suggested cheer: "Woof woof! Who wants to play fetch?"
-27. **zone-NN-waterpark**: "Splash Water Park" 💦. "A sunny water park:
-    twisting water slides in pink, violet and yellow, sparkling blue splash
-    pools, fountains spraying arcs of water, floating rubber rings, a big
-    tipping splash bucket, palm trees, droplets glittering in the sun. Fun
-    and refreshing, with nobody in the water." Suggested cheer: "Splash!
+26. **zone-10-puppy** ✅ shipped: "Puppy Land" 🐶. **The one exception to
+    the no-creatures rule**, by request: the style block's last line
+    becomes "No people, no text, no letters, no logos, no watermark."
+    Prompt: "A cheerful puppy playland: a sunny grassy park with rounded
+    hedges, colourful doghouses with pointed roofs, giant cartoon bones,
+    bouncy tennis balls, a paw-print trail winding through, fluffy clouds.
+    Three or four adorable round cartoon puppies with floppy ears and big
+    happy eyes play around the left and right edges: one chasing a ball,
+    one peeking out of a doghouse, one leaping for a frisbee in mid-air,
+    one rolling in the grass. Keep the puppies near the sides and the
+    middle of the scene open. Playful, sweet and bright." Edge line: *"…
+    toward a plain pale cream-lavender mist …; the very top and very
+    bottom rows should be pale."* "Keep them near the sides" worked first
+    time, so the path runs over open grass. Cheer: "Woof woof! Who wants to
+    play fetch?"
+27. **zone-11-waterpark** ✅ shipped: "Splash Water Park" 💦. "A sunny
+    water park: twisting water slides in pink, violet and yellow curving
+    down at the left and right sides, sparkling turquoise splash pools,
+    fountains spraying arcs of water, floating rubber rings, a big tipping
+    splash bucket on a tower, palm trees, water droplets glittering in the
+    sun. Fun and refreshing, with nobody in the water." Cheer: "Splash!
     Last one down the slide is a soggy noodle!"
 
-Each drop grows the map by six steps per zone (zones 1–9 are live today, 54
-steps). The lap system and the hero migration (`migrateMap()`) carry over
-automatically.
+Measured seams: canyon top `#FDF0E9` / puppy bottom `#FAEFF1`, and puppy
+top `#FAEEF2` / water park bottom `#F6EEFD`. Both images were pale at the
+edges as asked, so neither needed a haze pass.
+
+Each drop grows the map by six steps per zone (zones 1–11 are live today,
+66 steps). The lap system and the hero migration (`migrateMap()`) carry
+over automatically.
 
 ## Tips for consistent results
 

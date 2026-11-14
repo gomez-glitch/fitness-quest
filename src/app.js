@@ -600,7 +600,7 @@ function defaultProfileState(nickname = "Spark") {
     counters,
     profile: { nickname, persona: "spark-sprinter", avatar: "👟" },
     stats: { tried: [], groups: {}, todayDate: null, todayCount: 0, bestDay: 0, bestStreak: 0, timedDone: 0, adventuresDone: 0, journey: 0, seenJourney: 0, boops: 0,
-             mapOffset: 0, mapSize: TOTAL_STEPS, mapNews: null },
+             mapOffset: 0, mapSize: TOTAL_STEPS, mapNews: null, mapReach: 0 },
     pet: { tummy: 60, tummyAt: Date.now(), meals: 0, favDate: null, costume: null },
     daily: { date: null, done: [], bonusClaimed: false, spin: null },
     days: {},
@@ -621,25 +621,45 @@ function isValidLogEntry(entry) {
   );
 }
 
-// The journey map grows in content drops. stats.journey stays the true
-// lifetime count ("quest steps together"); stats.mapOffset only changes where
-// that count lands on the map. A hero who has finished the old map at least
-// once moves to the first new zone, keeping their lap number, and Spark hops
-// in from the old finale (followed by a discovery card) the next time the map
-// is on screen. Heroes still on their first lap simply walk on into the new
-// lands. Deterministic, so re-running it on an unsaved load is harmless.
-const LEGACY_MAP_STEPS = 36;
+// The journey map grows in content drops; new zones are always appended.
+// stats.journey stays the true lifetime count ("quest steps together");
+// stats.mapOffset only changes where that count lands on the map, and
+// stats.mapReach is the furthest step on the current map the hero has stood
+// on. When the map grows:
+//  - a hero who had explored every old land and is past their first lap
+//    moves to the first new zone, keeping their lap number, and Spark hops in
+//    from the old finale (then a discovery card) next time the map is shown;
+//  - everyone else keeps their exact place and walks on into the new lands,
+//    so nobody skips a land they haven't explored yet.
+// Deterministic, so re-running it on an unsaved load is harmless.
+const LEGACY_MAP_STEPS = 36; // the original six-zone map
+const DROP_A_FIRST_STEP = 36; // where Drop A placed heroes it moved forward
+
+// Saves from before mapReach existed. Drop A (54 steps) moved some lap-2+
+// heroes forward to the caves; until such a hero laps the map, they have
+// reached exactly as far as they now stand. Everyone else past their first
+// lap has walked the whole map.
+function backfillMapReach(stats, size) {
+  const pos = stats.journey + stats.mapOffset;
+  if (pos < size) return pos;
+  const step = pos % size;
+  if (size > LEGACY_MAP_STEPS && stats.mapOffset > 0 && step >= DROP_A_FIRST_STEP) return step;
+  return size - 1;
+}
 
 function migrateMap(stats, fromSize) {
   if (fromSize >= TOTAL_STEPS) return;
   const pos = stats.journey + stats.mapOffset;
-  const lapsDone = Math.floor(pos / fromSize);
-  if (lapsDone >= 1) {
-    const newPos = lapsDone * TOTAL_STEPS + fromSize;
-    stats.mapOffset = newPos - stats.journey;
+  const lap = Math.floor(pos / fromSize);
+  const step = pos % fromSize;
+  let newPos = lap * TOTAL_STEPS + step; // same lap, same step: zones keep their indices
+  if (lap >= 1 && stats.mapReach >= fromSize - 1) {
+    newPos = lap * TOTAL_STEPS + fromSize;
     stats.seenJourney = Math.max(0, stats.journey - 1);
     stats.mapNews = Math.floor(fromSize / STEPS_PER_ZONE);
+    stats.mapReach = fromSize;
   }
+  stats.mapOffset = newPos - stats.journey;
   stats.mapSize = TOTAL_STEPS;
 }
 
@@ -707,6 +727,9 @@ function normalizeProfile(parsed) {
     }
     // Stats saved before the map grew carry no size: that was the 36-step map.
     const mapSize = Number.isInteger(st.mapSize) && st.mapSize > 0 ? st.mapSize : LEGACY_MAP_STEPS;
+    state.stats.mapReach = Number.isInteger(st.mapReach) && st.mapReach >= 0 && st.mapReach < mapSize
+      ? st.mapReach
+      : backfillMapReach(state.stats, mapSize);
     migrateMap(state.stats, mapSize);
   }
 
@@ -3104,6 +3127,10 @@ function awardCompletion(exercise, reps) {
   st.stats.journey = (st.stats.journey || 0) + 1;
   const mapPos = st.stats.journey + mapOffset;
   const zoneAfter = zoneForStep(mapPos);
+  // Passing the finale means every land on this map has been walked.
+  st.stats.mapReach = Math.floor(mapPos / TOTAL_STEPS) > Math.floor((mapPos - 1) / TOTAL_STEPS)
+    ? TOTAL_STEPS - 1
+    : Math.max(st.stats.mapReach || 0, mapPos % TOTAL_STEPS);
   if (zoneAfter !== zoneBefore) {
     pendingDiscovery = {
       zone: zoneAfter,

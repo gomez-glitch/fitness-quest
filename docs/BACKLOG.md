@@ -42,7 +42,8 @@ items 2 and 3 below.
    hero banner, dance overlay, celebration backdrop.
 5. **World expansion: zones 7–19**, shipped as staged content drops so the
    app keeps feeling new:
-   - **Live today:** zones 1–9 (through Bubblegum Canyon), 54 steps.
+   - **Live today:** zones 1–11 (through Splash Water Park), 66 steps.
+     Drops A and E have shipped. On the map, E's lands sit after A's.
    - **Drop A — "Beneath the Castle"** ✅ SHIPPED 2026-11-14: Glow Crystal
      Caves, Dino Jungle, Bubblegum Canyon (zones 7–9), painted from day one.
      Heroes who had already passed the old castle were moved to the caves
@@ -53,12 +54,11 @@ items 2 and 3 below.
      Neon Cyber City, Dragon Peaks (zones 14–16).
    - **Drop D — "The Final Frontier":** Shipwreck Cove, Glitch Dimension,
      Galaxy Gardens finale (zones 17–19).
-   - **Drop E — "Fun Day Out"** (requested by the kids, 2026-11-14): Puppy
-     Land 🐶 and Splash Water Park 💦. Prompts are ready in `ART.md`. It
-     can ship before B–D, since each drop stands alone. Puppy Land
-     follows the no-creatures art rule the way Dino Jungle did: puppies
-     show up through toys, doghouses and paw-print trails, plus the 🐶
-     emoji on the map and Spark's "Woof woof!" line.
+   - **Drop E — "Fun Day Out"** ✅ SHIPPED 2026-11-14, the kids' own picks:
+     Puppy Land 🐶 and Splash Water Park 💦 (zones 10–11). Puppy Land is
+     the one deliberate exception to the no-creatures art rule, at the
+     grown-up's request: four puppies play around its edges while the
+     middle stays clear for the path.
    - Lollies are covered by **Bubblegum Canyon**, live since Drop A (swirly
      lollipop rocks, bubblegum river). A fuller sweet-shop land could join
      a later drop if the kids want more.
@@ -67,8 +67,13 @@ items 2 and 3 below.
    SVG fallback scenery per zone (it is clipped to its zone, so it can't
    spill over a neighbour). Migration is automatic: `migrateMap()` in
    `app.js` compares each hero's stored `mapSize` with the new
-   `TOTAL_STEPS`. Heroes past the old finale move to the first new zone,
-   keeping their lap number, then hop in and see its discovery card.
+   `TOTAL_STEPS`. A hero who has explored every old land (`mapReach` at
+   the old finale) and is past their first lap moves to the first new
+   zone, keeping their lap number, then hops in and sees its discovery
+   card. Everyone else keeps their exact place and walks into the new
+   lands, so nobody skips a land they haven't seen. Drop E was the first
+   drop to need this rule: heroes Drop A had just moved into the caves
+   stay there, rather than jumping on to the puppies.
 6. **Stretch & Calm pack** ✅ SHIPPED — 10 poses live as a "Stretch" group
    with calm generative music, breathing cues, and the Sunset Stretch
    adventure. Original spec kept below for reference:

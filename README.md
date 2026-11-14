@@ -66,12 +66,12 @@ colors, big buttons, and encouraging, positive language throughout.
   the whole adventure, through every timed hold and the dance countdown,
   so a phone never dims mid-plank
 - Spark's Journey: a world-map campaign where every completed quest moves
-  Spark one step along a winding 54-step path through nine painted storybook
-  zones (Sunny Meadows → Lava Volcano → Deep Sea → Crystal Mountains → Outer
-  Space → Rainbow Castle → Glow Crystal Caves → Dino Jungle → Bubblegum
-  Canyon). Each new land gets a discovery card with its own line from Spark,
+  Spark one step along a winding 66-step path through eleven painted
+  storybook zones (Sunny Meadows → Lava Volcano → Deep Sea → Crystal
+  Mountains → Outer Space → Rainbow Castle → Glow Crystal Caves → Dino
+  Jungle → Bubblegum Canyon → Puppy Land → Splash Water Park). Each new land gets a discovery card with its own line from Spark,
   the status line always names the next land a few quests away, and the
-  finish flag starts a new lap. The zone paintings are about 540 KB in total,
+  finish flag starts a new lap. The zone paintings are about 710 KB in total,
   load lazily, work offline once seen, and fall back to hand-drawn SVG
   scenery if an image can't load
 - 23 badges and 52 rotating daily fun facts

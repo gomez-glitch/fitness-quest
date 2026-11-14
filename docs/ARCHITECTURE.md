@@ -11,7 +11,7 @@ persistence, deployed to GitHub Pages by CI on every push to `main`.
 | `src/app.js` | Everything stateful: storage + migrations, profiles, exercises data, XP/levels/streaks/energy, badges, daily quests, spinner, dance party, adventure engine, journey wiring, Spark's Corner (pet moods, boop roulette, feeding, naps, costumes), home pager, rendering, and event handlers. ~3,300 lines — see `RETROSPECTIVE.md` §7. |
 | `src/mascot.js` | Spark, the articulated mascot: an SVG skeleton posed by forward kinematics from per-exercise joint-angle keyframes (`MOTIONS`). `createMascot` animates via rAF; `renderStaticMascot` draws poster poses. |
 | `src/clicker.js` | The shared rotating dial: tap/spin rep counting, and the GO → 3-2-1 → countdown engine for timed holds. Used by both the Play panel and Adventure mode via `createClicker(container, {onChange, onComplete})`. |
-| `src/journey.js` | The world-map campaign: nine zones (six original plus Drop A), a 54-node serpentine path, Spark token. Each zone carries a `cheer` line for its discovery screen, and its SVG scenery is clipped to the zone by a nested `<svg>`. Each zone is painted WebP art (`ZONE_ART`, from `art/`) layered over a hand-drawn SVG painter, which shows through if the image fails to load. `plateX()` slides zone name plates clear of the zone's last node, which always lands at plate height. `renderJourneyMap(container, steps)`, `renderZoneCard(container, zoneIdx)`. |
+| `src/journey.js` | The world-map campaign: eleven zones (the six originals, Drop A and Drop E), a 66-node serpentine path, Spark token. Each zone carries a `cheer` line for its discovery screen, and its SVG scenery is clipped to the zone by a nested `<svg>`. Each zone is painted WebP art (`ZONE_ART`, from `art/`) layered over a hand-drawn SVG painter, which shows through if the image fails to load. `plateX()` slides zone name plates clear of the zone's last node, which always lands at plate height. `renderJourneyMap(container, steps)`, `renderZoneCard(container, zoneIdx)`. |
 | `src/wake.js` | Screen Wake Lock with reasons: `wake.hold("hold" / "adventure" / "dance")` and `wake.release(reason)`. The lock is held while any reason is active and re-requested when the page becomes visible again. Without browser support it does nothing. |
 | `src/sound.js` | Web Audio engine. `sfx` + `music` gain buses → master compressor. Every note carries an attack envelope, ±10 cents detune and velocity jitter; FM bells for chime/fanfare/badge, filtered-noise transients for ticks/claps, pitch-dropping kick for the dance thump. All tones sit in C-major pentatonic, and `progressTick(ratio)` climbs that scale toward the rep target. `setChannel()` gates sfx/music/voice (persisted); `duck()` dips music while the coach speaks. |
 | `src/voice.js` | Expressive speech-synthesis coach. Ranks installed voices (premium/neural first, joke voices like Zarvox excluded, local preferred) and picks the best; `setProfile(id)` gives each hero a continuous pitch/pace fingerprint; mood presets (`excited` / `calm` / `count`) shape delivery. Honours mute and the `voice` channel. |
@@ -19,7 +19,7 @@ persistence, deployed to GitHub Pages by CI on every push to `main`.
 | `manifest.webmanifest` | PWA install: icons, shortcuts (deep links `./?tab=...`), standalone display. |
 | `scripts/build.js` | Copies the shell into `dist/` (no bundler). |
 | `scripts/dev-server.js` | Zero-dependency static file server (`npm run dev` / `preview`). |
-| `tests/e2e.js` | Playwright end-to-end suite (`npm test`), 100 checks. Test hooks: `__MQ_TEST_FREEZE_TRAY`, `__MQ_TEST_NO_TWEEN`, `__MQ_TEST_FORCE_NAP`, `__MQ_TEST_DANCE_SECONDS`. The suite stubs `navigator.wakeLock` so it can count held locks, and its Offline section relaunches the app with only `PRECACHE` cached and no network. |
+| `tests/e2e.js` | Playwright end-to-end suite (`npm test`), 104 checks. Test hooks: `__MQ_TEST_FREEZE_TRAY`, `__MQ_TEST_NO_TWEEN`, `__MQ_TEST_FORCE_NAP`, `__MQ_TEST_DANCE_SECONDS`. The suite stubs `navigator.wakeLock` so it can count held locks, and its Offline section relaunches the app with only `PRECACHE` cached and no network. |
 
 ## Data model (localStorage)
 
@@ -36,7 +36,7 @@ Key `move-quest-progress-v3`:
       profile: { nickname, persona, avatar },
       stats: { tried[], groups{}, todayDate, todayCount, bestDay, bestStreak,
                timedDone, adventuresDone, journey, seenJourney, boops,
-               mapOffset, mapSize, mapNews },
+               mapOffset, mapSize, mapNews, mapReach },
       pet: { tummy, tummyAt, meals, favDate, costume:{id,date} },
       daily: { date, done[], bonusClaimed, spin },
       days: { [yyyy-mm-dd]: {xp, reps} },                  // pruned to 14d
@@ -51,10 +51,13 @@ Migrations: v2 (single-profile) auto-wraps into the first v3 profile; the
 When the journey map grows, `migrateMap()` runs. `journey` is the true
 lifetime count, shown as "quest steps together", and is never rewritten.
 The map position is `journey + mapOffset`. `mapSize` records which map the
-offset was computed for (missing means the original 36 steps). A hero who
-had finished the old map moves to the first new zone with the same lap
-number, and `mapNews` queues that zone's discovery card for the next time
-the map is on screen.
+offset was computed for (missing means the original 36 steps), and
+`mapReach` is the furthest step on that map the hero has stood on. If a
+save predates `mapReach`, `backfillMapReach()` estimates it. A hero who
+has explored every old land and is past lap 1 moves to the first new zone
+with the same lap number, and `mapNews` queues that zone's discovery card
+for the next time the map is on screen. Everyone else keeps their exact
+place; zones are only ever appended, so step indices stay valid.
 `normalizeProfile()` defensively re-shapes everything on load — never trust
 stored data.
 
